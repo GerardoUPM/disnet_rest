@@ -5,8 +5,6 @@ import com.google.gson.GsonBuilder;
 import edu.upm.midas.authorization.model.ValidationResponse;
 import edu.upm.midas.authorization.service.AuthResourceService;
 import edu.upm.midas.authorization.token.component.JwtTokenUtil;
-import edu.upm.midas.model.Concept;
-import edu.upm.midas.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mobile.device.Device;
 import org.springframework.stereotype.Service;
@@ -31,19 +29,10 @@ public class TokenAuthorization {
     private AuthResourceService authResourceService;
 
 
-    public Response validateService(String userToken, List<Concept> conceptList, String path, Device device){
-        Response response = new Response();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String token = jwtTokenUtil.generateToken( userToken, gson.toJson(conceptList), path, device );
-
-        System.out.println( "Call Authorization API... " );
-        ValidationResponse validationResponse = authResourceService.validationServiceByToken( token );
-        response.setAuthorization( validationResponse.isAuthorized() );
-        response.setMessage( validationResponse.getMessage() );
-        response.setToken( token );
-
-        return response;
-
+    public ValidationResponse validateService(String userToken, String request, String path, Device device){
+        String token = jwtTokenUtil.generateToken( userToken, request, path, device );
+        System.out.println( "Call Authorization API... " + token );
+        return authResourceService.validationServiceByToken( token );
     }
 
 

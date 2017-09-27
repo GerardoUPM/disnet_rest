@@ -1,4 +1,4 @@
-package edu.upm.midas.data.relational.service.model.request;
+package edu.upm.midas.model.request;
 /**
  * Created by gerardo on 28/08/2017.
  *

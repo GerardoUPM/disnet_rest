@@ -1,5 +1,8 @@
 package edu.upm.midas.constants;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +16,7 @@ import java.util.List;
  * @className Constants
  * @see
  */
+@Component
 public class Constants {
 
     public static final String HTTP_HEADER = "https://";
@@ -26,5 +30,8 @@ public class Constants {
     public final static String OK = "OK";
     public final static String RESPONSE_INVALID_SOURCES = "Invalid source list";
     public final static String RESPONSE_SEMANTIC_TYPES = "Invalid semantic type list";
+
+    @Value("${my.header.param.token.name}")
+    public String HEADER_PARAM_TOKEN_NAME;
 
 }

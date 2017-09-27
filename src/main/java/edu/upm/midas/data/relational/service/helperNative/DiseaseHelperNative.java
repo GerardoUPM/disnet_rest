@@ -1,8 +1,8 @@
 package edu.upm.midas.data.relational.service.helperNative;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upm.midas.data.relational.service.DiseaseService;
-import edu.upm.midas.data.relational.service.model.response.diseases.Finding;
-import edu.upm.midas.data.relational.service.model.response.diseases.SymptomsResponse;
+import edu.upm.midas.model.Finding;
+import edu.upm.midas.model.response.diseases.SymptomsResponse;
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.UniqueId;
 import org.slf4j.Logger;
@@ -38,12 +38,11 @@ public class DiseaseHelperNative {
     ObjectMapper objectMapper;
 
 
-    public SymptomsResponse getFindings(String sourceName, Date version, String diseaseName, boolean isValidated){
+    public SymptomsResponse getFindings(String sourceName, Date version, String diseaseName, boolean isValidated, SymptomsResponse symptomsResponse){
 
         List<Object[]> symptoms = diseaseService.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(sourceName, version, diseaseName, isValidated);
         List<Finding> findings = new ArrayList<>();
 
-        SymptomsResponse symptomsResponse = new SymptomsResponse();
         symptomsResponse.setDisease( diseaseName );
         for (Object[] symptom: symptoms) {
             Finding finding = new Finding();

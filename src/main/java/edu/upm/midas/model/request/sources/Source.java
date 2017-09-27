@@ -1,4 +1,4 @@
-package edu.upm.midas.data.relational.service.model.request.sources;
+package edu.upm.midas.model.request.sources;
 import edu.upm.midas.constants.Constants;
 
 import javax.validation.constraints.NotNull;

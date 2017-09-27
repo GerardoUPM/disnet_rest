@@ -1,4 +1,4 @@
-package edu.upm.midas.data.relational.service.model.response.diseases;
+package edu.upm.midas.model;
 import java.util.Objects;
 
 /**
