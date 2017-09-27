@@ -19,8 +19,8 @@ import java.time.format.DateTimeFormatter;
 @Service("date")
 public class TimeProvider {
 
-    private static final DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private DateFormat sdf;
+    private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Date getNow(){
         //return new Date(117, 05, 29);
@@ -36,5 +36,22 @@ public class TimeProvider {
     }
 
     public Timestamp getTimestamp(){return new Timestamp(System.currentTimeMillis());}
+
+
+    public DateFormat getSdf() {
+        return this.sdf = new SimpleDateFormat("yyyy-MM-dd");
+    }
+
+    public void setSdf(DateFormat sdf) {
+        this.sdf = sdf;
+    }
+
+    public DateTimeFormatter getDtf() {
+        return dtf;
+    }
+
+    public void setDtf(DateTimeFormatter dtf) {
+        this.dtf = dtf;
+    }
 
 }

@@ -2,7 +2,7 @@ package edu.upm.midas.controller;
 
 import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
 import edu.upm.midas.data.relational.service.model.response.diseases.SymptomsResponse;
-import edu.upm.midas.common.util.UtilDate;
+import edu.upm.midas.common.util.TimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +24,7 @@ import java.util.Date;
 public class DiseaseController {
 
     @Autowired
-    private UtilDate date;
+    private TimeProvider timeProvider;
     @Autowired
     private DiseaseHelperNative diseaseService;
 
@@ -37,7 +37,7 @@ public class DiseaseController {
                                         @RequestParam(value = "version") String version,
                                         @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
                                         HttpServletRequest httpRequest) throws Exception {
-        Date dataVersion = date.getSdf().parse(version);
+        Date dataVersion = timeProvider.getSdf().parse(version);
         System.out.println(String.format("DIS: " + disease + " SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
         return diseaseService.getFindings(source, dataVersion, disease, validated);
     }
