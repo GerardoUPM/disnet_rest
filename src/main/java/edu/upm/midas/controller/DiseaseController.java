@@ -24,7 +24,7 @@ import java.util.Date;
  *
  */
 @RestController
-@RequestMapping("/api/diseases")
+@RequestMapping("${my.service.rest.request.mapping.general.url}")
 public class DiseaseController {
 
     @Autowired

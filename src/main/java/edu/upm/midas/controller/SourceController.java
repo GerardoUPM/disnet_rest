@@ -27,7 +27,7 @@ import java.util.List;
  * @see
  */
 @RestController
-@RequestMapping("/api/sources")
+@RequestMapping("${my.service.rest.request.mapping.general.url}")
 public class SourceController {
 
     @Autowired
@@ -39,7 +39,7 @@ public class SourceController {
 
 
     //En el header cada petición se debe enviar el token de validación
-    @RequestMapping(path = { "/" },
+    @RequestMapping(path = { "${my.service.rest.request.mapping.sources.path}" },
             method = RequestMethod.GET)
     public SourcesResponse getSources(HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">

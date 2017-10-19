@@ -40,7 +40,7 @@ public class JwtTokenUtil implements Serializable {
     @Value("${jwt.claims.name.token}")
     private String claim_name_token;
     @Value("${jwt.claims.name.api_code}")
-    private String claim_name_api_code;
+    private String claim_name_apiCode;
     @Value("${jwt.claims.name.request}")
     private String claim_name_request;
     @Value("${jwt.claims.name.url}")
@@ -115,7 +115,7 @@ public class JwtTokenUtil implements Serializable {
     public String generateToken(String userToken, String request, String path, Device device) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(this.claim_name_token, userToken);
-        claims.put(this.claim_name_api_code, this.apiCode);
+        claims.put(this.claim_name_apiCode, this.apiCode);
         claims.put(this.claim_name_request, request);
         claims.put(this.claim_name_url, path);
         return doGenerateToken(claims, generateAudience(device));
