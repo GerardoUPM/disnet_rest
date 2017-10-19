@@ -46,16 +46,15 @@ public class SourceController {
         String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         System.out.println("token en el header: " + token);
         ValidationResponse validationResponse = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
-
+        //</editor-fold>
+        //Se forma la respuesta
         SourcesResponse sourcesResponse = new SourcesResponse();
         sourcesResponse.setAuthorization( validationResponse.isAuthorized() );
         sourcesResponse.setAuthorizationMessage( validationResponse.getMessage() );
         sourcesResponse.setToken( token );
-        //</editor-fold>
         //Si la autorización es exitosa se completa la respuesta
         if (validationResponse.isAuthorized())
             sourcesResponse.setSources( sourceService.getSources() );
-
 
         return sourcesResponse;
     }
@@ -71,12 +70,12 @@ public class SourceController {
         String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         System.out.println("token en el header: " + token);
         ValidationResponse validationResponse = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
-
+        //</editor-fold>
+        //Se forma la respuesta
         VersionsResponse versionsResponse = new VersionsResponse();
         versionsResponse.setAuthorization( validationResponse.isAuthorized() );
         versionsResponse.setAuthorizationMessage( validationResponse.getMessage() );
         versionsResponse.setToken( token );
-        //</editor-fold>
 
         //Si la autorización es exitosa se completa la respuesta
         if (validationResponse.isAuthorized())

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @className CustomizeTvpClient
  * @see
  */
-@FeignClient(name = "auth-client",
+@FeignClient(name = "${my.service.authorization.name}",
         url = "${my.service.authorization.url}",
         fallback = AuthClientFallback.class,
         configuration = FeignAuthConfiguration.class)

@@ -50,12 +50,12 @@ public class DiseaseController {
         String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         System.out.println("token en el header: " + token);
         ValidationResponse validationResponse = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
-
+        //</editor-fold>
+        //Se forma la respuesta
         SymptomsResponse symptomsResponse = new SymptomsResponse();
         symptomsResponse.setAuthorization( validationResponse.isAuthorized() );
         symptomsResponse.setAuthorizationMessage( validationResponse.getMessage() );
         symptomsResponse.setToken( token );
-        //</editor-fold>
         //Si la autorización es exitosa se completa la respuesta
         if (validationResponse.isAuthorized()){
             Date dataVersion = timeProvider.getSdf().parse(version);

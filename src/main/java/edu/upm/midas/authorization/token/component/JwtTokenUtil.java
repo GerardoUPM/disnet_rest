@@ -37,6 +37,16 @@ public class JwtTokenUtil implements Serializable {
     @Value("${jwt.expiration}")
     private Long expiration;
 
+    @Value("${jwt.claims.name.token}")
+    private String claim_name_token;
+    @Value("${jwt.claims.name.api_code}")
+    private String claim_name_api_code;
+    @Value("${jwt.claims.name.request}")
+    private String claim_name_request;
+    @Value("${jwt.claims.name.url}")
+    private String claim_name_url;
+
+    //Obtiene el código del servicio. Nota: Debe coincidir con el de la base de datos
     @Value("${my.service.code}")
     private String apiCode;
 
@@ -104,10 +114,10 @@ public class JwtTokenUtil implements Serializable {
 
     public String generateToken(String userToken, String request, String path, Device device) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("token", userToken);
-        claims.put("api_code", this.apiCode);
-        claims.put("request", request);
-        claims.put("url", path);
+        claims.put(this.claim_name_token, userToken);
+        claims.put(this.claim_name_api_code, this.apiCode);
+        claims.put(this.claim_name_request, request);
+        claims.put(this.claim_name_url, path);
         return doGenerateToken(claims, generateAudience(device));
     }
 
