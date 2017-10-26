@@ -114,10 +114,10 @@ public class JwtTokenUtil implements Serializable {
 
     public String generateToken(String userToken, String request, String path, Device device) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put(this.claim_name_token, userToken);
-        claims.put(this.claim_name_apiCode, this.apiCode);
-        claims.put(this.claim_name_request, request);
-        claims.put(this.claim_name_url, path);
+        claims.put(claim_name_token, userToken);
+        claims.put(claim_name_apiCode, apiCode);
+        claims.put(claim_name_request, request);
+        claims.put(claim_name_url, path);
         return doGenerateToken(claims, generateAudience(device));
     }
 
@@ -129,7 +129,7 @@ public class JwtTokenUtil implements Serializable {
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(this.apiCode)
+                .setSubject(apiCode)
                 .setAudience(audience)
                 .setIssuedAt(createdDate)
                 //.setExpiration(expirationDate)

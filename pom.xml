@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<disease>disnet_rest</disease>
+	<name>disnet_rest</name>
 	<description>DISNET API REST</description>
 
 	<parent>
