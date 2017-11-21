@@ -39,14 +39,38 @@ public class SourceController {
 
 
     //En el header cada petición se debe enviar el token de validación
-    @RequestMapping(path = { "${my.service.rest.request.mapping.sources.path}" },
+    @RequestMapping(path = { "/query" },
             method = RequestMethod.GET)
-    public SourcesResponse getSources(HttpServletRequest httpRequest, Device device) throws Exception {
+    public SourcesResponse getSources(@PathVariable(value = "operation") String operation,
+                                      @PathVariable(value = "token") String token,
+                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
-        String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
-        System.out.println("token en el header: " + token);
+        //ANTES SE COGIA EL TOKEN DEL HEADER String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
+        //System.out.println("token en el header: " + token);
         ValidationResponse validationResponse = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
         //</editor-fold>
+        switch (operation){
+            case "sourceList":
+                break;
+            case "getVersions":
+                break;
+            case "findingsList":
+                break;
+            case "diseaseList":
+                break;
+            case "diseaseNumber":
+                break;
+            case "diseaseWithMoreSymptoms":
+                break;
+            case "diseaseWithLessSymptoms":
+                break;
+            case "mostCommonSymptoms":
+                break;
+            case "lessCommonSymptoms":
+                break;
+            default:
+                break;
+        }
         //Se forma la respuesta
         SourcesResponse sourcesResponse = new SourcesResponse();
         sourcesResponse.setAuthorization( validationResponse.isAuthorized() );
