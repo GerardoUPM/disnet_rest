@@ -15,8 +15,17 @@ import java.util.List;
  */
 public class CommonFindingsResponse extends ResponseFather {
 
+    private int size;
     private List<SymptomWithCount> symptomList;
 
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 
     public List<SymptomWithCount> getSymptomList() {
         return symptomList;

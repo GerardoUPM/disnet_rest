@@ -6,6 +6,7 @@ import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -106,9 +107,9 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @SuppressWarnings("unchecked")
     @Override
-    public Object[] numberDiseasesBySourceAndVersion(String sourceName, Date version) {
-        Object[] numberOfDiseases = null;
-        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+    public BigInteger numberDiseasesBySourceAndVersion(String sourceName, Date version) {
+        BigInteger numberOfDiseases = null;
+        List<BigInteger> diseaseList = (List<BigInteger>) getEntityManager()
                 .createNamedQuery("Disease.numberDiseaseBySourceAndVersion")
                 .setParameter("source", sourceName)
                 .setParameter("version", version)
@@ -152,7 +153,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
-        List<Object[]> diseases = null;
+        List<Object[]> diseases = null;//System.out.println(sourceName+" - "+ version+" - "+ isValidated+" - "+ limit);
         List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
                 .createNamedQuery("Disease.withMoreSymptomsBySourceAndVersionAndValidated")
                 .setParameter("source", sourceName)

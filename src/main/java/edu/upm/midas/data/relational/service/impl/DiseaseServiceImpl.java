@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,12 +70,12 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public int numberDiseasesBySourceAndVersion(String sourceName, Date version) {
-        Object[] disease = daoDisease.numberDiseasesBySourceAndVersion(sourceName, version);
+    public BigInteger numberDiseasesBySourceAndVersion(String sourceName, Date version) {
+        BigInteger disease = daoDisease.numberDiseasesBySourceAndVersion(sourceName, version);
         if (disease != null) {
-            return (int) disease[0];
+            return disease;
         }else{
-            return 0;
+            return BigInteger.valueOf(0);
         }
     }
 
@@ -97,23 +98,16 @@ public class DiseaseServiceImpl implements DiseaseService {
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<DiseaseSymptoms> withFewerSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
         List<Object[]> diseases = daoDisease.withFewerSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
-        List<DiseaseSymptoms> diseaseList = null;
-        if (diseases != null) {
-            diseaseList = new ArrayList<>();
-            for (Object[] dis : diseases) {
-                DiseaseSymptoms disease = new DiseaseSymptoms();
-                disease.setDiseaseId((String) dis[0]);
-                disease.setName((String) dis[1]);
-                disease.setCount((int) dis[2]);
-                diseaseList.add(disease);
-            }
-        }
-        return diseaseList;
+        return getDiseaseSymptomsList(diseases);
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<DiseaseSymptoms> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
-        List<Object[]> diseases = daoDisease.withFewerSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        List<Object[]> diseases = daoDisease.withMoreSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        return getDiseaseSymptomsList(diseases);
+    }
+
+    public List<DiseaseSymptoms> getDiseaseSymptomsList(List<Object[]> diseases){
         List<DiseaseSymptoms> diseaseList = null;
         if (diseases != null) {
             diseaseList = new ArrayList<>();
@@ -121,7 +115,8 @@ public class DiseaseServiceImpl implements DiseaseService {
                 DiseaseSymptoms disease = new DiseaseSymptoms();
                 disease.setDiseaseId((String) dis[0]);
                 disease.setName((String) dis[1]);
-                disease.setCount((int) dis[2]);
+                BigInteger count = (BigInteger) dis[2];//System.out.println(count+" - " +count + " - " + count.intValue() + " - "+count.intValueExact());
+                disease.setCount(count.intValue());
                 diseaseList.add(disease);
             }
         }
@@ -131,6 +126,7 @@ public class DiseaseServiceImpl implements DiseaseService {
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<Finding> findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(String sourceName, Date version, String diseaseId, boolean isValidated) {
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(sourceName, version, diseaseId, isValidated);
+        //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
         List<Finding> findings = null;
 
         if (symptoms != null) {

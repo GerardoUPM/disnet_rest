@@ -15,8 +15,17 @@ import java.util.List;
  */
 public class DiseaseSymptomsResponse extends ResponseFather {
 
+    private int size;
     private List<DiseaseSymptoms> diseaseList;
 
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 
     public List<DiseaseSymptoms> getDiseaseList() {
         return diseaseList;

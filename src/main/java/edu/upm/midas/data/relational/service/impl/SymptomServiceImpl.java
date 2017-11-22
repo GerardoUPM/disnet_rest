@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -77,7 +78,8 @@ public class SymptomServiceImpl implements SymptomService {
                 SymptomWithCount symptom = new SymptomWithCount();
                 symptom.setCui((String) sym[0]);
                 symptom.setName((String) sym[1]);
-                symptom.setCommon((int) sym[2]);
+                BigInteger count = (BigInteger) sym[2];
+                symptom.setCommon(count.intValue());
                 symptomList.add(symptom);
             }
         }

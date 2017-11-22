@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -57,7 +58,7 @@ public class DiseaseHelperNative {
     }
 
 
-    public int getNumberDiseases(String sourceName, Date version){
+    public BigInteger getNumberDiseases(String sourceName, Date version){
         return diseaseService.numberDiseasesBySourceAndVersion(sourceName, version);
     }
 
@@ -85,16 +86,19 @@ public class DiseaseHelperNative {
 
     public List<DiseaseSymptoms> getDiseaseWithCountList(String sourceName, Date version, boolean isValidated, int limit, List<DiseaseSymptoms> diseases){
         List<DiseaseSymptoms> diseaseList = null;
-        for (DiseaseSymptoms diseaseSymptoms : diseases){
-            DiseaseSymptoms disease = null;
-            //SE OBTIENEN LOS SINTOMAS POR CADA ENFERMEDAD ENCONTRADA
-            List<Finding> findings = diseaseService.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(sourceName, version, diseaseSymptoms.getDiseaseId(), isValidated);
-            if (findings != null) {
-                disease.setFindingList(findings);
-                disease.setDiseaseId(diseaseSymptoms.getDiseaseId());
-                disease.setName(diseaseSymptoms.getName());
-                disease.setCount(diseaseSymptoms.getCount());
-                diseaseList.add(disease);
+        if (diseases != null) {
+            diseaseList = new ArrayList<>();
+            for (DiseaseSymptoms diseaseSymptoms : diseases) {
+                //SE OBTIENEN LOS SINTOMAS POR CADA ENFERMEDAD ENCONTRADA
+                List<Finding> findings = diseaseService.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(sourceName, version, diseaseSymptoms.getDiseaseId(), isValidated);
+                if (findings != null) {
+                    DiseaseSymptoms disease = new DiseaseSymptoms();
+                    disease.setFindingList(findings);
+                    disease.setDiseaseId(diseaseSymptoms.getDiseaseId());
+                    disease.setName(diseaseSymptoms.getName());
+                    disease.setCount(diseaseSymptoms.getCount());
+                    diseaseList.add(disease);
+                }
             }
         }
         return diseaseList;

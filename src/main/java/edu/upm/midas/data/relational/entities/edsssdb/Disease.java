@@ -66,7 +66,7 @@ import java.util.Objects;
 
         @NamedNativeQuery(
                 name = "Disease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidated",
-                query = "SELECT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', ht.text_id " +
+                query = "SELECT DISTINCT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName'-- , ht.text_id \n" +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
@@ -79,12 +79,12 @@ import java.util.Objects;
                         "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
                         "WHERE sce.name = :sourceName " +
                         "AND hs.date = :version " +
-                        "AND d.name COLLATE utf8_bin LIKE :diseaseName " +
+                        "AND d.name COLLATE utf8_bin = :diseaseName " +
                         "AND hsym.validated = :validated -- filtering "
         ),
         @NamedNativeQuery(
                 name = "Disease.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated",
-                query = "SELECT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', ht.text_id " +
+                query = "SELECT DISTINCT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName'-- , ht.text_id \n" +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +

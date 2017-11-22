@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -242,9 +243,9 @@ public class QueryController {
             Date dataVersion = timeProvider.getSdf().parse(version);
             System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion));
             try {
-                int numberOfDiseases = diseaseHelper.getNumberDiseases(source, dataVersion);
-                if (numberOfDiseases > 0) {
-                    response.setCount(numberOfDiseases);
+                BigInteger numberOfDiseases = diseaseHelper.getNumberDiseases(source, dataVersion);
+                if (numberOfDiseases != null) {
+                    response.setCount(numberOfDiseases.intValue());
                     response.setResponseCode(HttpStatus.OK.value());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                 } else {
@@ -253,7 +254,7 @@ public class QueryController {
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase() + e.getMessage());
             }
         }else {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.value());
@@ -283,10 +284,11 @@ public class QueryController {
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             Date dataVersion = timeProvider.getSdf().parse(version);
-            System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
+            System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated+ " LIMIT: " + limit));
             try {
                 List<DiseaseSymptoms> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithMoreFindings(source, dataVersion, validated, limit);
                 if (diseasesWithMoreFindings != null) {
+                    response.setSize(diseasesWithMoreFindings.size());
                     response.setDiseaseList(diseasesWithMoreFindings);
                     response.setResponseCode(HttpStatus.OK.value());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
@@ -330,6 +332,7 @@ public class QueryController {
             try {
                 List<DiseaseSymptoms> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithFewerFindings(source, dataVersion, validated, limit);
                 if (diseasesWithMoreFindings != null) {
+                    response.setSize(diseasesWithMoreFindings.size());
                     response.setDiseaseList(diseasesWithMoreFindings);
                     response.setResponseCode(HttpStatus.OK.value());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
@@ -373,6 +376,7 @@ public class QueryController {
             try {
                 List<SymptomWithCount> symptoms = diseaseHelper.getMostCommonSymptoms(source, dataVersion, validated, limit);
                 if (symptoms != null) {
+                    response.setSize(symptoms.size());
                     response.setSymptomList(symptoms);
                     response.setResponseCode(HttpStatus.OK.value());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
@@ -416,6 +420,7 @@ public class QueryController {
             try {
                 List<SymptomWithCount> symptoms = diseaseHelper.getLessCommonSymptoms(source, dataVersion, validated, limit);
                 if (symptoms != null) {
+                    response.setSize(symptoms.size());
                     response.setSymptomList(symptoms);
                     response.setResponseCode(HttpStatus.OK.value());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());

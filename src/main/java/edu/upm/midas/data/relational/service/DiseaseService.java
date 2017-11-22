@@ -4,6 +4,7 @@ import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.model.DiseaseSymptoms;
 import edu.upm.midas.model.Finding;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public interface DiseaseService {
 
     List<Disease> findAll();
 
-    int numberDiseasesBySourceAndVersion(String sourceName, Date version);
+    BigInteger numberDiseasesBySourceAndVersion(String sourceName, Date version);
 
     List<edu.upm.midas.model.Disease> findAllBySourceAndVersion(String sourceName, Date version);
 

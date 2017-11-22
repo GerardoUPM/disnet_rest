@@ -2,6 +2,7 @@ package edu.upm.midas.data.relational.repository;
 
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public interface DiseaseRepository {
 
     Disease findByIdNativeResultClass(String diseaseId);
 
-    Object[] numberDiseasesBySourceAndVersion(String sourceName, Date version);
+    BigInteger numberDiseasesBySourceAndVersion(String sourceName, Date version);
 
     List<Object[]> findAllBySourceAndVersion(String sourceName, Date version);
 
