@@ -179,7 +179,7 @@ public class QueryController {
 
     @RequestMapping(path = { "/query/findingList" },//disease name
             method = RequestMethod.GET,
-            params = {"token", "source", "version", "disease", "validated"})
+            params = {"token", "source", "version", "disease"})
     public SymptomsResponse findingList(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
                                         @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                         @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
@@ -265,7 +265,7 @@ public class QueryController {
 
     @RequestMapping(path = { "/query/diseaseWithMoreSymptoms" },//disease name
             method = RequestMethod.GET,
-            params = {"token", "source", "version", "validated", "limit"})
+            params = {"token", "source", "version"})
     public DiseaseSymptomsResponse diseaseWithMoreSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
                                         @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                         @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
@@ -308,7 +308,7 @@ public class QueryController {
 
     @RequestMapping(path = { "/query/diseaseWithFewerSymptoms" },//disease name
             method = RequestMethod.GET,
-            params = {"token", "source", "version", "validated", "limit"})
+            params = {"token", "source", "version"})
     public DiseaseSymptomsResponse diseaseWithFewerSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
                                                            @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                                            @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
@@ -351,7 +351,7 @@ public class QueryController {
 
     @RequestMapping(path = { "/query/mostCommonSymptoms" },//disease name
             method = RequestMethod.GET,
-            params = {"token", "source", "version", "validated", "limit"})
+            params = {"token", "source", "version"})
     public CommonFindingsResponse mostCommonSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
                                                      @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                                      @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
@@ -394,7 +394,7 @@ public class QueryController {
 
     @RequestMapping(path = { "/query/lessCommonSymptoms" },//disease name
             method = RequestMethod.GET,
-            params = {"token", "source", "version", "validated", "limit"})
+            params = {"token", "source", "version"})
     public CommonFindingsResponse lessCommonSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
                                                      @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                                      @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
