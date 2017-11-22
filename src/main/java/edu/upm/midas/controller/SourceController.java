@@ -50,23 +50,23 @@ public class SourceController {
         ValidationResponse validationResponse = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
         //</editor-fold>
         switch (operation){
-            case "sourceList":
+            case "sourceList"://LA TENGO
                 break;
-            case "getVersions":
+            case "getVersions"://LA TENGO
                 break;
-            case "findingsList":
+            case "findingsList"://LA TENGO
                 break;
-            case "diseaseList":
+            case "diseaseList"://LA TENGO
                 break;
-            case "diseaseNumber":
+            case "diseaseNumber"://LA TENGO
                 break;
-            case "diseaseWithMoreSymptoms":
+            case "diseaseWithMoreSymptoms"://LA TENGO
                 break;
-            case "diseaseWithLessSymptoms":
+            case "diseaseWithFewerSymptoms"://LA TENGO
                 break;
-            case "mostCommonSymptoms":
+            case "mostCommonSymptoms"://LA TENGO
                 break;
-            case "lessCommonSymptoms":
+            case "lessCommonSymptoms"://LA TENGO
                 break;
             default:
                 break;
