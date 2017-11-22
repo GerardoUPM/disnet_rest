@@ -79,7 +79,7 @@ import java.util.Objects;
                         "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
                         "WHERE sce.name = :sourceName " +
                         "AND hs.date = :version " +
-                        "AND d.name COLLATE utf8_bin = :diseaseName " +
+                        "AND d.name COLLATE utf8_bin LIKE :diseaseName " +
                         "AND hsym.validated = :validated -- filtering "
         ),
         @NamedNativeQuery(
