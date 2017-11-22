@@ -1,15 +1,12 @@
 package edu.upm.midas.authorization.token.service;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import edu.upm.midas.authorization.model.ValidationResponse;
 import edu.upm.midas.authorization.service.AuthResourceService;
 import edu.upm.midas.authorization.token.component.JwtTokenUtil;
+import edu.upm.midas.model.response.ResponseFather;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mobile.device.Device;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Created by gerardo on 26/09/2017.
@@ -29,10 +26,17 @@ public class TokenAuthorization {
     private AuthResourceService authResourceService;
 
 
-    public ValidationResponse validateService(String userToken, String request, String path, Device device){
+    public ResponseFather validateService(String userToken, String request, String path, Device device){
+        ResponseFather response = new ResponseFather();
         String token = jwtTokenUtil.generateToken( userToken, request, path, device );
+
         System.out.println( "Call Authorization API... " + token );
-        return authResourceService.validationServiceByToken( token );
+        ValidationResponse validationResponse = authResourceService.validationServiceByToken( token );
+        response.setAuthorized( validationResponse.isAuthorized() );
+        response.setAuthorizationMessage( validationResponse.getMessage() );
+        response.setToken( userToken );
+
+        return response;
     }
 
 

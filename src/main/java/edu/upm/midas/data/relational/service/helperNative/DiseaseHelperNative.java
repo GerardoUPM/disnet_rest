@@ -1,10 +1,13 @@
 package edu.upm.midas.data.relational.service.helperNative;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.data.relational.service.DiseaseService;
+import edu.upm.midas.data.relational.service.SymptomService;
+import edu.upm.midas.model.DiseaseSymptoms;
 import edu.upm.midas.model.Finding;
-import edu.upm.midas.model.response.diseases.SymptomsResponse;
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.UniqueId;
+import edu.upm.midas.model.SymptomWithCount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,8 @@ public class DiseaseHelperNative {
     @Autowired
     private DiseaseService diseaseService;
     @Autowired
+    private SymptomService symptomService;
+    @Autowired
     private UniqueId uniqueId;
     @Autowired
     private DocumentHelperNative documentHelperNative;
@@ -38,28 +43,71 @@ public class DiseaseHelperNative {
     ObjectMapper objectMapper;
 
 
-    public SymptomsResponse getFindings(String sourceName, Date version, String diseaseName, boolean isValidated, SymptomsResponse symptomsResponse){
-
-        List<Object[]> symptoms = diseaseService.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(sourceName, version, diseaseName, isValidated);
-        List<Finding> findings = new ArrayList<>();
-
-        symptomsResponse.setDisease( diseaseName );
-        for (Object[] symptom: symptoms) {
-            Finding finding = new Finding();
-            finding.setCui( (String) symptom[0] );
-            finding.setName( (String) symptom[1]);
-            findings.add( finding );
+    public List<Finding> getFindings(String sourceName, Date version, String diseaseName, boolean isValidated){
+        List<Finding> findings = diseaseService.findSymptomsBySourceAndVersionAndDiseaseNameAndValidated(sourceName, version, diseaseName, isValidated);
+        if (findings != null) {
+            findings = removeRepetedFindings(findings);
         }
-        findings = removeRepetedFindings( findings );
-        symptomsResponse.setFindings( findings );
-        symptomsResponse.setSize( findings.size() );
 /*
         for (Finding finding: findings) {
             System.out.println(finding.toString());
         }
 */
+        return findings;
+    }
 
-        return symptomsResponse;
+
+    public int getNumberDiseases(String sourceName, Date version){
+        return diseaseService.numberDiseasesBySourceAndVersion(sourceName, version);
+    }
+
+
+    public List<edu.upm.midas.model.Disease> diseaseList(String sourceName, Date version){
+        return diseaseService.findAllBySourceAndVersion(sourceName, version);
+    }
+
+
+    public List<DiseaseSymptoms> getDiseasesWithFewerFindings(String sourceName, Date version, boolean isValidated, int limit){
+        List<DiseaseSymptoms> diseases = diseaseService.withFewerSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        //REGRESA LA MISMA LISTA PERO CON INFORMACIÓN DE SUS SINTOMAS... QUE CON LA PRIMER CONSULTA NO SE CONSIGUE
+        List<DiseaseSymptoms> diseaseList = getDiseaseWithCountList(sourceName, version, isValidated, limit, diseases);
+        return diseaseList;
+    }
+
+
+    public List<DiseaseSymptoms> getDiseasesWithMoreFindings(String sourceName, Date version, boolean isValidated, int limit){
+        List<DiseaseSymptoms> diseases = diseaseService.withMoreSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        //REGRESA LA MISMA LISTA PERO CON INFORMACIÓN DE SUS SINTOMAS... QUE CON LA PRIMER CONSULTA NO SE CONSIGUE
+        List<DiseaseSymptoms> diseaseList = getDiseaseWithCountList(sourceName, version, isValidated, limit, diseases);
+        return diseaseList;
+    }
+
+
+    public List<DiseaseSymptoms> getDiseaseWithCountList(String sourceName, Date version, boolean isValidated, int limit, List<DiseaseSymptoms> diseases){
+        List<DiseaseSymptoms> diseaseList = null;
+        for (DiseaseSymptoms diseaseSymptoms : diseases){
+            DiseaseSymptoms disease = null;
+            //SE OBTIENEN LOS SINTOMAS POR CADA ENFERMEDAD ENCONTRADA
+            List<Finding> findings = diseaseService.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(sourceName, version, diseaseSymptoms.getDiseaseId(), isValidated);
+            if (findings != null) {
+                disease.setFindingList(findings);
+                disease.setDiseaseId(diseaseSymptoms.getDiseaseId());
+                disease.setName(diseaseSymptoms.getName());
+                disease.setCount(diseaseSymptoms.getCount());
+                diseaseList.add(disease);
+            }
+        }
+        return diseaseList;
+    }
+
+
+    public List<SymptomWithCount> getMostCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
+        return symptomService.mostCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+    }
+
+
+    public List<SymptomWithCount> getLessCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
+        return symptomService.lessCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
     }
 
 

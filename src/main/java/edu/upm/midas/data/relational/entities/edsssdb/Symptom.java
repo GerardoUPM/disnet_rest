@@ -83,6 +83,49 @@ import java.util.Objects;
                         "INNER JOIN symptom sy ON sy.cui = hsy.cui " +
                         "WHERE ht.date = :version " +
                         "AND s.name = :source"
+        ),
+
+
+
+        //-- <<<mostCommonSymptoms>>> SINTOMAS MAS COMUNES
+        @NamedNativeQuery(
+                name = "Symptom.mostCommonBySourceAndVersionAndValidated",
+                query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id \n" +
+                        "-- source and version\n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version " +
+                        "AND hsym.validated = :validated " +
+                        "GROUP BY sym.cui, sym.name " +
+                        "ORDER BY COUNT(hsym.cui) DESC "
+        ),
+        //-- -- <<<lessCommonSymptoms>>> SINTOMAS MENOS COMUNES
+        @NamedNativeQuery(
+                name = "Symptom.lessCommonBySourceAndVersionAndValidated",
+                query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id \n" +
+                        "-- source and version\n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version " +
+                        "AND hsym.validated = :validated " +
+                        "GROUP BY sym.cui, sym.name " +
+                        "ORDER BY COUNT(hsym.cui) ASC "
         )
 
 

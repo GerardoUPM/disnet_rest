@@ -4,7 +4,7 @@ import edu.upm.midas.authorization.model.ValidationResponse;
 import edu.upm.midas.authorization.token.service.TokenAuthorization;
 import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
-import edu.upm.midas.model.response.diseases.SymptomsResponse;
+import edu.upm.midas.model.response.particular.SymptomsResponse;
 import edu.upm.midas.common.util.TimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mobile.device.Device;
@@ -37,7 +37,7 @@ public class DiseaseController {
     private Constants constants;
 
 
-    @RequestMapping(path = { "/{disease}/findings" },//disease name
+    @RequestMapping(path = { "/{disease}/findingsXXXXX" },//disease name
                     method = RequestMethod.GET,
                     params = {"source", "version"})
     public SymptomsResponse getFindings(@PathVariable(value = "disease") String disease,
@@ -49,10 +49,10 @@ public class DiseaseController {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         System.out.println("token en el header: " + token);
-        ValidationResponse validationResponse = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        SymptomsResponse symptomsResponse = new SymptomsResponse();
+        /*ValidationResponse validationResponse = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
         //</editor-fold>
         //Se forma la respuesta
-        SymptomsResponse symptomsResponse = new SymptomsResponse();
         symptomsResponse.setAuthorization( validationResponse.isAuthorized() );
         symptomsResponse.setAuthorizationMessage( validationResponse.getMessage() );
         symptomsResponse.setToken( token );
@@ -61,7 +61,7 @@ public class DiseaseController {
             Date dataVersion = timeProvider.getSdf().parse(version);
             System.out.println(String.format("DIS: " + disease + " SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
             return diseaseService.getFindings(source, dataVersion, disease, validated, symptomsResponse);
-        }
+        }*/
         return symptomsResponse;
     }
 

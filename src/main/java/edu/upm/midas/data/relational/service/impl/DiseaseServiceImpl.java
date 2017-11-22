@@ -2,11 +2,14 @@ package edu.upm.midas.data.relational.service.impl;
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import edu.upm.midas.data.relational.service.DiseaseService;
+import edu.upm.midas.model.DiseaseSymptoms;
+import edu.upm.midas.model.Finding;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -65,9 +68,98 @@ public class DiseaseServiceImpl implements DiseaseService {
         return listDiseaseEntities;
     }
 
-    @Override
-    public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {
-        return daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated( sourceName, version, diseaseName, isValidated );
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public int numberDiseasesBySourceAndVersion(String sourceName, Date version) {
+        Object[] disease = daoDisease.numberDiseasesBySourceAndVersion(sourceName, version);
+        if (disease != null) {
+            return (int) disease[0];
+        }else{
+            return 0;
+        }
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<edu.upm.midas.model.Disease> findAllBySourceAndVersion(String sourceName, Date version) {
+        List<Object[]> diseases = daoDisease.findAllBySourceAndVersion(sourceName, version);
+        List<edu.upm.midas.model.Disease> diseaseList = null;
+        if (diseases != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] dis : diseases) {
+                edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
+                disease.setDiseaseId((String) dis[0]);
+                disease.setName((String) dis[1]);
+                diseaseList.add(disease);
+            }
+        }
+        return diseaseList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<DiseaseSymptoms> withFewerSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> diseases = daoDisease.withFewerSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        List<DiseaseSymptoms> diseaseList = null;
+        if (diseases != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] dis : diseases) {
+                DiseaseSymptoms disease = new DiseaseSymptoms();
+                disease.setDiseaseId((String) dis[0]);
+                disease.setName((String) dis[1]);
+                disease.setCount((int) dis[2]);
+                diseaseList.add(disease);
+            }
+        }
+        return diseaseList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<DiseaseSymptoms> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> diseases = daoDisease.withFewerSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        List<DiseaseSymptoms> diseaseList = null;
+        if (diseases != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] dis : diseases) {
+                DiseaseSymptoms disease = new DiseaseSymptoms();
+                disease.setDiseaseId((String) dis[0]);
+                disease.setName((String) dis[1]);
+                disease.setCount((int) dis[2]);
+                diseaseList.add(disease);
+            }
+        }
+        return diseaseList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<Finding> findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(String sourceName, Date version, String diseaseId, boolean isValidated) {
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(sourceName, version, diseaseId, isValidated);
+        List<Finding> findings = null;
+
+        if (symptoms != null) {
+            findings = new ArrayList<>();
+            for (Object[] symptom : symptoms) {
+                Finding finding = new Finding();
+                finding.setCui((String) symptom[0]);
+                finding.setName((String) symptom[1]);
+                findings.add(finding);
+            }
+        }
+        return findings;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<Finding> findSymptomsBySourceAndVersionAndDiseaseNameAndValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidated( sourceName, version, diseaseName, isValidated );
+        List<Finding> findings = null;
+
+        if (symptoms != null) {
+            findings = new ArrayList<>();
+            for (Object[] symptom : symptoms) {
+                Finding finding = new Finding();
+                finding.setCui((String) symptom[0]);
+                finding.setName((String) symptom[1]);
+                findings.add(finding);
+            }
+        }
+        return findings;
     }
 
     @Transactional(propagation= Propagation.REQUIRED)

@@ -112,6 +112,38 @@ public class SymptomRepositoryImpl extends AbstractDao<String, Symptom>
                 .getResultList();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> mostCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> symptoms = null;
+        List<Object[]> symptomList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Symptom.mostCommonBySourceAndVersionAndValidated")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("validated", isValidated)
+                .setMaxResults(limit)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(symptomList))
+            symptoms = symptomList;
+        return symptoms;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> lessCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> symptoms = null;
+        List<Object[]> symptomList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Symptom.lessCommonBySourceAndVersionAndValidated")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("validated", isValidated)
+                .setMaxResults(limit)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(symptomList))
+            symptoms = symptomList;
+        return symptoms;
+    }
+
     @Override
     public void persist(Symptom symptom) {
         super.persist(symptom);

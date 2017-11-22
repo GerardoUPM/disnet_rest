@@ -32,6 +32,10 @@ public interface SymptomRepository {
 
     List<Symptom> findAllQuery();
 
+    List<Object[]> mostCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+
+    List<Object[]> lessCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+
     void persist(Symptom symptom);
 
     int insertNative(String cui, String name);

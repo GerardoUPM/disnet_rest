@@ -2,12 +2,14 @@ package edu.upm.midas.data.relational.service.impl;
 import edu.upm.midas.data.relational.entities.edsssdb.Symptom;
 import edu.upm.midas.data.relational.repository.SymptomRepository;
 import edu.upm.midas.data.relational.service.SymptomService;
+import edu.upm.midas.model.SymptomWithCount;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +54,33 @@ public class SymptomServiceImpl implements SymptomService {
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<Symptom> findAll() {
         List<Symptom> symptomList = daoSymptom.findAllQuery();
+        return symptomList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<SymptomWithCount> mostCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> symptoms = daoSymptom.mostCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        return getSymptomWithCountList(symptoms);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<SymptomWithCount> lessCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> symptoms = daoSymptom.lessCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+        return getSymptomWithCountList(symptoms);
+    }
+
+    private List<SymptomWithCount> getSymptomWithCountList(List<Object[]> symptoms){
+        List<SymptomWithCount> symptomList = null;
+        if (symptoms != null) {
+            symptomList = new ArrayList<>();
+            for (Object[] sym : symptoms) {
+                SymptomWithCount symptom = new SymptomWithCount();
+                symptom.setCui((String) sym[0]);
+                symptom.setName((String) sym[1]);
+                symptom.setCommon((int) sym[2]);
+                symptomList.add(symptom);
+            }
+        }
         return symptomList;
     }
 

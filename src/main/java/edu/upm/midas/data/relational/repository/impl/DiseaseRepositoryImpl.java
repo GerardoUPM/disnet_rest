@@ -106,6 +106,67 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @SuppressWarnings("unchecked")
     @Override
+    public Object[] numberDiseasesBySourceAndVersion(String sourceName, Date version) {
+        Object[] numberOfDiseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.numberDiseaseBySourceAndVersion")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            numberOfDiseases = diseaseList.get(0);
+        return numberOfDiseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findAllBySourceAndVersion(String sourceName, Date version) {
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findAllBySourceAndVersion")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> withFewerSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.withFewerSymptomsBySourceAndVersionAndValidated")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("validated", isValidated)
+                .setMaxResults(limit)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.withMoreSymptomsBySourceAndVersionAndValidated")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("validated", isValidated)
+                .setMaxResults(limit)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<Disease> findAllQuery() {
         return (List<Disease>) getEntityManager()
                 .createNamedQuery("Disease.findAll")
@@ -115,13 +176,30 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {
+    public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {
         List<Object[]> diseasesWithSymptoms = null;
         List<Object[]> symptomsList = (List<Object[]>) getEntityManager()
-                .createNamedQuery("Disease.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated")
+                .createNamedQuery("Disease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidated")
                 .setParameter("sourceName", sourceName)
                 .setParameter("version", version)
                 .setParameter("diseaseName", "%" + diseaseName + "%")
+                .setParameter("validated", isValidated)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(symptomsList))
+            diseasesWithSymptoms = symptomsList;
+        return diseasesWithSymptoms;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(String sourceName, Date version, String diseaseId, boolean isValidated) {
+        List<Object[]> diseasesWithSymptoms = null;
+        List<Object[]> symptomsList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("diseaseId",  diseaseId)
                 .setParameter("validated", isValidated)
                 //.setMaxResults(100)
                 .getResultList();

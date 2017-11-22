@@ -30,9 +30,19 @@ public interface DiseaseRepository {
 
     Disease findByIdNativeResultClass(String diseaseId);
 
+    Object[] numberDiseasesBySourceAndVersion(String sourceName, Date version);
+
+    List<Object[]> findAllBySourceAndVersion(String sourceName, Date version);
+
+    List<Object[]> withFewerSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+
+    List<Object[]> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+
     List<Disease> findAllQuery();
 
-    List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated);
+    List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndValidated(String sourceName, Date version, String diseaseName, boolean isValidated);
+
+    List<Object[]> findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(String sourceName, Date version, String diseaseId, boolean isValidated);
 
     void persist(Disease disease);
 

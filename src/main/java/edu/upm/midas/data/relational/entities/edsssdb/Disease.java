@@ -65,7 +65,7 @@ import java.util.Objects;
 
 
         @NamedNativeQuery(
-                name = "Disease.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated",
+                name = "Disease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidated",
                 query = "SELECT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', ht.text_id " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
@@ -79,7 +79,25 @@ import java.util.Objects;
                         "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
                         "WHERE sce.name = :sourceName " +
                         "AND hs.date = :version " +
-                        "AND d.name LIKE :diseaseName " +
+                        "AND d.name COLLATE utf8_bin = :diseaseName " +
+                        "AND hsym.validated = :validated -- filtering "
+        ),
+        @NamedNativeQuery(
+                name = "Disease.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated",
+                query = "SELECT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', ht.text_id " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        //-- source and version
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version " +
+                        "AND d.disease_id = :diseaseId " +
                         "AND hsym.validated = :validated -- filtering "
         ),
 
@@ -142,7 +160,77 @@ import java.util.Objects;
                         " WHERE s.name COLLATE utf8_bin = :sourceName " +
                         " AND doc.date = :version " +
                         " AND d.disease_id = :diseaseId "
+        ),
+
+
+
+        //-- <<<numberDisease>>> NUMERO ENFERMEDADES
+        @NamedNativeQuery(
+                name = "Disease.numberDiseaseBySourceAndVersion",
+                query = "SELECT COUNT(d.name) " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version "
+        ),
+        //-- <<<diseaseList>>> LISTA DE ENFERMEDADES
+        @NamedNativeQuery(
+                name = "Disease.findAllBySourceAndVersion",
+                query = " SELECT d.disease_id, d.name " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version "
+        ),
+        //-- <<<diseaseWithFewerSymptoms>>> 10 ENFERMEDADES CON MENOS SINTOMAS
+        @NamedNativeQuery(
+                name = "Disease.withFewerSymptomsBySourceAndVersionAndValidated",
+                query = "SELECT DISTINCT d.disease_id, d.name,  COUNT(DISTINCT hsym.cui) 'findings' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id \n" +
+                        "-- source and version\n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version \n" +
+                        "-- AND d.name LIKE 'Gastroenteritis' \n" +
+                        "AND hsym.validated = :validated " +
+                        "GROUP BY d.disease_id, d.name " +
+                        "ORDER BY COUNT(DISTINCT hsym.cui) ASC "
+        ),
+        //-- <<<diseaseWithMoreSymptoms>>> 10 ENFERMEDADES CON MAS SINTOMAS
+        @NamedNativeQuery(
+                name = "Disease.withMoreSymptomsBySourceAndVersionAndValidated",
+                query = "SELECT DISTINCT d.disease_id, d.name,  COUNT(DISTINCT hsym.cui) 'findings' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id \n" +
+                        "-- source and version\n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version \n" +
+                        "-- AND d.name LIKE 'Gastroenteritis' \n" +
+                        "AND hsym.validated = :validated " +
+                        "GROUP BY d.disease_id, d.name " +
+                        "ORDER BY COUNT(DISTINCT hsym.cui) DESC "
         )
+
 
 
 
