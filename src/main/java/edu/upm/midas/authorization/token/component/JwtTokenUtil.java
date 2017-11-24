@@ -112,12 +112,12 @@ public class JwtTokenUtil implements Serializable {
         return (AUDIENCE_TABLET.equals(audience) || AUDIENCE_MOBILE.equals(audience));
     }
 
-    public String generateToken(String userToken, String request, String path, Device device) {
+    public String generateToken(String userToken, String request, String url, Device device) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(claim_name_token, userToken);
         claims.put(claim_name_apiCode, apiCode);
         claims.put(claim_name_request, request);
-        claims.put(claim_name_url, path);
+        claims.put(claim_name_url, url);
         return doGenerateToken(claims, generateAudience(device));
     }
 

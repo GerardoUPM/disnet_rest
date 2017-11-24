@@ -26,9 +26,9 @@ public class TokenAuthorization {
     private AuthResourceService authResourceService;
 
 
-    public ResponseFather validateService(String userToken, String request, String path, Device device){
+    public ResponseFather validateService(String userToken, String request, String url, Device device){
         ResponseFather response = new ResponseFather();
-        String token = jwtTokenUtil.generateToken( userToken, request, path, device );
+        String token = jwtTokenUtil.generateToken( userToken, request, url, device );
 
         System.out.println( "Call Authorization API... " + token );
         ValidationResponse validationResponse = authResourceService.validationServiceByToken( token );

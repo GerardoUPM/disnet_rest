@@ -62,7 +62,7 @@ public class QueryController {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         //ANTES SE COGIA EL TOKEN DEL HEADER String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         //System.out.println("token en el header: " + token);
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         SourcesResponse response = new SourcesResponse();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -106,7 +106,7 @@ public class QueryController {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         //String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         VersionsResponse response = new VersionsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -145,7 +145,7 @@ public class QueryController {
                                            HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -189,7 +189,7 @@ public class QueryController {
                                         HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         SymptomsResponse response = new SymptomsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -232,7 +232,7 @@ public class QueryController {
                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         CountResponse response = new CountResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -275,7 +275,7 @@ public class QueryController {
                                         HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseSymptomsResponse response = new DiseaseSymptomsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -319,7 +319,7 @@ public class QueryController {
                                                            HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseSymptomsResponse response = new DiseaseSymptomsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -363,7 +363,7 @@ public class QueryController {
                                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         CommonFindingsResponse response = new CommonFindingsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -407,7 +407,7 @@ public class QueryController {
                                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         CommonFindingsResponse response = new CommonFindingsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getServletPath(), httpRequest.getServletPath(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
