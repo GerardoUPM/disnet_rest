@@ -39,5 +39,18 @@ public class TokenAuthorization {
         return response;
     }
 
+    public ResponseFather updateSeriv(String userToken, String request, String url, Device device){
+        ResponseFather response = new ResponseFather();
+        String token = jwtTokenUtil.generateToken( userToken, request, url, device );
+
+        System.out.println( "Call Authorization API... " + token );
+        ValidationResponse validationResponse = authResourceService.validationServiceByToken( token );
+        response.setAuthorized( validationResponse.isAuthorized() );
+        response.setAuthorizationMessage( validationResponse.getMessage() );
+        response.setToken( userToken );
+
+        return response;
+    }
+
 
 }
