@@ -212,7 +212,7 @@ import java.util.Objects;
         //-- <<<diseaseWithMoreSymptoms>>> 10 ENFERMEDADES CON MAS SINTOMAS
         @NamedNativeQuery(
                 name = "Disease.withMoreSymptomsBySourceAndVersionAndValidated",
-                query = "SELECT DISTINCT d.disease_id, d.name,  COUNT(DISTINCT hsym.cui) 'findings' " +
+                query = "SELECT DISTINCT d.disease_id, d.name, COUNT(DISTINCT hsym.cui) 'findings' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
