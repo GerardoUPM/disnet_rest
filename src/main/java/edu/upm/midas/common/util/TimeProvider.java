@@ -65,4 +65,8 @@ public class TimeProvider {
         this.dtf = dtf;
     }
 
+    public String dateFormatyyyMMdd(java.util.Date date){
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
+
 }
