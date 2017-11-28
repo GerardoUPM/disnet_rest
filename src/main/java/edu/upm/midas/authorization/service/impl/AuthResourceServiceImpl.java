@@ -1,9 +1,11 @@
 package edu.upm.midas.authorization.service.impl;
 
 import edu.upm.midas.authorization.client.AuthClient;
+import edu.upm.midas.authorization.model.UpdateQueryRuntimeRequest;
 import edu.upm.midas.authorization.model.ValidationResponse;
 import edu.upm.midas.authorization.service.AuthResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,5 +26,10 @@ public class AuthResourceServiceImpl implements AuthResourceService {
     @Override
     public ValidationResponse validationServiceByToken(String token) {
         return authClient.validationServiceByToken( token );
+    }
+
+    @Override
+    public HttpStatus updateQueryRunTime(UpdateQueryRuntimeRequest request) {
+        return authClient.updateQueryRunTime(request);
     }
 }

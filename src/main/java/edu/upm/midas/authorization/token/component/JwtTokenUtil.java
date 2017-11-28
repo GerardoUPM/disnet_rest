@@ -45,6 +45,8 @@ public class JwtTokenUtil implements Serializable {
     private String claim_name_request;
     @Value("${jwt.claims.name.url}")
     private String claim_name_url;
+    @Value("${jwt.claims.name.transaction_id}")
+    private String claim_name_transactionId;
 
     //Obtiene el código del servicio. Nota: Debe coincidir con el de la base de datos
     @Value("${my.service.code}")
@@ -135,6 +137,24 @@ public class JwtTokenUtil implements Serializable {
                 //.setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
+    }
+
+    /**
+     * @param token
+     * @return
+     */
+    public String getQueryIdJWTDecode(String token){
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token).getBody();
+
+            System.out.println("CLAIMS: " + claims.toString());
+
+            return claims.get(claim_name_transactionId).toString();
+        }catch (Exception e){
+            return "";
+        }
     }
 
     public Boolean canTokenBeRefreshed(String token, Date lastPasswordReset) {

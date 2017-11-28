@@ -1,4 +1,6 @@
 package edu.upm.midas.model.response;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Created by gerardo on 02/11/2017.
  *
@@ -16,6 +18,9 @@ public class ResponseFather {
 
     private int responseCode;
     private String responseMessage;
+
+    @JsonIgnore
+    private String infoToken;
 
 
     public String getToken() {
@@ -57,5 +62,13 @@ public class ResponseFather {
 
     public void setResponseMessage(String responseMessage) {
         this.responseMessage = responseMessage;
+    }
+
+    public String getInfoToken() {
+        return infoToken;
+    }
+
+    public void setInfoToken(String infoToken) {
+        this.infoToken = infoToken;
     }
 }

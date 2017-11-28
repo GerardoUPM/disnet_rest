@@ -1,6 +1,9 @@
 package edu.upm.midas.controller;
 
+import com.netflix.ribbon.proxy.annotation.Http;
+import edu.upm.midas.authorization.token.component.JwtTokenUtil;
 import edu.upm.midas.authorization.token.service.TokenAuthorization;
+import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.TimeProvider;
 import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
@@ -49,6 +52,10 @@ public class QueryController {
     @Autowired
     private TimeProvider timeProvider;
     @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private Common common;
+    @Autowired
     private Constants constants;
 
 
@@ -72,14 +79,18 @@ public class QueryController {
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()) {
             try {
+                //Se registra el tiempo de ejecución de la consulta
+                String start = timeProvider.getTimestampFormat();
                 List<String> sources = sourceHelper.getSources();
+                String end = timeProvider.getTimestampFormat();
                 if (sources != null) {
                     response.setSources(sources);
                     response.setResponseCode(HttpStatus.OK.value());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                } else {
-                    response.setResponseCode(HttpStatus.NOT_FOUND.value());
-                    response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                }else{
+                    response.setResponseCode(HttpStatus.NO_CONTENT.value());
+                    response.setResponseMessage("Query id " + HttpStatus.NO_CONTENT.getReasonPhrase());
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -91,6 +102,15 @@ public class QueryController {
         }
 
         return response;
+    }
+
+
+    public void saveQueryRuntime(String token, String start, String end){
+        String queryId = jwtTokenUtil.getQueryIdJWTDecode(token);
+        if (!common.isEmpty(queryId)) {
+            HttpStatus response = tokenAuthorization.updateQueryRuntime(queryId, start, end);
+            System.out.println(response);
+        }
     }
 
 

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 
@@ -21,6 +22,7 @@ public class TimeProvider {
 
     private DateFormat sdf;
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private DateTimeFormatter dtfsss = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
 
     public Date getNow(){
         //return new Date(117, 05, 29);
@@ -35,7 +37,16 @@ public class TimeProvider {
         return String.format(new java.util.Date().toString(), dtf);
     }
 
+    public String getTimeFormat(){
+        return String.format(new java.util.Date().toString(), dtf);
+    }
+
     public Timestamp getTimestamp(){return new Timestamp(System.currentTimeMillis());}
+
+    public String getTimestampFormat() throws ParseException {
+        java.util.Date date = new java.util.Date();
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSS").format(date);
+    }
 
 
     public DateFormat getSdf() {
