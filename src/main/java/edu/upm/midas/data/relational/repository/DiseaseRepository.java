@@ -35,15 +35,23 @@ public interface DiseaseRepository {
 
     List<Object[]> findAllBySourceAndVersion(String sourceName, Date version);
 
-    List<Object[]> withFewerSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+    List<Object[]> findAllWithUrlAndSymptomsCountBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated);
 
-    List<Object[]> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+    List<Object[]> withFewerSymptomsBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated, int limit);
+
+    List<Object[]> withMoreSymptomsBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated, int limit);
+
+    List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated);
+
+    List<Object[]> findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(String sourceName, Date version, String diseaseId, boolean isValidated);
+
+    List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedNative(String sourceName, Date version, String code, String resource, boolean isValidated);
+
+    Object[] findByExactNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
+
+    List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
 
     List<Disease> findAllQuery();
-
-    List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndValidated(String sourceName, Date version, String diseaseName, boolean isValidated);
-
-    List<Object[]> findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(String sourceName, Date version, String diseaseId, boolean isValidated);
 
     void persist(Disease disease);
 

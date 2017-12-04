@@ -1,8 +1,8 @@
 package edu.upm.midas.data.relational.service;
 
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
-import edu.upm.midas.model.DiseaseSymptoms;
-import edu.upm.midas.model.Finding;
+import edu.upm.midas.model.DiseaseDisnetConcepts;
+import edu.upm.midas.model.DisnetConcept;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -27,19 +27,25 @@ public interface DiseaseService {
 
     Disease findLastDiseaseQuery();
 
-    List<Disease> findAll();
-
     BigInteger numberDiseasesBySourceAndVersion(String sourceName, Date version);
 
     List<edu.upm.midas.model.Disease> findAllBySourceAndVersion(String sourceName, Date version);
 
-    List<DiseaseSymptoms> withFewerSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+    List<edu.upm.midas.model.Disease> findAllWithUrlAndSymptomsCountBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated);
 
-    List<DiseaseSymptoms> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+    List<DiseaseDisnetConcepts> withFewerSymptomsBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated, int limit);
 
-    List<Finding> findSymptomsBySourceAndVersionAndDiseaseNameAndValidated(String sourceName, Date version, String diseaseName, boolean isValidated);
+    List<DiseaseDisnetConcepts> withMoreSymptomsBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated, int limit);
 
-    List<Finding> findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(String sourceName, Date version, String diseaseId, boolean isValidated);
+    List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated);
+
+    List<DisnetConcept> findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(String sourceName, Date version, String diseaseId, boolean isValidated);
+
+    boolean existDiseaseByExactNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
+
+    List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
+
+    List<Disease> findAll();
 
     void save(Disease disease);
 

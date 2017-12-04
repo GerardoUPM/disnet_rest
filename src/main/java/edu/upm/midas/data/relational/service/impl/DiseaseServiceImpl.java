@@ -2,8 +2,8 @@ package edu.upm.midas.data.relational.service.impl;
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import edu.upm.midas.data.relational.service.DiseaseService;
-import edu.upm.midas.model.DiseaseSymptoms;
-import edu.upm.midas.model.Finding;
+import edu.upm.midas.model.DisnetConcept;
+import edu.upm.midas.model.DiseaseDisnetConcepts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -81,8 +81,8 @@ public class DiseaseServiceImpl implements DiseaseService {
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<edu.upm.midas.model.Disease> findAllBySourceAndVersion(String sourceName, Date version) {
-        List<Object[]> diseases = daoDisease.findAllBySourceAndVersion(sourceName, version);
         List<edu.upm.midas.model.Disease> diseaseList = null;
+        List<Object[]> diseases = daoDisease.findAllBySourceAndVersion(sourceName, version);
         if (diseases != null) {
             diseaseList = new ArrayList<>();
             for (Object[] dis : diseases) {
@@ -96,23 +96,42 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<DiseaseSymptoms> withFewerSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
-        List<Object[]> diseases = daoDisease.withFewerSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+    public List<edu.upm.midas.model.Disease> findAllWithUrlAndSymptomsCountBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated) {
+        List<edu.upm.midas.model.Disease> diseaseList = null;
+        List<Object[]> diseases = daoDisease.findAllWithUrlAndSymptomsCountBySourceAndVersionAndIsValidated(sourceName, version, isValidated);
+        if (diseases != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] dis : diseases) {
+                edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
+                disease.setDiseaseId((String) dis[0]);
+                disease.setName((String) dis[1]);
+                disease.setUrl((String) dis[2]);
+                BigInteger count = (BigInteger) dis[3];
+                disease.setDisnetConceptsCount(count.intValue());
+                diseaseList.add(disease);
+            }
+        }
+        return diseaseList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<DiseaseDisnetConcepts> withFewerSymptomsBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> diseases = daoDisease.withFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit);
         return getDiseaseSymptomsList(diseases);
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<DiseaseSymptoms> withMoreSymptomsBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
-        List<Object[]> diseases = daoDisease.withMoreSymptomsBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+    public List<DiseaseDisnetConcepts> withMoreSymptomsBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated, int limit) {
+        List<Object[]> diseases = daoDisease.withMoreSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit);
         return getDiseaseSymptomsList(diseases);
     }
 
-    public List<DiseaseSymptoms> getDiseaseSymptomsList(List<Object[]> diseases){
-        List<DiseaseSymptoms> diseaseList = null;
+    public List<DiseaseDisnetConcepts> getDiseaseSymptomsList(List<Object[]> diseases){
+        List<DiseaseDisnetConcepts> diseaseList = null;
         if (diseases != null) {
             diseaseList = new ArrayList<>();
             for (Object[] dis : diseases) {
-                DiseaseSymptoms disease = new DiseaseSymptoms();
+                DiseaseDisnetConcepts disease = new DiseaseDisnetConcepts();
                 disease.setDiseaseId((String) dis[0]);
                 disease.setName((String) dis[1]);
                 BigInteger count = (BigInteger) dis[2];//System.out.println(count+" - " +count + " - " + count.intValue() + " - "+count.intValueExact());
@@ -124,38 +143,82 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<Finding> findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(String sourceName, Date version, String diseaseId, boolean isValidated) {
-        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseIdAndValidated(sourceName, version, diseaseId, isValidated);
+    public List<DisnetConcept> findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(String sourceName, Date version, String diseaseId, boolean isValidated) {
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(sourceName, version, diseaseId, isValidated);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
-        List<Finding> findings = null;
+        List<DisnetConcept> DisnetConcepts = null;
 
         if (symptoms != null) {
-            findings = new ArrayList<>();
+            DisnetConcepts = new ArrayList<>();
             for (Object[] symptom : symptoms) {
-                Finding finding = new Finding();
-                finding.setCui((String) symptom[0]);
-                finding.setName((String) symptom[1]);
-                findings.add(finding);
+                DisnetConcept DisnetConcept = new DisnetConcept();
+                DisnetConcept.setCui((String) symptom[0]);
+                DisnetConcept.setName((String) symptom[1]);
+                DisnetConcepts.add(DisnetConcept);
             }
         }
-        return findings;
+        return DisnetConcepts;
+    }
+
+    @Override
+    public boolean existDiseaseByExactNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName) {
+        Object[] disease = daoDisease.findByExactNameAndSourceAndVersionNative(sourceName, version, diseaseName);
+        if (disease != null)
+            if (disease.length > 0)
+                return true;
+            else return false;
+        else return false;
+    }
+
+    @Override
+    public List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName) {
+        return null;
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<Finding> findSymptomsBySourceAndVersionAndDiseaseNameAndValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {
-        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidated( sourceName, version, diseaseName, isValidated );
-        List<Finding> findings = null;
+    public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {
+        List<edu.upm.midas.model.Disease> diseaseList = null;
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated( sourceName, version, diseaseName, isValidated );
 
+        System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
+
+        String diseaseId = "";
+        List<DisnetConcept> concepts = new ArrayList<>();
         if (symptoms != null) {
-            findings = new ArrayList<>();
+            diseaseList = new ArrayList<>();
             for (Object[] symptom : symptoms) {
-                Finding finding = new Finding();
-                finding.setCui((String) symptom[0]);
-                finding.setName((String) symptom[1]);
-                findings.add(finding);
+                //if (count == 1) diseaseId = (String) symptom[0];
+                if (!diseaseId.equals((String) symptom[3])){
+                    edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
+                    diseaseId = (String) symptom[3];
+                    disease.setName((String) symptom[4]);
+                    disease.setUrl((String) symptom[5]);
+                    if (concepts.size() > 0 ) {
+
+                        concepts.clear();
+                    }
+                    disease.setDisnetConceptList(concepts);
+                    diseaseList.add(disease);
+                }
+                DisnetConcept DisnetConcept = new DisnetConcept();
+                DisnetConcept.setCui((String) symptom[0]);
+                DisnetConcept.setName((String) symptom[1]);
+                //DisnetConcept.setUrl((String) symptom[5]);
+                DisnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[6]));
+                concepts.add(DisnetConcept);
+                //disnetConcepts.add(DisnetConcept);
             }
         }
-        return findings;
+        return diseaseList;
+    }
+
+    public List<String> setSemanticTypes(String semanticTypes){
+        List<String> semanticTypesList = new ArrayList<>();
+        String[] parts = semanticTypes.split(",");
+        for (String semanticType: parts) {
+            semanticTypesList.add(semanticType);
+        }
+        return semanticTypesList;
     }
 
     @Transactional(propagation= Propagation.REQUIRED)
@@ -181,7 +244,7 @@ public class DiseaseServiceImpl implements DiseaseService {
             dis.setName(disease.getName());
             dis.setCui(disease.getCui());
             //sour.getDiseasesBySidsource().clear();
-            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<SymptomsResponse>());
+            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<DisnetConceptsResponse>());
         }else
             return false;
         return true;
@@ -200,8 +263,8 @@ public class DiseaseServiceImpl implements DiseaseService {
 
             //dis.setDocumentList( disease.getDocumentList() );
 /*
-            if(StringUtils.isNotBlank(disease.getCui()))
-                dis.setCui(disease.getCui());
+            if(StringUtils.isNotBlank(disease.getUrl()))
+                dis.setUrl(disease.getUrl());
 */
             //if(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource()))
             //    sour.setDiseasesBySidsource(source.getDiseasesBySidsource());

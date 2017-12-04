@@ -31,6 +31,20 @@ public class Constants {
     public final static String RESPONSE_INVALID_SOURCES = "Invalid source list";
     public final static String RESPONSE_SEMANTIC_TYPES = "Invalid semantic type list";
 
+    public final static String TOKEN = "token";
+    public final static String SOURCE = "source";
+    public final static String VERSION = "version";
+    public final static String DISEASE_NAME = "diseaseName";
+    public final static String DISEASE_CODE = "diseaseCode";
+    public final static String TYPE_CODE = "typeCode";
+    public final static String FORCE_SEM_TYPES = "forceSemanticTypes";
+    public final static String EXCLUDE_SEM_TYPES = "excludeSemanticTypes";
+    public final static String LIMIT = "limit";
+
+    public final static String MESSAGE_PARAM_NOT_USED = "Parameter not used.";
+
+
+
     @Value("${my.header.param.token.name}")
     public String HEADER_PARAM_TOKEN_NAME;
 

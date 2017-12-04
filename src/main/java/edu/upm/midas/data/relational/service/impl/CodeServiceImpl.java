@@ -51,6 +51,16 @@ public class CodeServiceImpl implements CodeService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public boolean existCodeByCodeAndResourceNameAndSourceAndVersionNative(String sourceName, Date version, String code, String resourceName) {
+        List<Object[]> codeList = daoCode.findByCodeAndResourceNameAndSourceAndVersionNative(sourceName, version, code, resourceName);
+        if (codeList != null){
+            if (codeList.size() > 0)
+                return true;
+            else return false;
+        }else return false;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<Code> findAll() {
         List<Code> listCodeEntities = daoCode.findAllQuery();
         return listCodeEntities;
@@ -83,7 +93,7 @@ public class CodeServiceImpl implements CodeService {
             //==>cod.setCodePK(code.getCodePK());
 //            sour.set(source.getDisease());
             //sour.getDiseasesBySidsource().clear();
-            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<SymptomsResponse>());
+            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<DisnetConceptsResponse>());
         }else
             return false;
         return true;

@@ -66,7 +66,7 @@ public class DocumentServiceImpl implements DocumentService {
         if(doc!=null){
             //==>doc.setDocumentPK(document.getDocumentPK());
             //sour.getDiseasesBySidsource().clear();
-            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<SymptomsResponse>());
+            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<DisnetConceptsResponse>());
         }else
             return false;
         return true;

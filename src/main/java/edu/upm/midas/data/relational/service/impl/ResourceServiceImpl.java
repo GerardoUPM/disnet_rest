@@ -67,7 +67,7 @@ public class ResourceServiceImpl implements ResourceService {
             reso.setResourceId(resource.getResourceId());
             reso.setName(resource.getName());
             //sour.getDiseasesBySidsource().clear();
-            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<SymptomsResponse>());
+            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<DisnetConceptsResponse>());
         }else
             return false;
         return true;

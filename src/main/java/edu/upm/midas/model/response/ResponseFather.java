@@ -1,5 +1,7 @@
 package edu.upm.midas.model.response;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.util.List;
 
 /**
  * Created by gerardo on 02/11/2017.
@@ -16,10 +18,14 @@ public class ResponseFather {
     private boolean authorized;
     private String authorizationMessage;
 
-    private int responseCode;
+    private String responseCode;
     private String responseMessage;
+    //@JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<ApiResponseError> errorsFound;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Parameter> extraInfo;
 
-    @JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String infoToken;
 
 
@@ -48,11 +54,11 @@ public class ResponseFather {
     }
 
 
-    public int getResponseCode() {
+    public String getResponseCode() {
         return responseCode;
     }
 
-    public void setResponseCode(int responseCode) {
+    public void setResponseCode(String responseCode) {
         this.responseCode = responseCode;
     }
 
@@ -62,6 +68,22 @@ public class ResponseFather {
 
     public void setResponseMessage(String responseMessage) {
         this.responseMessage = responseMessage;
+    }
+
+    public List<ApiResponseError> getErrorsFound() {
+        return errorsFound;
+    }
+
+    public void setErrorsFound(List<ApiResponseError> errorsFound) {
+        this.errorsFound = errorsFound;
+    }
+
+    public List<Parameter> getExtraInfo() {
+        return extraInfo;
+    }
+
+    public void setExtraInfo(List<Parameter> extraInfo) {
+        this.extraInfo = extraInfo;
     }
 
     public String getInfoToken() {

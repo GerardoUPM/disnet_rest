@@ -45,6 +45,20 @@ import java.util.Objects;
                 query = "SELECT c.code, c.resource_id "
                         + "FROM code c WHERE c.code = :code AND c.resource_id = :resourceId"
         ),
+        @NamedNativeQuery(
+                name = "Code.findByCodeAndResourceNameAndSourceAndVersionNative",
+                query = "SELECT c.code, r.name, doc.document_id, doc.date " +
+                        "FROM document doc " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "INNER JOIN has_code hc ON hc.document_id = doc.document_id AND hc.date = doc.date " +
+                        "INNER JOIN code c ON c.code = hc.code AND c.resource_id = hc.resource_id " +
+                        "INNER JOIN resource r ON r.resource_id = c.resource_id " +
+                        "WHERE sce.name = :source " +
+                        "AND doc.date = :version " +
+                        "AND c.code = :code " +
+                        "AND r.name = :resource "
+        ),
 
 
         @NamedNativeQuery(

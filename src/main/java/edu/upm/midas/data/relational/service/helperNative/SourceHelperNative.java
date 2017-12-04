@@ -3,6 +3,7 @@ package edu.upm.midas.data.relational.service.helperNative;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.upm.midas.data.relational.service.SourceService;
 import edu.upm.midas.common.util.Common;
+import edu.upm.midas.model.response.ResponseFather;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,10 @@ public class SourceHelperNative {
      * @return
      */
     public List<String> getSources(){
-        List<String> sources = new ArrayList<>();
+        List<String> sources = null;
         List<Object[]> sourceAllNativeList = sourceService.findAllNative();
         if (sourceAllNativeList  != null) {
+            sources = new ArrayList<>();
             for (Object[] source : sourceAllNativeList) {
                 sources.add((String) source[0]);
             }
@@ -56,14 +58,24 @@ public class SourceHelperNative {
      * @return
      */
     public List<String> getVersions(String source) {
-        List<String> versions = new ArrayList<>();
+        List<String> versions = null;
         List<Date> versionAllNativeList = sourceService.findAllVersionsNative(source);
         if (versionAllNativeList != null){
+            versions = new ArrayList<>();
             for (Date version : versionAllNativeList) {
                 versions.add(version.toString());
             }
         }
         return versions;
+    }
+
+
+    public void validateSource(ResponseFather responseFather, String source) throws Exception{
+
+    }
+
+    public void validateVersion(ResponseFather responseFather, String version) throws Exception{
+
     }
 
 

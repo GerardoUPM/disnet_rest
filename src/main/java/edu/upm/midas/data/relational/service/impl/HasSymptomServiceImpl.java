@@ -57,7 +57,7 @@ public class HasSymptomServiceImpl implements HasSymptomService {
             //==>hs.setValidated(hasSymptom.getValidated());
 //            sour.set(source.getDisease());
             //sour.getDiseasesBySidsource().clear();
-            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<SymptomsResponse>());
+            //sour.getDiseasesBySidsource().addAll(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource())?source.getDiseasesBySidsource():new ArrayList<DisnetConceptsResponse>());
         }else
             return false;
         return true;

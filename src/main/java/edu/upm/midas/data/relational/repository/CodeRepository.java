@@ -31,6 +31,8 @@ public interface CodeRepository {
 
     Object[] findByIdNative(String code, int resourceId);
 
+    List<Object[]> findByCodeAndResourceNameAndSourceAndVersionNative(String sourceName, Date version, String code, String resourceName);
+
     List<Code> findAllQuery();
 
     void persist(Code code);

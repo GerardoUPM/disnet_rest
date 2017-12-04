@@ -1,5 +1,5 @@
 package edu.upm.midas.model.response.particular;
-import edu.upm.midas.model.DiseaseSymptoms;
+import edu.upm.midas.model.DiseaseDisnetConcepts;
 import edu.upm.midas.model.response.ResponseFather;
 
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 public class DiseaseSymptomsResponse extends ResponseFather {
 
     private int size;
-    private List<DiseaseSymptoms> diseaseList;
+    private List<DiseaseDisnetConcepts> diseaseList;
 
 
     public int getSize() {
@@ -27,11 +27,11 @@ public class DiseaseSymptomsResponse extends ResponseFather {
         this.size = size;
     }
 
-    public List<DiseaseSymptoms> getDiseaseList() {
+    public List<DiseaseDisnetConcepts> getDiseaseList() {
         return diseaseList;
     }
 
-    public void setDiseaseList(List<DiseaseSymptoms> diseaseList) {
+    public void setDiseaseList(List<DiseaseDisnetConcepts> diseaseList) {
         this.diseaseList = diseaseList;
     }
 }

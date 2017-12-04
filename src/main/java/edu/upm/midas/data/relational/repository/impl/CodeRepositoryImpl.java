@@ -110,6 +110,23 @@ public class CodeRepositoryImpl extends AbstractDao<CodePK, Code>
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<Object[]> findByCodeAndResourceNameAndSourceAndVersionNative(String sourceName, Date version, String code, String resourceName) {
+        List<Object[]> codes = null;
+        List<Object[]> codeList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Code.findByCodeAndResourceNameAndSourceAndVersionNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("code", code)
+                .setParameter("resource", resourceName)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(codeList))
+            codes = codeList;
+        return codes;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<Code> findAllQuery() {
         return (List<Code>) getEntityManager()
                 .createNamedQuery("Code.findAll")

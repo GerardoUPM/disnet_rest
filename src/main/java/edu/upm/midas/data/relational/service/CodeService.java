@@ -24,6 +24,8 @@ public interface CodeService {
     Code findByResourceIdQuery(int resourceId);
 
     Object[] findByIdNative(String code, int resourceId);
+
+    boolean existCodeByCodeAndResourceNameAndSourceAndVersionNative(String sourceName, Date version, String code, String resourceName);
     
     List<Code> findAll();
 

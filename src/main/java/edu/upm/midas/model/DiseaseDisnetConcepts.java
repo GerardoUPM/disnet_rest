@@ -7,15 +7,15 @@ import java.util.List;
  * @author Gerardo Lagunes G. ${EMAIL}
  * @version ${<VERSION>}
  * @project disnet_rest
- * @className DiseaseSymptoms
+ * @className DiseaseDisnetConcepts
  * @see
  */
-public class DiseaseSymptoms {
+public class DiseaseDisnetConcepts {
 
     private String diseaseId;
     private String name;
     private int count;
-    private List<Finding> findingList;
+    private List<DisnetConcept> DisnetConceptList;
 
 
     public String getDiseaseId() {
@@ -42,11 +42,11 @@ public class DiseaseSymptoms {
         this.count = count;
     }
 
-    public List<Finding> getFindingList() {
-        return findingList;
+    public List<DisnetConcept> getDisnetConceptList() {
+        return DisnetConceptList;
     }
 
-    public void setFindingList(List<Finding> findingList) {
-        this.findingList = findingList;
+    public void setDisnetConceptList(List<DisnetConcept> disnetConceptList) {
+        this.DisnetConceptList = disnetConceptList;
     }
 }
