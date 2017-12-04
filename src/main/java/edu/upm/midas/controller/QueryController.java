@@ -251,6 +251,8 @@ public class QueryController {
                                               @RequestParam(value = "diseaseCode", required = false, defaultValue = "") String diseaseCode,
                                               @RequestParam(value = "typeCode", required = false, defaultValue = "") String typeCode,
                                               @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                              @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
+                                              @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                               HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DisnetConceptsResponse response = new DisnetConceptsResponse();
