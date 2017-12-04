@@ -45,7 +45,7 @@ public interface DiseaseRepository {
 
     List<Object[]> findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(String sourceName, Date version, String diseaseId, boolean isValidated);
 
-    List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedNative(String sourceName, Date version, String code, String resource, boolean isValidated);
+    List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative(String sourceName, Date version, String code, String resource, boolean isValidated);
 
     Object[] findByExactNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
 

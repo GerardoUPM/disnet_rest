@@ -67,14 +67,13 @@ public class DiseaseHelperNative {
      * @param isValidated
      * @return
      */
-    public List<Disease> getDiseasesAndTheirDisnetConcepts(String sourceName, Date version, String diseaseName, boolean isValidated, String typeSearch){
+    public List<Disease> getDiseasesAndTheirDisnetConcepts(String sourceName, Date version, String diseaseName, String code, String resourceName, boolean isValidated, String typeSearch){
         List<Disease> diseaseList = null;
         if (typeSearch.equals("name")){System.out.println("NOMBRE");
             diseaseList = diseaseService.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(sourceName, version, diseaseName, isValidated);
         } else if (typeSearch.equals("code")){
             Disease disease = new Disease();
-            diseaseList = diseaseService.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(sourceName, version, diseaseName, isValidated);
-
+            diseaseList = diseaseService.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative(sourceName, version, code, resourceName, isValidated);
         }
 
 /*

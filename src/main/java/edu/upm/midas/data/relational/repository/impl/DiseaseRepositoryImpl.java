@@ -226,9 +226,22 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
         return diseasesWithSymptoms;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedNative(String sourceName, Date version, String code, String resource, boolean isValidated) {
-        return null;
+    public List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative(String sourceName, Date version, String code, String resource, boolean isValidated) {
+        List<Object[]> diseasesWithSymptoms = null;
+        List<Object[]> symptomsList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("code",  code)
+                .setParameter("resource",  resource)
+                .setParameter("validated", isValidated)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(symptomsList))
+            diseasesWithSymptoms = symptomsList;
+        return diseasesWithSymptoms;
     }
 
     @SuppressWarnings("unchecked")

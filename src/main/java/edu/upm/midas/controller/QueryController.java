@@ -273,7 +273,7 @@ public class QueryController {
                 TypeSearchValidation validation = diseaseHelper.validateDiseaseSearchingParameters(errorsFound, parameters, source, dataVersion, diseaseName, diseaseCode, typeCode);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    List<Disease> diseasesAndTheirDisnetConcepts = diseaseHelper.getDiseasesAndTheirDisnetConcepts(source, dataVersion, diseaseName, validated, validation.getTypeSearch());
+                    List<Disease> diseasesAndTheirDisnetConcepts = diseaseHelper.getDiseasesAndTheirDisnetConcepts(source, dataVersion, diseaseName, diseaseCode, typeCode, validated, validation.getTypeSearch());
                     String end = timeProvider.getTimestampFormat();
                     if (diseasesAndTheirDisnetConcepts != null) {
                         response.setDiseaseCount(diseasesAndTheirDisnetConcepts.size());

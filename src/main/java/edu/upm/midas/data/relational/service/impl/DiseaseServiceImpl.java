@@ -212,6 +212,43 @@ public class DiseaseServiceImpl implements DiseaseService {
         return diseaseList;
     }
 
+    @Override
+    public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative(String sourceName, Date version, String code, String resourceName, boolean isValidated) {
+        List<edu.upm.midas.model.Disease> diseaseList = null;
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative( sourceName, version, code, resourceName, isValidated );
+
+        System.out.println(sourceName+" | "+version+" | "+code+" | "+resourceName+" | "+isValidated+" | "+symptoms.size() );
+
+        String diseaseId = "";
+        List<DisnetConcept> concepts = new ArrayList<>();
+        if (symptoms != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] symptom : symptoms) {
+                //if (count == 1) diseaseId = (String) symptom[0];
+                if (!diseaseId.equals((String) symptom[3])){
+                    edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
+                    diseaseId = (String) symptom[3];
+                    disease.setName((String) symptom[4]);
+                    disease.setUrl((String) symptom[5]);
+                    if (concepts.size() > 0 ) {
+
+                        concepts.clear();
+                    }
+                    disease.setDisnetConceptList(concepts);
+                    diseaseList.add(disease);
+                }
+                DisnetConcept DisnetConcept = new DisnetConcept();
+                DisnetConcept.setCui((String) symptom[0]);
+                DisnetConcept.setName((String) symptom[1]);
+                //DisnetConcept.setUrl((String) symptom[5]);
+                DisnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[6]));
+                concepts.add(DisnetConcept);
+                //disnetConcepts.add(DisnetConcept);
+            }
+        }
+        return diseaseList;
+    }
+
     public List<String> setSemanticTypes(String semanticTypes){
         List<String> semanticTypesList = new ArrayList<>();
         String[] parts = semanticTypes.split(",");
