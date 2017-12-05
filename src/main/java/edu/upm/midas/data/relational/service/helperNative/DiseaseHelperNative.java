@@ -104,7 +104,7 @@ public class DiseaseHelperNative {
             disease.setName(diseaseName);
             disease.setUrl(getDiseaseUrlFromDisnetConceptList(disnetConcepts));
             disease.setDisnetConceptList(disnetConcepts);
-            disease.setDisnetConceptsCount(disnetConcepts.size());
+            disease.setDiseaseCount(disnetConcepts.size());
             diseaseList.add(disease);
         }
 */

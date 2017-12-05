@@ -429,7 +429,7 @@ public class QueryController {
                     List<DiseaseDisnetConcepts> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithMoreFindings(source, dataVersion, validated, limit);
                     String end = timeProvider.getTimestampFormat();
                     if (diseasesWithMoreFindings != null) {
-                        response.setSize(diseasesWithMoreFindings.size());
+                        response.setDiseaseCount(diseasesWithMoreFindings.size());
                         response.setDiseaseList(diseasesWithMoreFindings);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
@@ -493,7 +493,7 @@ public class QueryController {
                     List<DiseaseDisnetConcepts> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithFewerFindings(source, dataVersion, validated, limit);
                     String end = timeProvider.getTimestampFormat();
                     if (diseasesWithMoreFindings != null) {
-                        response.setSize(diseasesWithMoreFindings.size());
+                        response.setDiseaseCount(diseasesWithMoreFindings.size());
                         response.setDiseaseList(diseasesWithMoreFindings);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
