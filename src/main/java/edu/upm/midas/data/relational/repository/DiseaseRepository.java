@@ -51,6 +51,8 @@ public interface DiseaseRepository {
 
     List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
 
+    List<Object[]> findCodesBySourceAndVersionAndDiseaseNameNative(String sourceName, Date version, String diseaseName, int limit);
+
     List<Disease> findAllQuery();
 
     void persist(Disease disease);

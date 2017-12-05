@@ -647,6 +647,69 @@ public class QueryController {
     }
 
 
+    @RequestMapping(path = { "/query/searchByDiseaseName" },//disease name
+            method = RequestMethod.GET,
+            params = {"token", "source", "version", "diseaseName"})
+    public DisnetConceptsResponse searchByDiseaseName(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                     @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
+                                                     @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
+                                                     @RequestParam(value = "diseaseName") @Valid @NotBlank @NotNull @NotEmpty String diseaseName,
+                                                     @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+                                                     HttpServletRequest httpRequest, Device device) throws Exception {
+        //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
+        DisnetConceptsResponse response = new DisnetConceptsResponse();
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        //</editor-fold>
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
+        //Se forma la respuesta
+        response.setAuthorized(responseFather.isAuthorized());
+        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
+        response.setToken(responseFather.getToken());
+        //Si la autorización es exitosa se completa la respuesta
+        if (response.isAuthorized()){
+            try {
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    //String start = timeProvider.getTimestampFormat();String end = timeProvider.getTimestampFormat();
+                    String start = timeProvider.getTimestampFormat();
+                    List<Disease> diseases = diseaseHelper.getDiseasesWithTheirCodes(source, dataVersion, diseaseName);
+                    String end = timeProvider.getTimestampFormat();
+                    if (diseases != null) {
+                        response.setDiseaseCount(diseases.size());
+                        response.setDiseaseList(diseases);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
+                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    }
+                }else{
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                }
+            }catch (Exception e){
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            }
+        }else {
+            response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
+            response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
+        }
+        if (errorsFound.size() > 0)
+            response.setErrorsFound(errorsFound);
+        if (parameters.size() > 0 && errorsFound.size() <= 0)
+            response.setExtraInfo(parameters);
+
+        return response;
+    }
+
+
 
 
 }

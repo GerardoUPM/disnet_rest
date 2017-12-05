@@ -276,6 +276,22 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
         return diseases;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findCodesBySourceAndVersionAndDiseaseNameNative(String sourceName, Date version, String diseaseName, int limit) {
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findCodesBySourceAndVersionAndDiseaseNameNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("disease", "%" + diseaseName + "%")
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
     public void persist(Disease disease) {
         super.persist(disease);
     }

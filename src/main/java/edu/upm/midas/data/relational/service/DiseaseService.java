@@ -47,6 +47,8 @@ public interface DiseaseService {
 
     List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
 
+    List<edu.upm.midas.model.Disease> findCodesBySourceAndVersionAndDiseaseNameNative(String sourceName, Date version, String diseaseName, int limit);
+
     List<Disease> findAll();
 
     void save(Disease disease);

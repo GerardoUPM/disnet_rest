@@ -66,6 +66,11 @@ public class DiseaseHelperNative {
     ObjectMapper objectMapper;
 
 
+
+    public List<Disease> getDiseasesWithTheirCodes(String sourceName, Date version, String diseaseName){
+        return diseaseService.findCodesBySourceAndVersionAndDiseaseNameNative(sourceName, version, diseaseName, 0);
+    }
+
     /**
      * @param sourceName
      * @param version
@@ -175,6 +180,25 @@ public class DiseaseHelperNative {
 
     public List<SymptomWithCount> getLessCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
         return symptomService.lessCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+    }
+
+    public TypeSearchValidation sourceAndVersionAndDiseaseNameValidation(List<ApiResponseError> apiResponseErrors, List<Parameter> parameters, String sourceName, Date version, String diseaseName) throws Exception {
+        TypeSearchValidation validation = new TypeSearchValidation();
+        boolean diseaseNameEmpty = common.isEmpty(diseaseName);
+
+        try {
+            TypeSearchValidation svVal = sourceAndVersionValidation(apiResponseErrors, parameters, sourceName, version);
+            Validation diseaseNameVal = validateDiseaseName(apiResponseErrors, parameters, sourceName, version, diseaseName);
+            if (!svVal.isErrors()) {
+
+            } else {
+                validation.setErrors(true);
+            }
+        }catch (Exception e){
+
+        }
+
+        return validation;
     }
 
 

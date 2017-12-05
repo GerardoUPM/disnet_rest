@@ -4,6 +4,7 @@ import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import edu.upm.midas.data.relational.service.DiseaseService;
 import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.DiseaseDisnetConcepts;
+import edu.upm.midas.model.response.Code;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -160,7 +161,7 @@ public class DiseaseServiceImpl implements DiseaseService {
         return DisnetConcepts;
     }
 
-    @Override
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public boolean existDiseaseByExactNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName) {
         Object[] disease = daoDisease.findByExactNameAndSourceAndVersionNative(sourceName, version, diseaseName);
         if (disease != null)
@@ -170,9 +171,42 @@ public class DiseaseServiceImpl implements DiseaseService {
         else return false;
     }
 
-    @Override
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName) {
         return null;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<edu.upm.midas.model.Disease> findCodesBySourceAndVersionAndDiseaseNameNative(String sourceName, Date version, String diseaseName, int limit) {
+        List<edu.upm.midas.model.Disease> diseaseList = null;
+        List<Object[]> symptoms = daoDisease.findCodesBySourceAndVersionAndDiseaseNameNative( sourceName, version, diseaseName, limit );
+        String diseaseId = "";
+        List<Code> codes = new ArrayList<>();
+        if (symptoms != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] symptom : symptoms) {
+                if (!diseaseId.equals((String) symptom[0])){
+                    edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
+                    diseaseId = (String) symptom[0];
+                    disease.setName((String) symptom[1]);
+                    disease.setUrl((String) symptom[2]);
+                    //System.out.println("size for: "+concepts.size());
+                    if (codes.size() > 0 ) {
+                        codes = new ArrayList<>();//concepts.clear();
+                    }
+                    disease.setCodes(codes);
+                    diseaseList.add(disease);
+                }
+                Code code = new Code();
+                code.setCode((String) symptom[3]);
+                code.setTypeCode((String) symptom[4]);
+                codes.add(code);
+                //disnetConcepts.add(DisnetConcept);
+            }
+        }
+        return diseaseList;
+
+
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
