@@ -90,7 +90,7 @@ import java.util.Objects;
         //-- <<<mostCommonSymptoms>>> SINTOMAS MAS COMUNES
         @NamedNativeQuery(
                 name = "Symptom.mostCommonBySourceAndVersionAndValidated",
-                query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common' " +
+                query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common', getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
@@ -110,7 +110,7 @@ import java.util.Objects;
         //-- -- <<<lessCommonSymptoms>>> SINTOMAS MENOS COMUNES
         @NamedNativeQuery(
                 name = "Symptom.lessCommonBySourceAndVersionAndValidated",
-                query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common' " +
+                query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common', getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +

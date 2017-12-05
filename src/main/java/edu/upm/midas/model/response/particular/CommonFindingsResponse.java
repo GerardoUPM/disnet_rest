@@ -1,5 +1,5 @@
 package edu.upm.midas.model.response.particular;
-import edu.upm.midas.model.SymptomWithCount;
+import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.response.ResponseFather;
 
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 public class CommonFindingsResponse extends ResponseFather {
 
     private int size;
-    private List<SymptomWithCount> symptomList;
+    private List<DisnetConcept> disnetConcepts;
 
 
     public int getSize() {
@@ -27,11 +27,11 @@ public class CommonFindingsResponse extends ResponseFather {
         this.size = size;
     }
 
-    public List<SymptomWithCount> getSymptomList() {
-        return symptomList;
+    public List<DisnetConcept> getDisnetConcepts() {
+        return disnetConcepts;
     }
 
-    public void setSymptomList(List<SymptomWithCount> symptomList) {
-        this.symptomList = symptomList;
+    public void setDisnetConcepts(List<DisnetConcept> disnetConcepts) {
+        this.disnetConcepts = disnetConcepts;
     }
 }

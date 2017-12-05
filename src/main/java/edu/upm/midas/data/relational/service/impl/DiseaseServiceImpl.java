@@ -155,6 +155,7 @@ public class DiseaseServiceImpl implements DiseaseService {
                 DisnetConcept DisnetConcept = new DisnetConcept();
                 DisnetConcept.setCui((String) symptom[0]);
                 DisnetConcept.setName((String) symptom[1]);
+                DisnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[5]));
                 DisnetConcepts.add(DisnetConcept);
             }
         }

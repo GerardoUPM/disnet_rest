@@ -151,7 +151,7 @@ public class DiseaseHelperNative {
     public List<DiseaseDisnetConcepts> getDiseasesWithFewerFindings(String sourceName, Date version, boolean isValidated, int limit){
         List<DiseaseDisnetConcepts> diseases = diseaseService.withFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit);
         //REGRESA LA MISMA LISTA PERO CON INFORMACIÓN DE SUS SINTOMAS... QUE CON LA PRIMER CONSULTA NO SE CONSIGUE
-        List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithCountList(sourceName, version, isValidated, limit, diseases);
+        List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithSymptomsList(sourceName, version, isValidated, limit, diseases);
         return diseaseList;
     }
 
@@ -159,12 +159,12 @@ public class DiseaseHelperNative {
     public List<DiseaseDisnetConcepts> getDiseasesWithMoreFindings(String sourceName, Date version, boolean isValidated, int limit){
         List<DiseaseDisnetConcepts> diseases = diseaseService.withMoreSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit);
         //REGRESA LA MISMA LISTA PERO CON INFORMACIÓN DE SUS SINTOMAS... QUE CON LA PRIMER CONSULTA NO SE CONSIGUE
-        List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithCountList(sourceName, version, isValidated, limit, diseases);
+        List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithSymptomsList(sourceName, version, isValidated, limit, diseases);
         return diseaseList;
     }
 
 
-    public List<DiseaseDisnetConcepts> getDiseaseWithCountList(String sourceName, Date version, boolean isValidated, int limit, List<DiseaseDisnetConcepts> diseases){
+    public List<DiseaseDisnetConcepts> getDiseaseWithSymptomsList(String sourceName, Date version, boolean isValidated, int limit, List<DiseaseDisnetConcepts> diseases){
         List<DiseaseDisnetConcepts> diseaseList = null;
         if (diseases != null) {
             diseaseList = new ArrayList<>();
@@ -185,12 +185,12 @@ public class DiseaseHelperNative {
     }
 
 
-    public List<SymptomWithCount> getMostCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
+    public List<DisnetConcept> getMostCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
         return symptomService.mostCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
     }
 
 
-    public List<SymptomWithCount> getLessCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
+    public List<DisnetConcept> getLessCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
         return symptomService.lessCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
     }
 

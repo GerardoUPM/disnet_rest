@@ -21,6 +21,8 @@ public class DisnetConcept {
     @JsonIgnore
     private String url;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private int common;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> semanticTypes;
 
 
@@ -46,6 +48,14 @@ public class DisnetConcept {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public int getCommon() {
+        return common;
+    }
+
+    public void setCommon(int common) {
+        this.common = common;
     }
 
     public List<String> getSemanticTypes() {

@@ -115,7 +115,7 @@ import java.util.Objects;
         // -- <<<findingsList>>> (POR ID DE ENFERMEDAD) CUALES SITOMAS CON SUS SEMANTIC TYPES TIENE UNA ENFERMEDAD "id de la enfermedad" POR FUENTE Y VERSION Y SI ESTAN VALIDADOS
         @NamedNativeQuery(
                 name = "Disease.findSymptomsBySourceAndVersionAndDiseaseIdAndValidatedNative",
-                query = "SELECT DISTINCT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName'-- , ht.text_id \n" +
+                query = "SELECT DISTINCT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', getSemanticTypesBySymptom(sym.cui) 'semantic_types' \n" +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +

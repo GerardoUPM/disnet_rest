@@ -17,7 +17,6 @@ import edu.upm.midas.model.response.Parameter;
 import edu.upm.midas.model.response.ResponseFather;
 import edu.upm.midas.model.response.particular.*;
 import edu.upm.midas.model.response.validations.TypeSearchValidation;
-import edu.upm.midas.model.response.validations.Validation;
 import edu.upm.midas.service.error.ErrorService;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -550,11 +549,11 @@ public class QueryController {
                 TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    List<SymptomWithCount> symptoms = diseaseHelper.getMostCommonSymptoms(source, dataVersion, validated, limit);
+                    List<DisnetConcept> symptoms = diseaseHelper.getMostCommonSymptoms(source, dataVersion, validated, limit);
                     String end = timeProvider.getTimestampFormat();
                     if (symptoms != null) {
                         response.setSize(symptoms.size());
-                        response.setSymptomList(symptoms);
+                        response.setDisnetConcepts(symptoms);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
@@ -613,11 +612,11 @@ public class QueryController {
                 if (!validation.isErrors()) {
                     //String start = timeProvider.getTimestampFormat();String end = timeProvider.getTimestampFormat();
                     String start = timeProvider.getTimestampFormat();
-                    List<SymptomWithCount> symptoms = diseaseHelper.getLessCommonSymptoms(source, dataVersion, validated, limit);
+                    List<DisnetConcept> symptoms = diseaseHelper.getLessCommonSymptoms(source, dataVersion, validated, limit);
                     String end = timeProvider.getTimestampFormat();
                     if (symptoms != null) {
                         response.setSize(symptoms.size());
-                        response.setSymptomList(symptoms);
+                        response.setDisnetConcepts(symptoms);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);

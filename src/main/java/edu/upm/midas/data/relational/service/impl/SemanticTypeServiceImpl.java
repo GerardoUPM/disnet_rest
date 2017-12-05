@@ -74,7 +74,7 @@ public class SemanticTypeServiceImpl implements SemanticTypeService {
         SemanticType st = daoSemanticType.findById(semanticType.getSemanticType());
         if(st!=null){
             //MODIFICAR SERIAMENTE
-                //st.setSymptomList( semanticType.getSymptomList() );
+                //st.setDisnetConcepts( semanticType.getDisnetConcepts() );
 /*
             if(StringUtils.isNotBlank(code.getCodePK()))
                 cod.setSourceId(code.getSourceId());

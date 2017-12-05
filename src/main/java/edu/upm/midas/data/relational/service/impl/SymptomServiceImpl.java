@@ -2,6 +2,7 @@ package edu.upm.midas.data.relational.service.impl;
 import edu.upm.midas.data.relational.entities.edsssdb.Symptom;
 import edu.upm.midas.data.relational.repository.SymptomRepository;
 import edu.upm.midas.data.relational.service.SymptomService;
+import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.SymptomWithCount;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,31 +60,41 @@ public class SymptomServiceImpl implements SymptomService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<SymptomWithCount> mostCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+    public List<DisnetConcept> mostCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
         List<Object[]> symptoms = daoSymptom.mostCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
         return getSymptomWithCountList(symptoms);
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<SymptomWithCount> lessCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
+    public List<DisnetConcept> lessCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
         List<Object[]> symptoms = daoSymptom.lessCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
         return getSymptomWithCountList(symptoms);
     }
 
-    private List<SymptomWithCount> getSymptomWithCountList(List<Object[]> symptoms){
-        List<SymptomWithCount> symptomList = null;
+    private List<DisnetConcept> getSymptomWithCountList(List<Object[]> symptoms){
+        List<DisnetConcept> symptomList = null;
         if (symptoms != null) {
             symptomList = new ArrayList<>();
             for (Object[] sym : symptoms) {
-                SymptomWithCount symptom = new SymptomWithCount();
+                DisnetConcept symptom = new DisnetConcept();
                 symptom.setCui((String) sym[0]);
                 symptom.setName((String) sym[1]);
                 BigInteger count = (BigInteger) sym[2];
                 symptom.setCommon(count.intValue());
+                symptom.setSemanticTypes(setSemanticTypes((String) sym[3]));
                 symptomList.add(symptom);
             }
         }
         return symptomList;
+    }
+
+    public List<String> setSemanticTypes(String semanticTypes){
+        List<String> semanticTypesList = new ArrayList<>();
+        String[] parts = semanticTypes.split(",");
+        for (String semanticType: parts) {
+            semanticTypesList.add(semanticType);
+        }
+        return semanticTypesList;
     }
 
     @Transactional(propagation= Propagation.REQUIRED)
