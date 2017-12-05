@@ -177,48 +177,21 @@ public class DiseaseServiceImpl implements DiseaseService {
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {
-        List<edu.upm.midas.model.Disease> diseaseList = null;
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated( sourceName, version, diseaseName, isValidated );
-
-        System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
-
-        String diseaseId = "";
-        List<DisnetConcept> concepts = new ArrayList<>();
-        if (symptoms != null) {
-            diseaseList = new ArrayList<>();
-            for (Object[] symptom : symptoms) {
-                //if (count == 1) diseaseId = (String) symptom[0];
-                if (!diseaseId.equals((String) symptom[3])){
-                    edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
-                    diseaseId = (String) symptom[3];
-                    disease.setName((String) symptom[4]);
-                    disease.setUrl((String) symptom[5]);
-                    if (concepts.size() > 0 ) {
-
-                        concepts.clear();
-                    }
-                    disease.setDisnetConceptList(concepts);
-                    diseaseList.add(disease);
-                }
-                DisnetConcept DisnetConcept = new DisnetConcept();
-                DisnetConcept.setCui((String) symptom[0]);
-                DisnetConcept.setName((String) symptom[1]);
-                //DisnetConcept.setUrl((String) symptom[5]);
-                DisnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[6]));
-                concepts.add(DisnetConcept);
-                //disnetConcepts.add(DisnetConcept);
-            }
-        }
-        return diseaseList;
+        //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
+        return createDiseaseList(symptoms);
     }
 
     @Override
     public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative(String sourceName, Date version, String code, String resourceName, boolean isValidated) {
-        List<edu.upm.midas.model.Disease> diseaseList = null;
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative( sourceName, version, code, resourceName, isValidated );
+        //System.out.println("HOLA: "+sourceName+" | "+version+" | "+code+" | "+resourceName+" | "+isValidated+" | "+symptoms.size() );
+        return createDiseaseList(symptoms);
+    }
 
-        System.out.println(sourceName+" | "+version+" | "+code+" | "+resourceName+" | "+isValidated+" | "+symptoms.size() );
 
+    public List<edu.upm.midas.model.Disease> createDiseaseList(List<Object[]> symptoms){
+        List<edu.upm.midas.model.Disease> diseaseList = null;
         String diseaseId = "";
         List<DisnetConcept> concepts = new ArrayList<>();
         if (symptoms != null) {
@@ -230,9 +203,9 @@ public class DiseaseServiceImpl implements DiseaseService {
                     diseaseId = (String) symptom[3];
                     disease.setName((String) symptom[4]);
                     disease.setUrl((String) symptom[5]);
+                    //System.out.println("size for: "+concepts.size());
                     if (concepts.size() > 0 ) {
-
-                        concepts.clear();
+                        concepts = new ArrayList<>();//concepts.clear();
                     }
                     disease.setDisnetConceptList(concepts);
                     diseaseList.add(disease);
@@ -248,6 +221,7 @@ public class DiseaseServiceImpl implements DiseaseService {
         }
         return diseaseList;
     }
+
 
     public List<String> setSemanticTypes(String semanticTypes){
         List<String> semanticTypesList = new ArrayList<>();

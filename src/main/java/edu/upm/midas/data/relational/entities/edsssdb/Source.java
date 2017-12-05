@@ -48,6 +48,13 @@ import java.util.Objects;
                         + "FROM source s ORDER BY CAST( SUBSTRING( s.source_id , 3) AS UNSIGNED) DESC",
                 resultClass = Source.class
         ),
+
+        @NamedNativeQuery(
+                name = "Source.findAllVersionsNative",
+                query = "SELECT DISTINCT d.date FROM document d "
+        ),
+
+
         @NamedNativeQuery(
                 name = "Source.findLastIdNative",
                 query = "SELECT s.source_id "
@@ -85,7 +92,7 @@ import java.util.Objects;
                         + "FROM source s "
         ),
         @NamedNativeQuery(
-                name = "Source.findAllVersionsNative",
+                name = "Source.findAllVersionsBySourceNative",
                 query = "SELECT DISTINCT hs.date 'version' " +
                         "FROM has_source hs " +
                         "INNER JOIN source s ON s.source_id = hs.source_id " +

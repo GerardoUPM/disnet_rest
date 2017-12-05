@@ -41,6 +41,11 @@ public class Constants {
     public final static String EXCLUDE_SEM_TYPES = "excludeSemanticTypes";
     public final static String LIMIT = "limit";
 
+    public final static String TYPE_QUERY_NAME = "name";
+    public final static String TYPE_QUERY_NAMES = "names";
+    public final static String TYPE_QUERY_CODES = "codes";
+    public final static String TYPE_QUERY_UNKNOWN = "unknown";
+
     public final static String MESSAGE_PARAM_NOT_USED = "Parameter not used.";
 
 

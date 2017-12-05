@@ -32,11 +32,13 @@ public interface SourceRepository {
 
     Source findByIdNativeResultClass(String sourceId);
 
+    List<Object[]> findAllVersionsNative();
+
     List<Source> findAllQuery();
 
     List<Object[]> findAllNative();
 
-    List<Date> findAllVersionsNative(String source);//Source name
+    List<Date> findAllVersionsBySourceNative(String source);//Source name
 
     void persist(Source source);
 

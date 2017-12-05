@@ -59,7 +59,7 @@ public class SourceHelperNative {
      */
     public List<String> getVersions(String source) {
         List<String> versions = null;
-        List<Date> versionAllNativeList = sourceService.findAllVersionsNative(source);
+        List<Date> versionAllNativeList = sourceService.findAllVersionsBySourceNative(source);
         if (versionAllNativeList != null){
             versions = new ArrayList<>();
             for (Date version : versionAllNativeList) {

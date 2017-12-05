@@ -47,4 +47,14 @@ public class CodeAndTypeCodeValidation extends Validation {
     public void setFoundTypeCode(boolean foundTypeCode) {
         this.foundTypeCode = foundTypeCode;
     }
+
+    @Override
+    public String toString() {
+        return "CodeAndTypeCodeValidation{" +
+                "codeEmpty=" + codeEmpty +
+                ", typeCodeEmpty=" + typeCodeEmpty +
+                ", foundCode=" + foundCode +
+                ", foundTypeCode=" + foundTypeCode +
+                '}';
+    }
 }

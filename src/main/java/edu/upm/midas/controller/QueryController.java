@@ -17,6 +17,7 @@ import edu.upm.midas.model.response.Parameter;
 import edu.upm.midas.model.response.ResponseFather;
 import edu.upm.midas.model.response.particular.*;
 import edu.upm.midas.model.response.validations.TypeSearchValidation;
+import edu.upm.midas.model.response.validations.Validation;
 import edu.upm.midas.service.error.ErrorService;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -168,7 +169,13 @@ public class QueryController {
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                     saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                    errorService.insertApiErrorEnumGenericError(errorsFound, ApiErrorEnum.RESOURCE_NOT_FOUND, "Source exception.", "No versions were found for the source. Verify the DISNET source list.", true, new Parameter(Constants.SOURCE, source));
+                    errorService.insertApiErrorEnumGenericError(
+                            errorsFound,
+                            ApiErrorEnum.RESOURCE_NOT_FOUND,
+                            "Source exception.",
+                            "No versions were found for the source. Verify the DISNET source list.",
+                            true,
+                            new Parameter(Constants.SOURCE, source));
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -199,6 +206,7 @@ public class QueryController {
         DiseaseListResponse response = new DiseaseListResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -210,19 +218,32 @@ public class QueryController {
                 Date dataVersion = timeProvider.getSdf().parse(version);
                 //System.out.println(" SOURCE: " + source + " VERSION: " + dataVersion);
                 //Validar versión y fuente
-                String start = timeProvider.getTimestampFormat();
-                List<edu.upm.midas.model.Disease> diseaseList = diseaseHelper.diseaseListWithUrlAndSymptomsCountBySourceAndVersionAndIsValidated(source, dataVersion, validated);
-                String end = timeProvider.getTimestampFormat();
-                if (diseaseList != null) {
-                    response.setDiseaseList(diseaseList);
-                    response.setSize(diseaseList.size());
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    String start = timeProvider.getTimestampFormat();
+                    List<edu.upm.midas.model.Disease> diseaseList = diseaseHelper.diseaseListWithUrlAndSymptomsCountBySourceAndVersionAndIsValidated(source, dataVersion, validated);
+                    String end = timeProvider.getTimestampFormat();
+                    if (diseaseList != null) {
+                        response.setDiseaseList(diseaseList);
+                        response.setSize(diseaseList.size());
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        errorService.insertApiErrorEnumGenericError(
+                                errorsFound,
+                                ApiErrorEnum.RESOURCE_NOT_FOUND,
+                                "Disease list exception.",
+                                "No diseases were found with the requested parameters. Check the list of DISNET sources and versions.",
+                                true,
+                                null);
+                    }
+                }else{
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                } else {
-                    response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                    response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -236,6 +257,8 @@ public class QueryController {
         }
         if (errorsFound.size() > 0)
             response.setErrorsFound(errorsFound);
+        if (parameters.size() > 0 && errorsFound.size() <= 0)
+            response.setExtraInfo(parameters);
 
         return response;
     }
@@ -266,7 +289,7 @@ public class QueryController {
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-//            try {
+            try {
                 Date dataVersion = timeProvider.getSdf().parse(version);
                 //System.out.println("DIS: " + disease + " SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated + " diseaseName: "+diseaseName);
                 //Validación de los parametros de busqueda
@@ -282,16 +305,26 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        errorService.insertApiErrorEnumGenericErrorWithParameters(
+                                errorsFound,
+                                ApiErrorEnum.INVALID_PARAMETERS,
+                                "Disease and symptoms list exception",
+                                "No symptoms were found with the specified parameters.",
+                                true,
+                                null );
                     }
+                }else{
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                 }
-//            }catch (Exception e){
-//                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-//                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-//                errorService.insertInternatServerError(errorsFound, e, true);
-//            }
+            }catch (Exception e){
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                errorService.insertInternatServerError(errorsFound, e, true);
+            }
         }else {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
@@ -316,6 +349,8 @@ public class QueryController {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         CountResponse response = new CountResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         //</editor-fold>
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
@@ -323,21 +358,28 @@ public class QueryController {
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-            Date dataVersion = timeProvider.getSdf().parse(version);
-            System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion));
             try {
-                String start = timeProvider.getTimestampFormat();
-                BigInteger numberOfDiseases = diseaseHelper.getNumberDiseases(source, dataVersion);
-                String end = timeProvider.getTimestampFormat();
-                if (numberOfDiseases != null) {
-                    response.setCount(numberOfDiseases.intValue());
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion));
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    String start = timeProvider.getTimestampFormat();
+                    BigInteger numberOfDiseases = diseaseHelper.getNumberDiseases(source, dataVersion);
+                    String end = timeProvider.getTimestampFormat();
+                    if (numberOfDiseases != null) {
+                        response.setCount(numberOfDiseases.intValue());
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
+                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    }
+                }else{
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                } else {
-                    response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                    response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -347,6 +389,11 @@ public class QueryController {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
+        if (errorsFound.size() > 0)
+            response.setErrorsFound(errorsFound);
+        if (parameters.size() > 0 && errorsFound.size() <= 0)
+            response.setExtraInfo(parameters);
+
         return response;
     }
 
@@ -364,28 +411,37 @@ public class QueryController {
         DiseaseSymptomsResponse response = new DiseaseSymptomsResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-            Date dataVersion = timeProvider.getSdf().parse(version);
-            System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated+ " LIMIT: " + limit));
             try {
-                String start = timeProvider.getTimestampFormat();
-                List<DiseaseDisnetConcepts> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithMoreFindings(source, dataVersion, validated, limit);
-                String end = timeProvider.getTimestampFormat();
-                if (diseasesWithMoreFindings != null) {
-                    response.setSize(diseasesWithMoreFindings.size());
-                    response.setDiseaseList(diseasesWithMoreFindings);
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated+ " LIMIT: " + limit));
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    String start = timeProvider.getTimestampFormat();
+                    List<DiseaseDisnetConcepts> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithMoreFindings(source, dataVersion, validated, limit);
+                    String end = timeProvider.getTimestampFormat();
+                    if (diseasesWithMoreFindings != null) {
+                        response.setSize(diseasesWithMoreFindings.size());
+                        response.setDiseaseList(diseasesWithMoreFindings);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
+                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    }
+                }else{
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                } else {
-                    response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                    response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -395,6 +451,11 @@ public class QueryController {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
+        if (errorsFound.size() > 0)
+            response.setErrorsFound(errorsFound);
+        if (parameters.size() > 0 && errorsFound.size() <= 0)
+            response.setExtraInfo(parameters);
+
         return response;
     }
 
@@ -412,28 +473,37 @@ public class QueryController {
         DiseaseSymptomsResponse response = new DiseaseSymptomsResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-            Date dataVersion = timeProvider.getSdf().parse(version);
-            System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
             try {
-                String start = timeProvider.getTimestampFormat();
-                List<DiseaseDisnetConcepts> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithFewerFindings(source, dataVersion, validated, limit);
-                String end = timeProvider.getTimestampFormat();
-                if (diseasesWithMoreFindings != null) {
-                    response.setSize(diseasesWithMoreFindings.size());
-                    response.setDiseaseList(diseasesWithMoreFindings);
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    String start = timeProvider.getTimestampFormat();
+                    List<DiseaseDisnetConcepts> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithFewerFindings(source, dataVersion, validated, limit);
+                    String end = timeProvider.getTimestampFormat();
+                    if (diseasesWithMoreFindings != null) {
+                        response.setSize(diseasesWithMoreFindings.size());
+                        response.setDiseaseList(diseasesWithMoreFindings);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
+                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    }
+                }else{
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                } else {
-                    response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                    response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -443,6 +513,11 @@ public class QueryController {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
+        if (errorsFound.size() > 0)
+            response.setErrorsFound(errorsFound);
+        if (parameters.size() > 0 && errorsFound.size() <= 0)
+            response.setExtraInfo(parameters);
+
         return response;
     }
 
@@ -460,28 +535,37 @@ public class QueryController {
         CommonFindingsResponse response = new CommonFindingsResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-            Date dataVersion = timeProvider.getSdf().parse(version);
-            System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
             try {
-                String start = timeProvider.getTimestampFormat();
-                List<SymptomWithCount> symptoms = diseaseHelper.getMostCommonSymptoms(source, dataVersion, validated, limit);
-                String end = timeProvider.getTimestampFormat();
-                if (symptoms != null) {
-                    response.setSize(symptoms.size());
-                    response.setSymptomList(symptoms);
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    String start = timeProvider.getTimestampFormat();
+                    List<SymptomWithCount> symptoms = diseaseHelper.getMostCommonSymptoms(source, dataVersion, validated, limit);
+                    String end = timeProvider.getTimestampFormat();
+                    if (symptoms != null) {
+                        response.setSize(symptoms.size());
+                        response.setSymptomList(symptoms);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
+                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    }
+                }else{
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                } else {
-                    response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                    response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -491,6 +575,11 @@ public class QueryController {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
+        if (errorsFound.size() > 0)
+            response.setErrorsFound(errorsFound);
+        if (parameters.size() > 0 && errorsFound.size() <= 0)
+            response.setExtraInfo(parameters);
+
         return response;
     }
 
@@ -508,29 +597,38 @@ public class QueryController {
         CommonFindingsResponse response = new CommonFindingsResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-            Date dataVersion = timeProvider.getSdf().parse(version);
-            System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
             try {
-                //String start = timeProvider.getTimestampFormat();String end = timeProvider.getTimestampFormat();
-                String start = timeProvider.getTimestampFormat();
-                List<SymptomWithCount> symptoms = diseaseHelper.getLessCommonSymptoms(source, dataVersion, validated, limit);
-                String end = timeProvider.getTimestampFormat();
-                if (symptoms != null) {
-                    response.setSize(symptoms.size());
-                    response.setSymptomList(symptoms);
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    //String start = timeProvider.getTimestampFormat();String end = timeProvider.getTimestampFormat();
+                    String start = timeProvider.getTimestampFormat();
+                    List<SymptomWithCount> symptoms = diseaseHelper.getLessCommonSymptoms(source, dataVersion, validated, limit);
+                    String end = timeProvider.getTimestampFormat();
+                    if (symptoms != null) {
+                        response.setSize(symptoms.size());
+                        response.setSymptomList(symptoms);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
+                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    }
+                }else{
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                } else {
-                    response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                    response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -540,6 +638,11 @@ public class QueryController {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
+        if (errorsFound.size() > 0)
+            response.setErrorsFound(errorsFound);
+        if (parameters.size() > 0 && errorsFound.size() <= 0)
+            response.setExtraInfo(parameters);
+
         return response;
     }
 

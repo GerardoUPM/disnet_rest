@@ -2,9 +2,11 @@ package edu.upm.midas.data.relational.service.helperNative;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
+import edu.upm.midas.common.util.TimeProvider;
 import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.service.CodeService;
 import edu.upm.midas.data.relational.service.DiseaseService;
+import edu.upm.midas.data.relational.service.SourceService;
 import edu.upm.midas.data.relational.service.SymptomService;
 import edu.upm.midas.enums.ApiErrorEnum;
 import edu.upm.midas.model.Disease;
@@ -45,6 +47,8 @@ public class DiseaseHelperNative {
     @Autowired
     private SymptomService symptomService;
     @Autowired
+    private SourceService sourceService;
+    @Autowired
     private CodeService codeService;
     @Autowired
     private UniqueId uniqueId;
@@ -54,6 +58,8 @@ public class DiseaseHelperNative {
     private ErrorService errorService;
     @Autowired
     private Common common;
+    @Autowired
+    private TimeProvider timeProvider;
 
     private static final Logger logger = LoggerFactory.getLogger(DiseaseHelperNative.class);
     @Autowired
@@ -69,13 +75,11 @@ public class DiseaseHelperNative {
      */
     public List<Disease> getDiseasesAndTheirDisnetConcepts(String sourceName, Date version, String diseaseName, String code, String resourceName, boolean isValidated, String typeSearch){
         List<Disease> diseaseList = null;
-        if (typeSearch.equals("name")){System.out.println("NOMBRE");
+        if (typeSearch.equals(Constants.TYPE_QUERY_NAME)){System.out.println("TYPE_QUERY_NAME");
             diseaseList = diseaseService.findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(sourceName, version, diseaseName, isValidated);
-        } else if (typeSearch.equals("code")){
-            Disease disease = new Disease();
+        } else if (typeSearch.equals(Constants.TYPE_QUERY_CODES)){System.out.println("TYPE_QUERY_CODES");
             diseaseList = diseaseService.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndIsValidatedNative(sourceName, version, code, resourceName, isValidated);
         }
-
 /*
         if (disnetConcepts != null) {
             diseaseList = new ArrayList<>();
@@ -174,6 +178,19 @@ public class DiseaseHelperNative {
     }
 
 
+    public TypeSearchValidation sourceAndVersionValidation(List<ApiResponseError> apiResponseErrors, List<Parameter> parameters, String sourceName, Date version){
+        TypeSearchValidation validation = new TypeSearchValidation();
+
+        Validation sourceValidation = sourceValidation(apiResponseErrors, parameters, sourceName);
+        Validation versionValidation = versionValidation(apiResponseErrors, parameters, sourceName, version);
+
+        if (sourceValidation.isFound() && versionValidation.isFound()) {
+            validation.setErrors(false);
+        }else validation.setErrors(true);
+        return validation;
+    }
+
+
     public TypeSearchValidation validateDiseaseSearchingParameters(List<ApiResponseError> apiResponseErrors, List<Parameter> parameters, String sourceName, Date version, String diseaseName, String diseaseCode, String typeCode) throws Exception {
         TypeSearchValidation validation = new TypeSearchValidation();
         List<ApiResponseError> apiResponseErrorList = null;
@@ -182,93 +199,104 @@ public class DiseaseHelperNative {
         boolean diseaseCodeEmpty = common.isEmpty(diseaseCode);
         boolean typeCodeEmpty = common.isEmpty(typeCode);
 
-        if (diseaseNameEmpty && diseaseCodeEmpty && typeCodeEmpty){
-            //ERROR
-            //System.out.println("1");
-            //Es necesario tener al menos un parametro de busqueda
-            errorService.insertApiErrorEnumGenericErrorWithParameters(
-                    apiResponseErrors,
-                    ApiErrorEnum.INVALID_PARAMETERS,
-                    "Disease search",
-                    "A search parameter must be selected. By name or by disease code.",
-                    true,
-                    new ArrayList<Parameter>(){{
-                        add(new Parameter(Constants.DISEASE_NAME, true, false, diseaseCode, null));
-                        add(new Parameter(Constants.DISEASE_CODE, true, false, diseaseCode, null));
-                        add(new Parameter(Constants.TYPE_CODE, true, false, typeCode, null));
-                    }} );
-            validation.setErrors(true);
-        }else if (!diseaseNameEmpty && !diseaseCodeEmpty && !typeCodeEmpty ){
-            //Solo se debe seleccionar un parametro de busqueda, no los dos
-            //System.out.println("4");
-            errorService.insertApiErrorEnumGenericErrorWithParameters(
-                    apiResponseErrors,
-                    ApiErrorEnum.INVALID_PARAMETERS,
-                    "Disease search",
-                    "It is necessary to select only one search parameter, not both.",
-                    true,
-                    new ArrayList<Parameter>(){{
-                        add(new Parameter(Constants.DISEASE_NAME, true, false, diseaseCode, null));
-                        add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
-                        add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
-                    }} );
-            validation.setErrors(true);
-        }else if(diseaseNameEmpty && ( diseaseCodeEmpty || typeCodeEmpty) ){
-            //ERROR
-            //System.out.println("2");
-            //Si el nombre de enfermedad esta vacío, no se debe dejar vacío, el código ni el tipo de código
-            errorService.insertApiErrorEnumGenericErrorWithParameters(
-                    apiResponseErrors,
-                    ApiErrorEnum.INVALID_PARAMETERS,
-                    "Disease search",
-                    "Both disease code and type of code are pair and neither should be empty.",
-                    true,
-                    new ArrayList<Parameter>(){{
-                        add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
-                        add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
-                    }} );
-            validation.setErrors(true);
-        }else if(!diseaseNameEmpty && ( (diseaseCodeEmpty && !typeCodeEmpty) || (!diseaseCodeEmpty && typeCodeEmpty) )){
-            //ERROR
-            //System.out.println("3");
-            //Si se busca por nombre de enfermedad, no se debe rellenar ni código, ni tipo de código
-            errorService.insertApiErrorEnumGenericErrorWithParameters(
-                    apiResponseErrors,
-                    ApiErrorEnum.INVALID_PARAMETERS,
-                    "Disease search",
-                    "If searching by disease name, do not fill in disease code or type of code.",
-                    true,
-                    new ArrayList<Parameter>(){{
-                        add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
-                        add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
-                    }} );
-            validation.setErrors(true);
-        }
+        Validation sourceValidation = sourceValidation(apiResponseErrors, parameters, sourceName);
+        Validation versionValidation = versionValidation(apiResponseErrors, parameters, sourceName, version);
 
-        if (!validation.isErrors()){
+        if (sourceValidation.isFound() && versionValidation.isFound()) {
 
-            validation.setErrors(true);
-
-            if(!diseaseNameEmpty){
-                //
-                System.out.println("ENFERMEDAD");
-                Validation diseaseNameValidation = validateDiseaseName(apiResponseErrors, parameters, sourceName, version, diseaseName);
-                if(diseaseNameValidation.isFound() && diseaseNameValidation.isInternalError()==false){
-                    validation.setErrors(false);
-                    validation.setTypeSearch("name");
-                }
-            } else if(!diseaseCodeEmpty && !typeCodeEmpty){
-                System.out.println("CODIGOS");
-                CodeAndTypeCodeValidation validationCodes = validateDiseaseCodeAndTypeCode(apiResponseErrors, parameters, sourceName, version, diseaseCode, typeCode);
-                if (validationCodes.isFoundCode() && validationCodes.isFoundTypeCode() && validationCodes.isInternalError()==false){
-                    validation.setErrors(false);
-                    validation.setTypeSearch("codes");
-                }
-            } else {
+            if (diseaseNameEmpty && diseaseCodeEmpty && typeCodeEmpty) {
+                //ERROR
+                //System.out.println("1");
+                //Es necesario tener al menos un parametro de busqueda
+                errorService.insertApiErrorEnumGenericErrorWithParameters(
+                        apiResponseErrors,
+                        ApiErrorEnum.INVALID_PARAMETERS,
+                        "Disease search",
+                        "A search parameter must be selected. By name or by disease code.",
+                        true,
+                        new ArrayList<Parameter>() {{
+                            add(new Parameter(Constants.DISEASE_NAME, true, false, diseaseCode, null));
+                            add(new Parameter(Constants.DISEASE_CODE, true, false, diseaseCode, null));
+                            add(new Parameter(Constants.TYPE_CODE, true, false, typeCode, null));
+                        }});
                 validation.setErrors(true);
-                validation.setTypeSearch("unknown");
+            } else if (!diseaseNameEmpty && !diseaseCodeEmpty && !typeCodeEmpty) {
+                //Solo se debe seleccionar un parametro de busqueda, no los dos
+                //System.out.println("4");
+                errorService.insertApiErrorEnumGenericErrorWithParameters(
+                        apiResponseErrors,
+                        ApiErrorEnum.INVALID_PARAMETERS,
+                        "Disease search",
+                        "It is necessary to select only one search parameter, not both.",
+                        true,
+                        new ArrayList<Parameter>() {{
+                            add(new Parameter(Constants.DISEASE_NAME, true, false, diseaseCode, null));
+                            add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
+                            add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
+                        }});
+                validation.setErrors(true);
+            } else if (diseaseNameEmpty && (diseaseCodeEmpty || typeCodeEmpty)) {
+                //ERROR
+                //System.out.println("2");
+                //Si el nombre de enfermedad esta vacío, no se debe dejar vacío, el código ni el tipo de código
+                errorService.insertApiErrorEnumGenericErrorWithParameters(
+                        apiResponseErrors,
+                        ApiErrorEnum.INVALID_PARAMETERS,
+                        "Disease search",
+                        "Both disease code and type of code are pair and neither should be empty.",
+                        true,
+                        new ArrayList<Parameter>() {{
+                            add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
+                            add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
+                        }});
+                validation.setErrors(true);
+            } else if (!diseaseNameEmpty && ((diseaseCodeEmpty && !typeCodeEmpty) || (!diseaseCodeEmpty && typeCodeEmpty))) {
+                //ERROR
+                //System.out.println("3");
+                //Si se busca por nombre de enfermedad, no se debe rellenar ni código, ni tipo de código
+                errorService.insertApiErrorEnumGenericErrorWithParameters(
+                        apiResponseErrors,
+                        ApiErrorEnum.INVALID_PARAMETERS,
+                        "Disease search",
+                        "If searching by disease name, do not fill in disease code or type of code.",
+                        true,
+                        new ArrayList<Parameter>() {{
+                            add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
+                            add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
+                        }});
+                validation.setErrors(true);
             }
 
+            if (!validation.isErrors()) {
+
+                validation.setErrors(true);
+
+                if (!diseaseNameEmpty) {
+                    //
+                    System.out.println("ENFERMEDAD");
+                    Validation diseaseNameValidation = validateDiseaseName(apiResponseErrors, parameters, sourceName, version, diseaseName);
+                    if (diseaseNameValidation.isFound() && !diseaseNameValidation.isInternalError()) {
+                        validation.setErrors(false);
+                        validation.setTypeSearch(Constants.TYPE_QUERY_NAME);
+                    }
+                } else if (!diseaseCodeEmpty && !typeCodeEmpty) {
+                    System.out.println("CODIGOS");
+                    CodeAndTypeCodeValidation validationCodes = validateDiseaseCodeAndTypeCode(apiResponseErrors, parameters, sourceName, version, diseaseCode, typeCode);
+                    System.out.println(validationCodes.toString());
+                    if (validationCodes.isFoundCode() && validationCodes.isFoundTypeCode() && !validationCodes.isInternalError()) {
+                        validation.setErrors(false);
+                        validation.setTypeSearch(Constants.TYPE_QUERY_CODES);
+                    }
+                } else {
+                    validation.setErrors(true);
+                    validation.setTypeSearch(Constants.TYPE_QUERY_UNKNOWN);
+                }
+
+            }
+
+        }else {
+            validation.setErrors(true);
+            validation.setTypeSearch(Constants.TYPE_QUERY_UNKNOWN);
         }
 
         return validation;
@@ -290,6 +318,8 @@ public class DiseaseHelperNative {
                             true,
                             new Parameter(Constants.DISEASE_NAME, true, false, diseaseName, null));
                     validation.setFound(false);
+                }else{
+                    validation.setFound(true);
                 }
             }catch (Exception e){
                 //Se agrega el error en la lista principal de la respuesta
@@ -299,7 +329,7 @@ public class DiseaseHelperNative {
                         Throwables.getRootCause(e).getClass().getName(),
                         e.getMessage(),
                         true,
-                        new Parameter(Constants.DISEASE_NAME, diseaseName));
+                        new Parameter(Constants.DISEASE_NAME, false, false, diseaseName, null));
                 validation.setInternalError(true);
             }
 //        }else{
@@ -309,8 +339,6 @@ public class DiseaseHelperNative {
 //        }
         return validation;
     }
-
-
 
 
     public CodeAndTypeCodeValidation validateDiseaseCodeAndTypeCode(List<ApiResponseError> apiResponseErrors, List<Parameter> parameters, String sourceName, Date version, String diseaseCode, String typeCode) throws Exception{
@@ -339,6 +367,9 @@ public class DiseaseHelperNative {
                                 new Parameter(Constants.TYPE_CODE, true, false, typeCode, null));
                         validation.setFoundCode(false);
                         validation.setFoundTypeCode(false);
+                    }else{
+                        validation.setFoundCode(true);
+                        validation.setFoundTypeCode(true);
                     }
                 } catch (Exception e) {
                     //Se agrega el error en la lista principal de la respuesta
@@ -349,8 +380,8 @@ public class DiseaseHelperNative {
                             e.getMessage(),
                             true,
                             new ArrayList<Parameter>(){{
-                                add(new Parameter(Constants.DISEASE_CODE, diseaseCode));
-                                add(new Parameter(Constants.TYPE_CODE, typeCode));
+                                add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
+                                add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
                             }} );
                     validation.setInternalError(true);
                 }
@@ -369,8 +400,75 @@ public class DiseaseHelperNative {
         return validation;
     }
 
-    public void validateTypeCode(ResponseFather responseFather, List<Parameter> parameters, String typeCode) throws Exception{
+    public Validation sourceValidation(List<ApiResponseError> apiResponseErrors, List<Parameter> parameters, String sourceName){
+        Validation validation = new Validation();
 
+        try {
+            String sourceId = sourceService.findByNameNative(sourceName);
+            if (common.isEmpty(sourceId)){
+                errorService.insertApiErrorEnumGenericError(
+                        apiResponseErrors,
+                        ApiErrorEnum.RESOURCE_NOT_FOUND,
+                        "Source exception",
+                        "The source was not found. Check the DISNET source list.",
+                        true,
+                        new Parameter(Constants.SOURCE, true, false, sourceName, null));
+                validation.setFound(false);
+            }else{
+                validation.setFound(true);
+                validation.setEmpty(false);
+            }
+        }catch (Exception e){
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    new Parameter(Constants.SOURCE, false, false, sourceName, null));
+            validation.setInternalError(true);
+        }
+
+        return validation;
+    }
+
+
+    public Validation versionValidation(List<ApiResponseError> apiResponseErrors, List<Parameter> parameters, String sourceName, Date version){
+        Validation validation = new Validation();
+
+        try {
+            List<Date> versions = sourceService.findAllVersionsBySourceNative(sourceName);
+            boolean found = false;
+            if (versions != null){
+                for (Date version_: versions) {
+                    if (version.equals(version_)) found = true;
+                }
+            }
+            if (!found){
+                errorService.insertApiErrorEnumGenericError(
+                        apiResponseErrors,
+                        ApiErrorEnum.RESOURCE_NOT_FOUND,
+                        "Version exception",
+                        "The version was not found. Check the DISNET version list by source.",
+                        true,
+                        new Parameter(Constants.VERSION, true, false, timeProvider.dateFormatyyyMMdd(version), null));
+                validation.setFound(false);
+            }else{
+                validation.setFound(true);
+                validation.setEmpty(false);
+            }
+        }catch (Exception e){
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    new Parameter(Constants.VERSION, false, false, timeProvider.dateFormatyyyMMdd(version), null));
+            validation.setInternalError(true);
+        }
+
+        return validation;
     }
 
 

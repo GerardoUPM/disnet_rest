@@ -26,11 +26,13 @@ public interface SourceService {
 
     String findLastSourceIdQuery();
 
+    List<String> findAllVersionsNative();
+
     List<Source> findAll();
 
     List<Object[]> findAllNative();
 
-    List<Date> findAllVersionsNative(String source);//Source name
+    List<Date> findAllVersionsBySourceNative(String source);//Source name
 
     void save(Source source);
 

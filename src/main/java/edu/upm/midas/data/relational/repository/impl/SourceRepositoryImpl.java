@@ -51,13 +51,17 @@ public class SourceRepositoryImpl extends AbstractDao<String, Source> implements
         return source;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String findByNameNative(String sourceName) {
-        String sourceId = (String) getEntityManager()
+        String sourceId = null;
+        List<String> sources = (List<String>) getEntityManager()
                 .createNamedQuery("Source.findByNameNative")
                 .setParameter("name", sourceName)
                 .setMaxResults(1)
-                .getSingleResult();
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(sources))
+            sourceId = sources.get(0);
         return sourceId;
     }
 
@@ -108,6 +112,19 @@ public class SourceRepositoryImpl extends AbstractDao<String, Source> implements
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<Object[]> findAllVersionsNative() {
+        List<Object[]> versions = null;
+        List<Object[]> versionList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Source.findAllVersionsNative")
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(versionList))
+            versions = versionList;
+        return versions;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<Source> findAllQuery() {
         /*List_<Source> sources = getEntityManager()
                 .createNamedQuery("Source.findAll")
@@ -135,10 +152,10 @@ public class SourceRepositoryImpl extends AbstractDao<String, Source> implements
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Date> findAllVersionsNative(String source) {
+    public List<Date> findAllVersionsBySourceNative(String source) {
         List<Date> versions = null;
         List<Date> versionList = (List<Date>) getEntityManager()
-                .createNamedQuery("Source.findAllVersionsNative")
+                .createNamedQuery("Source.findAllVersionsBySourceNative")
                 .setParameter("name", source)
                 //.setMaxResults(100)
                 .getResultList();

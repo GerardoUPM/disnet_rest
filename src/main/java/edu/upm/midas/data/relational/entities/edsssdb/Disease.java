@@ -156,7 +156,8 @@ import java.util.Objects;
                         "AND doc.date = :version " +
                         "AND c.code = :code " +
                         "AND r.name = :resource " +
-                        "AND hsym.validated = :validated "
+                        "AND hsym.validated = :validated " +
+                        "ORDER BY d.disease_id ASC "
         ),
 
 
@@ -309,6 +310,27 @@ import java.util.Objects;
                         "AND hsym.validated = :validated " +
                         "GROUP BY d.disease_id, d.name " +
                         "ORDER BY COUNT(DISTINCT hsym.cui) DESC "
+        ),
+        //-- <<<diseaseList>>> LISTA DE ENFERMEDADES, SUS URLS Y SUS CODIGOS
+        @NamedNativeQuery(
+                name = "Disease.findCodesBySourceAndVersionAndDiseaseNameNative",
+                query = "SELECT d.disease_id, d.name, u.url, hc.code , r.name " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "-- url\n" +
+                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- code\n" +
+                        "INNER JOIN has_code hc ON hc.document_id = doc.document_id AND hc.date = doc.date " +
+                        "INNER JOIN code c ON c.code = hc.code AND c.resource_id = hc.resource_id " +
+                        "INNER JOIN resource r ON r.resource_id = c.resource_id " +
+                        "WHERE sce.name = :source " +
+                        "AND doc.date = :version " +
+                        "AND d.name LIKE :disease " +
+                        "ORDER BY d.name ASC "
         )
 
 

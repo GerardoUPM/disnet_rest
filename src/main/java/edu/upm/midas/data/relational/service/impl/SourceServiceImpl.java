@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +61,19 @@ public class SourceServiceImpl implements SourceService {
         return daoSource.findLastSourceIdQuery();
     }
 
+    @Override
+    public List<String> findAllVersionsNative() {
+        List<String> versionList = null;
+        List<Object[]> versions = daoSource.findAllVersionsNative();
+        if (versions != null) {
+            versionList = new ArrayList<>();
+            for (Object[] version : versions) {
+                versionList.add((String) version[0]);
+            }
+        }
+        return null;
+    }
+
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<Source> findAll() {
         List<Source> listSourceEntities = daoSource.findAllQuery();
@@ -72,8 +86,8 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public List<Date> findAllVersionsNative(String source) {
-        return daoSource.findAllVersionsNative( source );
+    public List<Date> findAllVersionsBySourceNative(String source) {
+        return daoSource.findAllVersionsBySourceNative( source );
     }
 
     @Transactional(propagation= Propagation.REQUIRED)
