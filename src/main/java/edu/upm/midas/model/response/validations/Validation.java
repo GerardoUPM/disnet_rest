@@ -17,8 +17,8 @@ public class Validation {
 
     public Validation() {
         this.empty = true;
-        this.found = true;
-        this.internalError = false;
+        this.found = false;
+        this.internalError = true;
     }
 
     public boolean isEmpty() {

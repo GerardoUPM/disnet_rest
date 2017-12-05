@@ -45,9 +45,19 @@ public interface DiseaseService {
 
     boolean existDiseaseByExactNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
 
+    boolean existDiseaseByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
+
     List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName);
 
     List<edu.upm.midas.model.Disease> findCodesBySourceAndVersionAndDiseaseNameNative(String sourceName, Date version, String diseaseName, int limit);
+
+    List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes);
+
+    List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes);
+
+    List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes);
+
+    List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes);
 
     List<Disease> findAll();
 

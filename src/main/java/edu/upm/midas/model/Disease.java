@@ -23,9 +23,11 @@ public class Disease {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String url;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private Integer disnetConceptsCount;
+    private Integer codesCount;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Code> codes;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer disnetConceptsCount;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<DisnetConcept> disnetConceptList;
 
@@ -72,6 +74,17 @@ public class Disease {
 
     public void setDisnetConceptsCount(Integer disnetConceptsCount) {
         this.disnetConceptsCount = disnetConceptsCount;
+    }
+
+    public Integer getCodesCount() {
+        if (codes != null){
+            if (codes.size() > 0) codesCount = codes.size();
+        }
+        return codesCount;
+    }
+
+    public void setCodesCount(Integer codesCount) {
+        this.codesCount = codesCount;
     }
 
     public List<Code> getCodes() {

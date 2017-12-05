@@ -289,14 +289,14 @@ public class QueryController {
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-            try {
+//            try {
                 Date dataVersion = timeProvider.getSdf().parse(version);
                 //System.out.println("DIS: " + disease + " SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated + " diseaseName: "+diseaseName);
                 //Validación de los parametros de busqueda
-                TypeSearchValidation validation = diseaseHelper.validateDiseaseSearchingParameters(errorsFound, parameters, source, dataVersion, diseaseName, diseaseCode, typeCode);
+                TypeSearchValidation validation = diseaseHelper.validateDiseaseSearchingParameters(errorsFound, parameters, source, dataVersion, diseaseName, diseaseCode, typeCode, excludeSemanticTypes, forceSemanticTypes);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    List<Disease> diseasesAndTheirDisnetConcepts = diseaseHelper.getDiseasesAndTheirDisnetConcepts(source, dataVersion, diseaseName, diseaseCode, typeCode, validated, validation.getTypeSearch());
+                    List<Disease> diseasesAndTheirDisnetConcepts = diseaseHelper.getDiseasesAndTheirDisnetConcepts(source, dataVersion, diseaseName, diseaseCode, typeCode, validated, validation);
                     String end = timeProvider.getTimestampFormat();
                     if (diseasesAndTheirDisnetConcepts != null) {
                         response.setDiseaseCount(diseasesAndTheirDisnetConcepts.size());
@@ -320,11 +320,11 @@ public class QueryController {
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                 }
-            }catch (Exception e){
-                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-                errorService.insertInternatServerError(errorsFound, e, true);
-            }
+//            }catch (Exception e){
+//                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+//                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+//                errorService.insertInternatServerError(errorsFound, e, true);
+//            }
         }else {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
@@ -672,7 +672,7 @@ public class QueryController {
                 Date dataVersion = timeProvider.getSdf().parse(version);
                 //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
                 //Validar versión y fuente
-                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionAndDiseaseNameValidation(errorsFound, parameters, source, dataVersion, diseaseName);
                 if (!validation.isErrors()) {
                     //String start = timeProvider.getTimestampFormat();String end = timeProvider.getTimestampFormat();
                     String start = timeProvider.getTimestampFormat();

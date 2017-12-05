@@ -172,6 +172,16 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public boolean existDiseaseByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName) {
+        List<Object[]> diseases = daoDisease.findByLikeNameAndSourceAndVersionNative(sourceName, version, diseaseName);
+        if (diseases != null)
+            if (diseases.size() > 0)
+                return true;
+            else return false;
+        else return false;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<Object[]> findByLikeNameAndSourceAndVersionNative(String sourceName, Date version, String diseaseName) {
         return null;
     }
@@ -207,6 +217,34 @@ public class DiseaseServiceImpl implements DiseaseService {
         return diseaseList;
 
 
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes) {
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndForceSemanticTypesNative( sourceName, version, diseaseName, isValidated, semanticTypes );
+        //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
+        return createDiseaseList(symptoms);
+    }
+
+    @Override
+    public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes) {
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndExcludeSemanticTypesNative( sourceName, version, diseaseName, isValidated, semanticTypes );
+        //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
+        return createDiseaseList(symptoms);
+    }
+
+    @Override
+    public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative( sourceName, version, code, typeCode, isValidated, semanticTypes );
+        //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
+        return createDiseaseList(symptoms);
+    }
+
+    @Override
+    public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
+        List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative( sourceName, version, code, typeCode, isValidated, semanticTypes );
+        //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
+        return createDiseaseList(symptoms);
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)

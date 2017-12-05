@@ -159,6 +159,30 @@ import java.util.Objects;
                         "AND hsym.validated = :validated " +
                         "ORDER BY d.disease_id ASC "
         ),
+        // AQUI NO SE USARÁ. SINO EN EL REPOSITORY-- <<<findingsList>>> (POR CODIGOS DE ENFERMEDAD) CUALES SITOMAS CON SUS SEMANTIC TYPES TIENE UNA ENFERMEDAD "code y typeCode" POR FUENTE Y VERSION Y SI ESTAN VALIDADOS Y POR SEMANTICS TYPES
+        @NamedNativeQuery(
+                name = "Disease.findSymptomsBySourceAndVersionAndCodeAndDiseaseNameAndValidatedAndSemanticTypesNative",
+                query = "SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "-- url\n" +
+                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- symptoms\n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "INNER JOIN has_semantic_type hst ON hst.cui = sym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version " +
+                        "AND d.name COLLATE utf8_bin = :disease " +
+                        "AND hsym.validated = :validated " +
+                        "AND hst.semantic_type = 'dsyn' "
+        ),
 
 
         @NamedNativeQuery(
@@ -314,7 +338,7 @@ import java.util.Objects;
         //-- <<<diseaseList>>> LISTA DE ENFERMEDADES, SUS URLS Y SUS CODIGOS
         @NamedNativeQuery(
                 name = "Disease.findCodesBySourceAndVersionAndDiseaseNameNative",
-                query = "SELECT d.disease_id, d.name, u.url, hc.code , r.name " +
+                query = "SELECT d.disease_id, d.name, u.url, hc.code , r.name 'resource' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +

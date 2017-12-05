@@ -6,6 +6,7 @@ import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
@@ -290,6 +291,185 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
         if (CollectionUtils.isNotEmpty(diseaseList))
             diseases = diseaseList;
         return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes) {
+        String semanticTypesQuery = createForceSemanticTypesQuery(semanticTypes);
+        Query query = getEntityManager().createNativeQuery("SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
+                "FROM disease d " +
+                "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                "-- url\n" +
+                "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                "INNER JOIN url u ON u.url_id = docu.url_id " +
+                "-- symptoms\n" +
+                "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                "INNER JOIN has_semantic_type hst ON hst.cui = sym.cui " +
+                "WHERE sce.name = :source " +
+                "AND hs.date = :version " +
+                "AND d.name COLLATE utf8_bin = :disease " +
+                "AND hsym.validated = :validated " + semanticTypesQuery);
+
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) query.setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("disease", diseaseName)
+                .setParameter("validated", isValidated)
+                .getResultList();
+
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes) {
+        String semanticTypesQuery = createExcludeSemanticTypesQuery(semanticTypes);
+        Query query = getEntityManager().createNativeQuery("SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
+                "FROM disease d " +
+                "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                "-- url\n" +
+                "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                "INNER JOIN url u ON u.url_id = docu.url_id " +
+                "-- symptoms\n" +
+                "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                "INNER JOIN has_semantic_type hst ON hst.cui = sym.cui " +
+                "WHERE sce.name = :source " +
+                "AND hs.date = :version " +
+                "AND d.name COLLATE utf8_bin = :disease " +
+                "AND hsym.validated = :validated " + semanticTypesQuery);
+
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) query.setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("disease", diseaseName)
+                .setParameter("validated", isValidated)
+                .getResultList();
+
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
+        String semanticTypesQuery = createForceSemanticTypesQuery(semanticTypes);
+        Query query = getEntityManager().createNativeQuery("SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', u.url, d.name 'diseaseName', getSemanticTypesBySymptom(sym.cui) 'semantic_types'-- ht.text_id \n" +
+                "FROM disease d \n" +
+                "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id \n" +
+                "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date \n" +
+                "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date \n" +
+                "INNER JOIN source sce ON sce.source_id = hs.source_id \n" +
+                "-- url\n" +
+                "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date\n" +
+                "INNER JOIN url u ON u.url_id = docu.url_id\n" +
+                "-- symptoms\n" +
+                "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date \n" +
+                "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id \n" +
+                "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id \n" +
+                "INNER JOIN symptom sym ON sym.cui = hsym.cui \n" +
+                "-- semanticTypes\n" +
+                "INNER JOIN has_semantic_type hst ON hst.cui = sym.cui\n" +
+                "-- code\n" +
+                "INNER JOIN has_code hc ON hc.document_id = doc.document_id AND hc.date = doc.date\n" +
+                "INNER JOIN code c ON c.code = hc.code AND c.resource_id = hc.resource_id\n" +
+                "INNER JOIN resource r ON r.resource_id = c.resource_id\n" +
+                "WHERE sce.name = :source \n" +
+                "AND doc.date = :version \n" +
+                "AND c.code = :code \n" +
+                "AND r.name = :resource \n" +
+                "AND hsym.validated = :validated \n" +
+                semanticTypesQuery +
+                "ORDER BY d.disease_id ASC ");
+
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) query.setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("code", code)
+                .setParameter("resource", typeCode)
+                .setParameter("validated", isValidated)
+                .getResultList();
+
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
+        String semanticTypesQuery = createExcludeSemanticTypesQuery(semanticTypes);
+        Query query = getEntityManager().createNativeQuery("SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', u.url, d.name 'diseaseName', getSemanticTypesBySymptom(sym.cui) 'semantic_types'-- ht.text_id \n" +
+                "FROM disease d \n" +
+                "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id \n" +
+                "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date \n" +
+                "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date \n" +
+                "INNER JOIN source sce ON sce.source_id = hs.source_id \n" +
+                "-- url\n" +
+                "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date\n" +
+                "INNER JOIN url u ON u.url_id = docu.url_id\n" +
+                "-- symptoms\n" +
+                "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date \n" +
+                "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id \n" +
+                "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id \n" +
+                "INNER JOIN symptom sym ON sym.cui = hsym.cui \n" +
+                "-- semanticTypes\n" +
+                "INNER JOIN has_semantic_type hst ON hst.cui = sym.cui\n" +
+                "-- code\n" +
+                "INNER JOIN has_code hc ON hc.document_id = doc.document_id AND hc.date = doc.date\n" +
+                "INNER JOIN code c ON c.code = hc.code AND c.resource_id = hc.resource_id\n" +
+                "INNER JOIN resource r ON r.resource_id = c.resource_id\n" +
+                "WHERE sce.name = :source \n" +
+                "AND doc.date = :version \n" +
+                "AND c.code = :code \n" +
+                "AND r.name = :resource \n" +
+                "AND hsym.validated = :validated \n" +
+                semanticTypesQuery +
+                "ORDER BY d.disease_id ASC ");
+
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) query.setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("code", code)
+                .setParameter("resource", typeCode)
+                .setParameter("validated", isValidated)
+                .getResultList();
+
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    public String createForceSemanticTypesQuery(List<String> semanticTypes){
+        String query = "";
+        for (String semanticType: semanticTypes) {
+            query += " AND hst.semantic_type = '" + semanticType +"' ";
+        }
+        return query;
+    }
+
+
+    public String createExcludeSemanticTypesQuery(List<String> semanticTypes){
+        String query = "";
+        for (String semanticType: semanticTypes) {
+            query += " AND hst.semantic_type != '" + semanticType +"' ";
+        }
+        return query;
     }
 
     public void persist(Disease disease) {
