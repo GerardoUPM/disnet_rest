@@ -15,16 +15,16 @@ import java.util.List;
  */
 public class DiseaseSymptomsResponse extends ResponseFather {
 
-    private int size;
+    private int diseaseCount;
     private List<DiseaseDisnetConcepts> diseaseList;
 
 
-    public int getSize() {
-        return size;
+    public int getDiseaseCount() {
+        return diseaseCount;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setDiseaseCount(int diseaseCount) {
+        this.diseaseCount = diseaseCount;
     }
 
     public List<DiseaseDisnetConcepts> getDiseaseList() {
