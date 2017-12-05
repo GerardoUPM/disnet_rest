@@ -11,7 +11,6 @@ import edu.upm.midas.enums.ApiErrorEnum;
 import edu.upm.midas.model.Disease;
 import edu.upm.midas.model.DiseaseDisnetConcepts;
 import edu.upm.midas.model.DisnetConcept;
-import edu.upm.midas.model.SymptomWithCount;
 import edu.upm.midas.model.response.ApiResponseError;
 import edu.upm.midas.model.response.Parameter;
 import edu.upm.midas.model.response.ResponseFather;
@@ -174,7 +173,7 @@ public class QueryController {
                             "Source exception.",
                             "No versions were found for the source. Verify the DISNET source list.",
                             true,
-                            new Parameter(Constants.SOURCE, source));
+                            new Parameter(Constants.SOURCE, true, false, source, ""));
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -404,6 +403,8 @@ public class QueryController {
                                         @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                         @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
                                         @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                        @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
+                                        @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                         @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                         HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
@@ -466,6 +467,8 @@ public class QueryController {
                                                            @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                                            @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
                                                            @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                                           @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
+                                                           @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                                            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                                            HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
@@ -528,6 +531,8 @@ public class QueryController {
                                                      @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                                      @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
                                                      @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                                     @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
+                                                     @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                                      @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
@@ -552,7 +557,7 @@ public class QueryController {
                     List<DisnetConcept> symptoms = diseaseHelper.getMostCommonSymptoms(source, dataVersion, validated, limit);
                     String end = timeProvider.getTimestampFormat();
                     if (symptoms != null) {
-                        response.setSize(symptoms.size());
+                        response.setDisnetConceptsCount(symptoms.size());
                         response.setDisnetConcepts(symptoms);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
@@ -590,6 +595,8 @@ public class QueryController {
                                                      @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                                      @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
                                                      @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                                     @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
+                                                     @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                                      @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
@@ -615,7 +622,7 @@ public class QueryController {
                     List<DisnetConcept> symptoms = diseaseHelper.getLessCommonSymptoms(source, dataVersion, validated, limit);
                     String end = timeProvider.getTimestampFormat();
                     if (symptoms != null) {
-                        response.setSize(symptoms.size());
+                        response.setDisnetConceptsCount(symptoms.size());
                         response.setDisnetConcepts(symptoms);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());

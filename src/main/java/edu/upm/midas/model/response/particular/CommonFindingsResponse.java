@@ -15,16 +15,16 @@ import java.util.List;
  */
 public class CommonFindingsResponse extends ResponseFather {
 
-    private int size;
+    private int disnetConceptsCount;
     private List<DisnetConcept> disnetConcepts;
 
 
-    public int getSize() {
-        return size;
+    public int getDisnetConceptsCount() {
+        return disnetConceptsCount;
     }
 
-    public void setSize(int size) {
-        this.size = size;
+    public void setDisnetConceptsCount(int disnetConceptsCount) {
+        this.disnetConceptsCount = disnetConceptsCount;
     }
 
     public List<DisnetConcept> getDisnetConcepts() {

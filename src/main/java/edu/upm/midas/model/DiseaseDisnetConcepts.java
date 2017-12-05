@@ -15,7 +15,7 @@ public class DiseaseDisnetConcepts {
     private String diseaseId;
     private String name;
     private int count;
-    private List<DisnetConcept> DisnetConceptList;
+    private List<DisnetConcept> disnetConceptList;
 
 
     public String getDiseaseId() {
@@ -43,10 +43,10 @@ public class DiseaseDisnetConcepts {
     }
 
     public List<DisnetConcept> getDisnetConceptList() {
-        return DisnetConceptList;
+        return disnetConceptList;
     }
 
     public void setDisnetConceptList(List<DisnetConcept> disnetConceptList) {
-        this.DisnetConceptList = disnetConceptList;
+        this.disnetConceptList = disnetConceptList;
     }
 }

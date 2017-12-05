@@ -221,6 +221,62 @@ public class DiseaseHelperNative {
     }
 
 
+    public TypeSearchValidation sourceAndVersionAndSemanticTypesValidation(List<ApiResponseError> apiResponseErrors,
+                                                                           List<Parameter> parameters,
+                                                                           String sourceName, Date version,
+                                                                           String excludeSemanticTypes,
+                                                                           String forceSemanticTypes){
+        TypeSearchValidation validation = new TypeSearchValidation();
+
+        Validation sourceValidation = sourceValidation(apiResponseErrors, parameters, sourceName);
+        Validation versionValidation = versionValidation(apiResponseErrors, parameters, sourceName, version);
+
+        if (sourceValidation.isFound() && versionValidation.isFound()) {
+            validation.setErrors(false);
+            semanticTypesValidationProcedure(apiResponseErrors, parameters, excludeSemanticTypes, forceSemanticTypes, validation);
+        }else validation.setErrors(true);
+        return validation;
+    }
+
+
+    public void semanticTypesValidationProcedure(List<ApiResponseError> apiResponseErrors,
+                                                 List<Parameter> parameters,
+                                                 String excludeSemanticTypes,
+                                                 String forceSemanticTypes,
+                                                 TypeSearchValidation validation){
+        SemanticTypesValidation exludeSemTypesValidation = excludeSemanticTypesValidation(apiResponseErrors, parameters, excludeSemanticTypes);
+        SemanticTypesValidation forceSemTypesValidation = forceSemanticTypesValidation(apiResponseErrors, parameters, forceSemanticTypes);
+
+        if (!exludeSemTypesValidation.isEmpty() && !forceSemTypesValidation.isEmpty()){
+            //ERROR
+            errorService.insertApiErrorEnumGenericErrorWithParameters(
+                    apiResponseErrors,
+                    ApiErrorEnum.INVALID_PARAMETERS,
+                    "Disease search",
+                    "Exclusive parameters.  Only one of them can be defined.",
+                    true,
+                    new ArrayList<Parameter>() {{
+                        add(new Parameter(Constants.EXCLUDE_SEM_TYPES, false, false, excludeSemanticTypes, null));
+                        add(new Parameter(Constants.FORCE_SEM_TYPES, false, false, forceSemanticTypes, null));
+                    }});
+            validation.setErrors(true);
+        } else if(  (!exludeSemTypesValidation.isEmpty() && forceSemTypesValidation.isEmpty()) ||
+                (exludeSemTypesValidation.isEmpty() && !forceSemTypesValidation.isEmpty())){//OK
+            System.out.println("OK");
+            if (!exludeSemTypesValidation.isEmpty() && forceSemTypesValidation.isEmpty()){
+                validation.setTypeSemanticTypesSearch(Constants.EXCLUDE_SEM_TYPES);
+                validation.setExcludeSemanticTypes(exludeSemTypesValidation.getValidSemanticTypes());
+                validation.setErrors(false);
+            }
+            if (exludeSemTypesValidation.isEmpty() && !forceSemTypesValidation.isEmpty()){
+                validation.setTypeSemanticTypesSearch(Constants.FORCE_SEM_TYPES);
+                validation.setForceSemanticTypes(forceSemTypesValidation.getValidSemanticTypes());
+                validation.setErrors(false);
+            }
+        }else{}
+    }
+
+
     public TypeSearchValidation validateDiseaseSearchingParameters(List<ApiResponseError> apiResponseErrors,
                                                                    List<Parameter> parameters,
                                                                    String sourceName, Date version,
@@ -328,36 +384,7 @@ public class DiseaseHelperNative {
                     validation.setTypeSearch(Constants.TYPE_QUERY_UNKNOWN);
                 }
 
-                SemanticTypesValidation exludeSemTypesValidation = excludeSemanticTypesValidation(apiResponseErrors, parameters, excludeSemanticTypes);
-                SemanticTypesValidation forceSemTypesValidation = forceSemanticTypesValidation(apiResponseErrors, parameters, forceSemanticTypes);
-
-                if (!exludeSemTypesValidation.isEmpty() && !forceSemTypesValidation.isEmpty()){
-                    //ERROR
-                    errorService.insertApiErrorEnumGenericErrorWithParameters(
-                            apiResponseErrors,
-                            ApiErrorEnum.INVALID_PARAMETERS,
-                            "Disease search",
-                            "Exclusive parameters.  Only one of them can be defined.",
-                            true,
-                            new ArrayList<Parameter>() {{
-                                add(new Parameter(Constants.EXCLUDE_SEM_TYPES, false, false, excludeSemanticTypes, null));
-                                add(new Parameter(Constants.FORCE_SEM_TYPES, false, false, forceSemanticTypes, null));
-                            }});
-                    validation.setErrors(true);
-                } else if(  (!exludeSemTypesValidation.isEmpty() && forceSemTypesValidation.isEmpty()) ||
-                            (exludeSemTypesValidation.isEmpty() && !forceSemTypesValidation.isEmpty())){//OK
-                    System.out.println("OK");
-                    if (!exludeSemTypesValidation.isEmpty() && forceSemTypesValidation.isEmpty()){
-                        validation.setTypeSemanticTypesSearch(Constants.EXCLUDE_SEM_TYPES);
-                        validation.setExcludeSemanticTypes(exludeSemTypesValidation.getValidSemanticTypes());
-                        validation.setErrors(false);
-                    }
-                    if (exludeSemTypesValidation.isEmpty() && !forceSemTypesValidation.isEmpty()){
-                        validation.setTypeSemanticTypesSearch(Constants.FORCE_SEM_TYPES);
-                        validation.setForceSemanticTypes(forceSemTypesValidation.getValidSemanticTypes());
-                        validation.setErrors(false);
-                    }
-                }else{}
+                semanticTypesValidationProcedure(apiResponseErrors, parameters, excludeSemanticTypes, forceSemanticTypes, validation);
             }
         }else {
             validation.setErrors(true);
