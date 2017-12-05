@@ -136,7 +136,7 @@ public class DiseaseServiceImpl implements DiseaseService {
                 disease.setDiseaseId((String) dis[0]);
                 disease.setName((String) dis[1]);
                 BigInteger count = (BigInteger) dis[2];//System.out.println(count+" - " +count + " - " + count.intValue() + " - "+count.intValueExact());
-                disease.setCount(count.intValue());
+                disease.setDisnetConceptCount(count.intValue());
                 diseaseList.add(disease);
             }
         }
@@ -152,11 +152,11 @@ public class DiseaseServiceImpl implements DiseaseService {
         if (symptoms != null) {
             DisnetConcepts = new ArrayList<>();
             for (Object[] symptom : symptoms) {
-                DisnetConcept DisnetConcept = new DisnetConcept();
-                DisnetConcept.setCui((String) symptom[0]);
-                DisnetConcept.setName((String) symptom[1]);
-                DisnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[5]));
-                DisnetConcepts.add(DisnetConcept);
+                DisnetConcept disnetConcept = new DisnetConcept();
+                disnetConcept.setCui((String) symptom[0]);
+                disnetConcept.setName((String) symptom[1]);
+                disnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[5]));
+                DisnetConcepts.add(disnetConcept);
             }
         }
         return DisnetConcepts;

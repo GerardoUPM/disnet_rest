@@ -12,7 +12,6 @@ import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.DiseaseDisnetConcepts;
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.UniqueId;
-import edu.upm.midas.model.SymptomWithCount;
 import edu.upm.midas.model.response.ApiResponseError;
 import edu.upm.midas.model.response.Parameter;
 import edu.upm.midas.model.response.validations.CodeAndTypeCodeValidation;
@@ -170,13 +169,13 @@ public class DiseaseHelperNative {
             diseaseList = new ArrayList<>();
             for (DiseaseDisnetConcepts diseaseDisnetConcepts : diseases) {
                 //SE OBTIENEN LOS SINTOMAS POR CADA ENFERMEDAD ENCONTRADA
-                List<DisnetConcept> DisnetConcepts = diseaseService.findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(sourceName, version, diseaseDisnetConcepts.getDiseaseId(), isValidated);
-                if (DisnetConcepts != null) {
+                List<DisnetConcept> disnetConcepts = diseaseService.findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(sourceName, version, diseaseDisnetConcepts.getDiseaseId(), isValidated);
+                if (disnetConcepts != null) {
                     DiseaseDisnetConcepts disease = new DiseaseDisnetConcepts();
-                    disease.setDisnetConceptList(DisnetConcepts);
-                    disease.setDiseaseId(diseaseDisnetConcepts.getDiseaseId());
+                    disease.setDisnetConceptList(disnetConcepts);
+                    //disease.setDiseaseId(diseaseDisnetConcepts.getDiseaseId());
                     disease.setName(diseaseDisnetConcepts.getName());
-                    disease.setCount(diseaseDisnetConcepts.getCount());
+                    disease.setDisnetConceptCount(diseaseDisnetConcepts.getDisnetConceptCount());
                     diseaseList.add(disease);
                 }
             }

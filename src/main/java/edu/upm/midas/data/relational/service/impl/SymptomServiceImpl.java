@@ -80,7 +80,7 @@ public class SymptomServiceImpl implements SymptomService {
                 symptom.setCui((String) sym[0]);
                 symptom.setName((String) sym[1]);
                 BigInteger count = (BigInteger) sym[2];
-                symptom.setCommon(count.intValue());
+                symptom.setCommon((Integer) count.intValue());
                 symptom.setSemanticTypes(setSemanticTypes((String) sym[3]));
                 symptomList.add(symptom);
             }

@@ -20,7 +20,6 @@ public class DisnetConcept {
     private String name;
     @JsonIgnore
     private String url;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private int common;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> semanticTypes;

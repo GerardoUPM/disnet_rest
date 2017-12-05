@@ -14,7 +14,7 @@ public class DiseaseDisnetConcepts {
 
     private String diseaseId;
     private String name;
-    private int count;
+    private int disnetConceptCount;
     private List<DisnetConcept> disnetConceptList;
 
 
@@ -34,12 +34,12 @@ public class DiseaseDisnetConcepts {
         this.name = name;
     }
 
-    public int getCount() {
-        return count;
+    public int getDisnetConceptCount() {
+        return disnetConceptCount;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setDisnetConceptCount(int disnetConceptCount) {
+        this.disnetConceptCount = disnetConceptCount;
     }
 
     public List<DisnetConcept> getDisnetConceptList() {
