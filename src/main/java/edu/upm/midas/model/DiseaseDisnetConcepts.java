@@ -12,6 +12,7 @@ import java.util.List;
  */
 public class DiseaseDisnetConcepts {
 
+
     private String diseaseId;
     private String name;
     private int disnetConceptCount;

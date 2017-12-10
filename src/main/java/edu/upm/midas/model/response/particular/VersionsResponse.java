@@ -14,9 +14,17 @@ import java.util.List;
  */
 public class VersionsResponse extends ResponseFather {
 
+    private Integer versionsCount;
     private List<String> versions;
 
 
+    public Integer getVersionsCount() {
+        return versionsCount;
+    }
+
+    public void setVersionsCount(Integer versionsCount) {
+        this.versionsCount = versionsCount;
+    }
 
     public List<String> getVersions() {
         return versions;

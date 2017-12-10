@@ -1,4 +1,5 @@
 package edu.upm.midas.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import edu.upm.midas.model.response.Code;
 
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public class Disease {
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnore
     private String diseaseId;
     private String name;
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -78,7 +79,8 @@ public class Disease {
 
     public Integer getCodesCount() {
         if (codes != null){
-            if (codes.size() > 0) codesCount = codes.size();
+            //if (codes.size() > 0) codesCount = codes.size();
+            codesCount = codes.size();
         }
         return codesCount;
     }

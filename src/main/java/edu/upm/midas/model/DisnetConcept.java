@@ -20,7 +20,8 @@ public class DisnetConcept {
     private String name;
     @JsonIgnore
     private String url;
-    private int common;
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    private Integer common;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> semanticTypes;
 
@@ -49,11 +50,11 @@ public class DisnetConcept {
         this.url = url;
     }
 
-    public int getCommon() {
+    public Integer getCommon() {
         return common;
     }
 
-    public void setCommon(int common) {
+    public void setCommon(Integer common) {
         this.common = common;
     }
 

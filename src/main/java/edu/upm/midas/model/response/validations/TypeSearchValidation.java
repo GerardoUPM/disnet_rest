@@ -62,4 +62,16 @@ public class TypeSearchValidation {
     public void setForceSemanticTypes(List<String> forceSemanticTypes) {
         this.forceSemanticTypes = forceSemanticTypes;
     }
+
+
+    @Override
+    public String toString() {
+        return "TypeSearchValidation{" +
+                "typeSearch='" + typeSearch + '\'' +
+                ", errors=" + errors +
+                ", typeSemanticTypesSearch='" + typeSemanticTypesSearch + '\'' +
+                ", excludeSemanticTypes=" + excludeSemanticTypes +
+                ", forceSemanticTypes=" + forceSemanticTypes +
+                '}';
+    }
 }

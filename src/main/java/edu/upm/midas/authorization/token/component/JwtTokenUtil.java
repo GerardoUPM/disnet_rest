@@ -149,7 +149,7 @@ public class JwtTokenUtil implements Serializable {
                     .setSigningKey(secret)
                     .parseClaimsJws(token).getBody();
 
-            System.out.println("CLAIMS: " + claims.toString());
+            //System.out.println("CLAIMS: " + claims.toString());
 
             return claims.get(claim_name_transactionId).toString();
         }catch (Exception e){

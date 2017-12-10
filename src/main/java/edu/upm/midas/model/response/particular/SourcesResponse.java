@@ -14,9 +14,17 @@ import java.util.List;
  */
 public class SourcesResponse extends ResponseFather {
 
+    private Integer sourceCount;
     private List<String> sources;
 
 
+    public Integer getSourceCount() {
+        return sourceCount;
+    }
+
+    public void setSourceCount(Integer sourceCount) {
+        this.sourceCount = sourceCount;
+    }
 
     public List<String> getSources() {
         return sources;

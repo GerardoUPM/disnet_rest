@@ -1,9 +1,15 @@
 package edu.upm.midas.data.relational.service.helperNative;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Throwables;
+import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.service.SourceService;
 import edu.upm.midas.common.util.Common;
+import edu.upm.midas.enums.ApiErrorEnum;
+import edu.upm.midas.model.response.ApiResponseError;
+import edu.upm.midas.model.response.Parameter;
 import edu.upm.midas.model.response.ResponseFather;
+import edu.upm.midas.service.error.ErrorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +36,8 @@ public class SourceHelperNative {
     @Autowired
     private UrlHelperNative urlHelperNative;
     @Autowired
+    private ErrorService errorService;
+    @Autowired
     private Common common;
 
     private static final Logger logger = LoggerFactory.getLogger(SourceHelperNative.class);
@@ -40,14 +48,24 @@ public class SourceHelperNative {
     /**
      * @return
      */
-    public List<String> getSources(){
-        List<String> sources = null;
-        List<Object[]> sourceAllNativeList = sourceService.findAllNative();
-        if (sourceAllNativeList  != null) {
-            sources = new ArrayList<>();
-            for (Object[] source : sourceAllNativeList) {
-                sources.add((String) source[0]);
+    public List<String> getSources(List<ApiResponseError> apiResponseErrors){
+        List<String> sources = new ArrayList<>();
+        try {
+            List<Object[]> sourceAllNativeList = sourceService.findAllNative();
+            if (sourceAllNativeList != null) {
+                for (Object[] source : sourceAllNativeList) {
+                    sources.add((String) source[0]);
+                }
             }
+        }catch (Exception e){
+            //Se agrega el error en la lista principal de la respuesta
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    null);
         }
         return sources;
     }
@@ -57,14 +75,24 @@ public class SourceHelperNative {
      * @param source
      * @return
      */
-    public List<String> getVersions(String source) {
-        List<String> versions = null;
-        List<Date> versionAllNativeList = sourceService.findAllVersionsBySourceNative(source);
-        if (versionAllNativeList != null){
-            versions = new ArrayList<>();
-            for (Date version : versionAllNativeList) {
-                versions.add(version.toString());
+    public List<String> getVersions(List<ApiResponseError> apiResponseErrors, String source) {
+        List<String> versions = new ArrayList<>();
+        try {
+            List<Date> versionAllNativeList = sourceService.findAllVersionsBySourceNative(source);
+            if (versionAllNativeList != null) {
+                for (Date version : versionAllNativeList) {
+                    versions.add(version.toString());
+                }
             }
+        }catch (Exception e){
+            //Se agrega el error en la lista principal de la respuesta
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    new Parameter(Constants.DISEASE_NAME, false, false, source, null));
         }
         return versions;
     }
