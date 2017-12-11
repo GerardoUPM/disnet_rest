@@ -215,7 +215,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
                 .setParameter("source", sourceName)
                 .setParameter("version", version)
                 .setParameter("validated", isValidated)
-                //.setMaxResults(100)
+                .setMaxResults(limit)
                 .getResultList();
         if (CollectionUtils.isNotEmpty(diseaseList))
             diseases = diseaseList;

@@ -328,7 +328,7 @@ public class QueryController {
         response.setToken(responseFather.getToken());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
-//            try {
+            try {
                 Date dataVersion = timeProvider.getSdf().parse(version);
                 //System.out.println("DIS: " + disease + " SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated + " diseaseName: "+diseaseName);
                 //Validación de los parametros de busqueda
@@ -363,13 +363,13 @@ public class QueryController {
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                 }
-//            }catch (Exception e){
-//                response.setDiseaseCount(diseases.size());
-//                response.setDiseaseList(diseases);
-//                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-//                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-//                errorService.insertInternatServerError(errorsFound, e, true);
-//            }
+            }catch (Exception e){
+                response.setDiseaseCount(diseases.size());
+                response.setDiseaseList(diseases);
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                errorService.insertInternatServerError(errorsFound, e, true);
+            }
         }else {
             response.setDiseaseCount(diseases.size());
             response.setDiseaseList(diseases);
@@ -444,10 +444,10 @@ public class QueryController {
     }
 
 
-    @RequestMapping(path = { "/query/diseaseWithMoreDisnetConcepts" },//disease name
+    @RequestMapping(path = { "/query/diseaseWithMoreDisnetConcepts" },//OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
-    public DiseaseSymptomsResponse diseaseWithMoreSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+    public DiseaseListResponse diseaseWithMoreSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
                                         @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                         @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
                                         @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
@@ -456,11 +456,12 @@ public class QueryController {
                                         @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                         HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
-        DiseaseSymptomsResponse response = new DiseaseSymptomsResponse();
+        DiseaseListResponse response = new DiseaseListResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
+        List<Disease> diseases = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
@@ -474,35 +475,47 @@ public class QueryController {
                 TypeSearchValidation validation = diseaseHelper.sourceAndVersionAndSemanticTypesValidation(errorsFound, parameters, source, dataVersion, excludeSemanticTypes, forceSemanticTypes);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    List<Disease> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithMoreDisnetConcepts(source, dataVersion, validated, limit, validation);
+                    diseases = diseaseHelper.getDiseasesWithMoreOrFewerDisnetConcepts(errorsFound, source, dataVersion, validated, limit, true, validation);
                     String end = timeProvider.getTimestampFormat();
-                    if (diseasesWithMoreFindings != null) {
-                        response.setDiseaseCount(diseasesWithMoreFindings.size());
-                        response.setDiseaseList(diseasesWithMoreFindings);
+                    if (diseases.size() > 0) {
+                        response.setDiseaseCount(diseases.size());
+                        response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        response.setDiseaseCount(diseases.size());
+                        response.setDiseaseList(diseases);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        errorService.insertApiErrorEnumGenericErrorWithParameters(
+                                errorsFound,
+                                ApiErrorEnum.RESOURCES_NOT_FOUND,
+                                "Disease and DISNET Concept list exception",
+                                "No DISNET Concepts were found with the specified parameters.",
+                                true,
+                                null );
                     }
                 }else{
+                    response.setDiseaseCount(diseases.size());
+                    response.setDiseaseList(diseases);
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                 }
             }catch (Exception e){
+                response.setDiseaseCount(diseases.size());
+                response.setDiseaseList(diseases);
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
             }
         }else {
+            response.setDiseaseCount(diseases.size());
+            response.setDiseaseList(diseases);
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
-        if (errorsFound.size() > 0)
-            response.setErrorsFound(errorsFound);
-        if (parameters.size() > 0 && errorsFound.size() <= 0)
-            response.setExtraInfo(parameters);
+        response.setErrorsFound(errorsFound);
 
         return response;
     }
@@ -511,7 +524,7 @@ public class QueryController {
     @RequestMapping(path = { "/query/diseaseWithFewerDisnetConcepts" },//disease name
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
-    public DiseaseSymptomsResponse diseaseWithFewerSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+    public DiseaseListResponse diseaseWithFewerSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
                                                            @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
                                                            @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
                                                            @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
@@ -520,11 +533,12 @@ public class QueryController {
                                                            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                                            HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
-        DiseaseSymptomsResponse response = new DiseaseSymptomsResponse();
+        DiseaseListResponse response = new DiseaseListResponse();
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
+        List<Disease> diseases = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
@@ -538,35 +552,47 @@ public class QueryController {
                 TypeSearchValidation validation = diseaseHelper.sourceAndVersionAndSemanticTypesValidation(errorsFound, parameters, source, dataVersion, excludeSemanticTypes, forceSemanticTypes);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    List<DiseaseDisnetConcepts> diseasesWithMoreFindings = diseaseHelper.getDiseasesWithFewerFindings(source, dataVersion, validated, limit);
+                    diseases = diseaseHelper.getDiseasesWithMoreOrFewerDisnetConcepts(errorsFound, source, dataVersion, validated, limit, false, validation);
                     String end = timeProvider.getTimestampFormat();
-                    if (diseasesWithMoreFindings != null) {
-                        response.setDiseaseCount(diseasesWithMoreFindings.size());
-                        response.setDiseaseList(diseasesWithMoreFindings);
+                    if (diseases.size() > 0) {
+                        response.setDiseaseCount(diseases.size());
+                        response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        response.setDiseaseCount(diseases.size());
+                        response.setDiseaseList(diseases);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        errorService.insertApiErrorEnumGenericErrorWithParameters(
+                                errorsFound,
+                                ApiErrorEnum.RESOURCES_NOT_FOUND,
+                                "Disease and DISNET Concept list exception",
+                                "No DISNET Concepts were found with the specified parameters.",
+                                true,
+                                null );
                     }
                 }else{
+                    response.setDiseaseCount(diseases.size());
+                    response.setDiseaseList(diseases);
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                 }
             }catch (Exception e){
+                response.setDiseaseCount(diseases.size());
+                response.setDiseaseList(diseases);
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
             }
         }else {
+            response.setDiseaseCount(diseases.size());
+            response.setDiseaseList(diseases);
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
-        if (errorsFound.size() > 0)
-            response.setErrorsFound(errorsFound);
-        if (parameters.size() > 0 && errorsFound.size() <= 0)
-            response.setExtraInfo(parameters);
+        response.setErrorsFound(errorsFound);
 
         return response;
     }

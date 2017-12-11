@@ -220,16 +220,32 @@ public class DiseaseHelperNative {
     }
 
 
-    public List<DiseaseDisnetConcepts> getDiseasesWithFewerFindings(String sourceName, Date version, boolean isValidated, int limit){
-        List<DiseaseDisnetConcepts> diseases = diseaseService.withFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit);
+    public List<Disease> getDiseasesWithMoreOrFewerDisnetConcepts(List<ApiResponseError> apiResponseErrors, String sourceName, Date version, boolean isValidated, int limit, boolean moreDisnetConcepts, TypeSearchValidation validation){
+        List<Disease> diseaseList = new ArrayList<>();
+        try {
+            List<Disease> diseases = diseaseService.withMoreOrFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit, moreDisnetConcepts);
+            //Con la lista de las enfermedades cargada, se buscan sus códigos, si los tiene
+            if (diseases != null) {
+                diseaseList = getDisnetConcepts(apiResponseErrors, validation, sourceName, version, isValidated, diseases);
+            }
+        }catch (Exception e){
+            //Se agrega el error en la lista principal de la respuesta
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    null);
+        }
         //REGRESA LA MISMA LISTA PERO CON INFORMACIÓN DE SUS SINTOMAS... QUE CON LA PRIMER CONSULTA NO SE CONSIGUE
-        List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithSymptomsList(sourceName, version, isValidated, limit, diseases);
+        //List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithSymptomsList(sourceName, version, isValidated, limit, diseases);
         return diseaseList;
     }
 
 
-    public List<Disease> getDiseasesWithMoreDisnetConcepts(String sourceName, Date version, boolean isValidated, int limit, TypeSearchValidation validation){
-        List<Disease> diseases = diseaseService.withMoreOrFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit, true);
+    public List<DiseaseDisnetConcepts> getDiseasesWithFewerFindings(String sourceName, Date version, boolean isValidated, int limit){
+        List<DiseaseDisnetConcepts> diseases = diseaseService.withFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit);
         //REGRESA LA MISMA LISTA PERO CON INFORMACIÓN DE SUS SINTOMAS... QUE CON LA PRIMER CONSULTA NO SE CONSIGUE
         List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithSymptomsList(sourceName, version, isValidated, limit, diseases);
         return diseaseList;

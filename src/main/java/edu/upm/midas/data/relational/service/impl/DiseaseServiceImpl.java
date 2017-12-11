@@ -230,7 +230,12 @@ public class DiseaseServiceImpl implements DiseaseService {
                 disease.setDiseaseId((String) dis[0]);
                 disease.setName((String) dis[1]);
                 disease.setUrl((String) dis[3]);
-                disease.setDisnetConceptsCount((Integer) dis[4]);
+                try {
+                    disease.setDisnetConceptsCount((Integer) dis[4]);
+                } catch (Exception e){
+                    BigInteger count = (BigInteger) dis[4];
+                    disease.setDisnetConceptsCount(count.intValue());
+                }
                 diseaseList.add(disease);
             }
         }
