@@ -19,8 +19,10 @@ public class DisnetConcept {
     private String cui;
     private String name;
     @JsonIgnore
+    private Boolean validated;
+    @JsonIgnore
     private String url;
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer common;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> semanticTypes;
@@ -40,6 +42,14 @@ public class DisnetConcept {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getValidated() {
+        return validated;
+    }
+
+    public void setValidated(Boolean validated) {
+        this.validated = validated;
     }
 
     public String getUrl() {

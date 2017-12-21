@@ -46,6 +46,11 @@ public class Constants {
     public final static String TYPE_QUERY_CODES = "codes";
     public final static String TYPE_QUERY_UNKNOWN = "unknown";
 
+
+    public final static String METAMAP_API_REST_CODE = "SE007";
+    public final static String TVP_API_REST_CODE = "SE006";
+    public final static String DIS_ALBUM_API_REST_CODE = "SE010";
+
     public final static String MESSAGE_PARAM_NOT_USED = "Parameter not used.";
 
 

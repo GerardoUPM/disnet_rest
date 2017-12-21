@@ -1,6 +1,7 @@
 package edu.upm.midas.data.relational.service;
 
 import edu.upm.midas.data.relational.entities.edsssdb.Source;
+import edu.upm.midas.model.response.Configuration;
 
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,8 @@ public interface SourceService {
     String findLastSourceIdQuery();
 
     List<String> findAllVersionsNative();
+
+    List<Configuration> findSourceAndVersionConfigurationBySourceAndVersion(String sourceName, Date version);
 
     List<Source> findAll();
 

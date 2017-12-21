@@ -45,20 +45,20 @@ public class ApiResponseError {
     }
 
     public ApiResponseError(ApiErrorEnum apiEnumError, String excepcion, String errorDetail, boolean isForTheUser, Parameter parameter){
-        this.errorCode=apiEnumError.getClave();
+        this.errorCode=apiEnumError.getKey();
         this.errorStatus=apiEnumError.name();
-        if (isForTheUser)this.message=apiEnumError.getDescripcion() + ". " + errorDetail;
-        else this.message=apiEnumError.getDescripcion();
+        if (isForTheUser)this.message=apiEnumError.getDescription() + ". " + errorDetail;
+        else this.message=apiEnumError.getDescription();
         this.exception=excepcion;
         this.errorDetail=errorDetail;
         this.parameter = parameter;
     }
 
     public ApiResponseError(ApiErrorEnum apiEnumError, String excepcion, String errorDetail, boolean isForTheUser, List<Parameter> parameters){
-        this.errorCode=apiEnumError.getClave();
+        this.errorCode=apiEnumError.getKey();
         this.errorStatus=apiEnumError.name();
-        if (isForTheUser)this.message=apiEnumError.getDescripcion() + ". " + errorDetail;
-        else this.message=apiEnumError.getDescripcion();
+        if (isForTheUser)this.message=apiEnumError.getDescription() + ". " + errorDetail;
+        else this.message=apiEnumError.getDescription();
         this.exception=excepcion;
         this.errorDetail=errorDetail;
         this.parameters = parameters;

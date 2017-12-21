@@ -1,5 +1,6 @@
 package edu.upm.midas.service.error;
 import com.google.common.base.Throwables;
+import edu.upm.midas.constants.Constants;
 import edu.upm.midas.enums.ApiErrorEnum;
 import edu.upm.midas.model.response.ApiResponseError;
 import edu.upm.midas.model.response.Parameter;
@@ -22,7 +23,7 @@ public class ErrorService {
 
 
     public void insertAuthorizationError(List<ApiResponseError> errorsFound, boolean isForTheUser){
-        ApiResponseError error = new ApiResponseError(ApiErrorEnum.UNAUTHORIZED, "Token authorization.", "Wrong token.", isForTheUser, new Parameter("token"));
+        ApiResponseError error = new ApiResponseError(ApiErrorEnum.UNAUTHORIZED, "Token authorization.", "Wrong token.", isForTheUser, new Parameter(Constants.TOKEN, true, false, "", ""));
         errorsFound.add(error);
     }
 

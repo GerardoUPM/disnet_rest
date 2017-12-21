@@ -34,6 +34,8 @@ public interface SourceRepository {
 
     List<Object[]> findAllVersionsNative();
 
+    List<Object[]> findSourceAndVersionConfigurationBySourceAndVersion(String sourceName, Date version);
+
     List<Source> findAllQuery();
 
     List<Object[]> findAllNative();

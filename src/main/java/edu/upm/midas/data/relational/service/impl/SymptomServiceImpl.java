@@ -3,7 +3,6 @@ import edu.upm.midas.data.relational.entities.edsssdb.Symptom;
 import edu.upm.midas.data.relational.repository.SymptomRepository;
 import edu.upm.midas.data.relational.service.SymptomService;
 import edu.upm.midas.model.DisnetConcept;
-import edu.upm.midas.model.SymptomWithCount;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,8 +59,8 @@ public class SymptomServiceImpl implements SymptomService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<DisnetConcept> mostCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit) {
-        List<Object[]> symptoms = daoSymptom.mostCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+    public List<DisnetConcept> mostOrLessCommonBySourceAndVersionAndIsValidatedAndForceOrExludeSemanticTypes(String sourceName, Date version, boolean isValidated, int limit, boolean mostSymptoms, boolean forceSemanticTypes, List<String> semanticTypes) {
+        List<Object[]> symptoms = daoSymptom.mostOrLessCommonBySourceAndVersionAndIsValidatedAndForceOrExludeSemanticTypes(sourceName, version, isValidated, limit, mostSymptoms, forceSemanticTypes, semanticTypes);
         return getSymptomWithCountList(symptoms);
     }
 

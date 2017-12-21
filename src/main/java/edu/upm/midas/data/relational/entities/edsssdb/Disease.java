@@ -206,6 +206,69 @@ import java.util.Objects;
                         "AND doc.date = :version " +
                         "ORDER BY d.name ASC"
         ),
+        // (1) OBTIENE ENFERMEDADES CON MAS DE 20 SINTOMAS (SIN REPETIR ENFERMEDAD) CON EL ANTERIOR DE REPITE PORQUE LA URL ES DIFERENTE
+        @NamedNativeQuery(
+                name = "Disease.findAllBySourceAndVersionAndSymptomsCountNative",
+                query = "SELECT DISTINCT d.name 'diseaseName', d.disease_id 'diseaseCode', d.cui, getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount', getDocumentInfo(sce.name, doc.date, d.disease_id) 'urls' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version  " +
+                        "AND getDisnetConceptsCount(sce.name, doc.date, d.disease_id) > :numberSymptom " +
+                        "ORDER BY getDisnetConceptsCount(sce.name, doc.date, d.disease_id) DESC "
+        ),
+        // (2) TERMINOS DE UNA ENFERMEDAD VALIDADOS Y NO. SEGUN UN DOCUMENTO, PORQUE HAY DOCUMENTOS DE LOS QUE SE HABLA DE UNA MISMA ENFERMEDAD
+        @NamedNativeQuery(
+                name = "Disease.findTermsBySourceAndVersionAndDocumentAndDiseaseNative",
+                query = "SELECT DISTINCT sym.cui, sym.name, hsym.validated, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "-- section \n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "-- texts \n" +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "-- symptom\n" +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "-- semantic_types\n" +
+                        "INNER JOIN has_semantic_type hst ON hst.cui = sym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version " +
+                        "AND doc.document_id = :documentId " +
+                        "AND d.disease_id = :diseaseId " +
+                        "GROUP BY sym.cui, sym.name, hsym.validated " +
+                        "ORDER BY hsym.validated DESC "
+        ),
+        // (3) OBTIENE LOS TEXTOS DE DONDE FUE OBTENIDO EL TERMINO
+        @NamedNativeQuery(
+                name = "Disease.findTextsBySourceAndVersionAndDocumentAndDiseaseNative",
+                query = "SELECT sym.name, sec.description, ht.text_order, t.text_id, t.text " +
+                        "FROM symptom sym " +
+                        "INNER JOIN has_symptom hsym ON hsym.cui = sym.cui " +
+                        "INNER JOIN text t ON t.text_id = hsym.text_id " +
+                        "INNER JOIN has_text ht ON ht.text_id = t.text_id " +
+                        "INNER JOIN has_section hsec ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN section sec ON sec.section_id = hsec.section_id " +
+                        "-- source\n" +
+                        "INNER JOIN document doc ON doc.document_id = hsec.document_id AND doc.date = hsec.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "-- disease \n" +
+                        "INNER JOIN has_disease hd ON hd.document_id = doc.document_id AND hd.date = doc.date " +
+                        "INNER JOIN disease d ON d.disease_id = hd.disease_id " +
+                        "WHERE sce.name = :source " +
+                        "AND ht.date = :version " +
+                        "AND ht.document_id = :documentId " +
+                        "AND d.disease_id = :diseaseId " +
+                        "AND sym.cui = :cui " +
+                        "ORDER BY sec.description, ht.text_order ASC "
+        ),
         @NamedNativeQuery(
                 name = "Disease.findByIdAndSourceAndVersionNative",
                 query = "SELECT d.disease_id, d.name, d.cui " +

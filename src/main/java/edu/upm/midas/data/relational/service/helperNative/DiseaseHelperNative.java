@@ -14,6 +14,7 @@ import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.UniqueId;
 import edu.upm.midas.model.response.ApiResponseError;
 import edu.upm.midas.model.response.Code;
+import edu.upm.midas.model.response.Configuration;
 import edu.upm.midas.model.response.Parameter;
 import edu.upm.midas.model.response.validations.CodeAndTypeCodeValidation;
 import edu.upm.midas.model.response.validations.SemanticTypesValidation;
@@ -330,14 +331,64 @@ public class DiseaseHelperNative {
     }
 
 
-    public List<DisnetConcept> getMostCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
-        return symptomService.mostCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
+    public List<DisnetConcept> getMostOrLessCommonDisnetConcepts(List<ApiResponseError> apiResponseErrors,
+                                                                 String sourceName, Date version,
+                                                                 boolean isValidated,
+                                                                 int limit,
+                                                                 boolean mostSymptoms, TypeSearchValidation validation){
+        List<DisnetConcept> disnetConceptList = new ArrayList<>();
+        try {
+            List<DisnetConcept> disnetConcepts = null;
+            if (validation.getTypeSemanticTypesSearch().equals(Constants.FORCE_SEM_TYPES)){
+                disnetConcepts = symptomService.mostOrLessCommonBySourceAndVersionAndIsValidatedAndForceOrExludeSemanticTypes(sourceName, version, isValidated, limit, mostSymptoms, true, validation.getForceSemanticTypes());
+            }else if(validation.getTypeSemanticTypesSearch().equals(Constants.EXCLUDE_SEM_TYPES)){
+                disnetConcepts = symptomService.mostOrLessCommonBySourceAndVersionAndIsValidatedAndForceOrExludeSemanticTypes(sourceName, version, isValidated, limit, mostSymptoms, false, validation.getExcludeSemanticTypes());
+            }else{
+                disnetConcepts = symptomService.mostOrLessCommonBySourceAndVersionAndIsValidatedAndForceOrExludeSemanticTypes(sourceName, version, isValidated, limit, mostSymptoms, false, new ArrayList<>());
+            }
+            if (disnetConcepts != null){
+                disnetConceptList = disnetConcepts;
+            }
+        }catch (Exception e){
+            //Se agrega el error en la lista principal de la respuesta
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    null);
+        }
+        return disnetConceptList;
     }
 
 
     public List<DisnetConcept> getLessCommonSymptoms(String sourceName, Date version, boolean isValidated, int limit){
         return symptomService.lessCommonBySourceAndVersionAndValidated(sourceName, version, isValidated, limit);
     }
+
+
+    public List<Configuration> getConfigurationList(List<ApiResponseError> apiResponseErrors,
+                                                    String sourceName, Date version){
+        List<Configuration> configurationList = new ArrayList<>();
+        try {
+            List<Configuration> configurations = sourceService.findSourceAndVersionConfigurationBySourceAndVersion(sourceName, version);
+            if (configurations != null) {
+                configurationList = configurations;
+            }
+        }catch (Exception e){
+            //Se agrega el error en la lista principal de la respuesta
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    null);
+        }
+        return configurationList;
+    }
+
 
     public TypeSearchValidation sourceAndVersionAndDiseaseNameValidation(List<ApiResponseError> apiResponseErrors, List<Parameter> parameters, String sourceName, Date version, String diseaseName, boolean matchExactName) throws Exception {
         TypeSearchValidation validation = new TypeSearchValidation();
@@ -472,7 +523,7 @@ public class DiseaseHelperNative {
                             "It is necessary to select only one search parameter, not both.",
                             true,
                             new ArrayList<Parameter>() {{
-                                add(new Parameter(Constants.DISEASE_NAME, true, false, diseaseCode, null));
+                                add(new Parameter(Constants.DISEASE_NAME, true, false, diseaseName, null));
                                 add(new Parameter(Constants.DISEASE_CODE, false, false, diseaseCode, null));
                                 add(new Parameter(Constants.TYPE_CODE, false, false, typeCode, null));
                             }});

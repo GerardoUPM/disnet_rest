@@ -97,6 +97,18 @@ import java.util.Objects;
                         "FROM has_source hs " +
                         "INNER JOIN source s ON s.source_id = hs.source_id " +
                         "WHERE s.name = :name "
+        ),
+
+
+
+        @NamedNativeQuery(
+                name = "Source.findSourceAndVersionConfigurationBySourceAndVersionNative",
+                query = "SELECT c.conf_id, c.tool, c.configuration " +
+                        "FROM configuration c " +
+                        "INNER JOIN source s ON s.source_id = c.source_id " +
+                        "WHERE s.name COLLATE utf8_bin = :source " +
+                        "AND c.version = :version " +
+                        "ORDER BY c.conf_id "
         )
 })
 

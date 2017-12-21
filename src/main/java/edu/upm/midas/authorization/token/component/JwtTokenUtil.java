@@ -45,6 +45,8 @@ public class JwtTokenUtil implements Serializable {
     private String claim_name_request;
     @Value("${jwt.claims.name.url}")
     private String claim_name_url;
+    @Value("${jwt.claims.name.method}")
+    private String claim_name_method;
     @Value("${jwt.claims.name.transaction_id}")
     private String claim_name_transactionId;
 
@@ -114,12 +116,13 @@ public class JwtTokenUtil implements Serializable {
         return (AUDIENCE_TABLET.equals(audience) || AUDIENCE_MOBILE.equals(audience));
     }
 
-    public String generateToken(String userToken, String request, String url, Device device) {
+    public String generateToken(String userToken, String request, String method, String url, Device device) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(claim_name_token, userToken);
         claims.put(claim_name_apiCode, apiCode);
         claims.put(claim_name_request, request);
         claims.put(claim_name_url, url);
+        claims.put(claim_name_method, method);
         return doGenerateToken(claims, generateAudience(device));
     }
 

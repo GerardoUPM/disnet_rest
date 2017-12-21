@@ -10,10 +10,10 @@ import java.util.List;
  * @author Gerardo Lagunes G. ${EMAIL}
  * @version ${<VERSION>}
  * @project disnet_rest
- * @className CommonFindingsResponse
+ * @className CommonDisnetConceptsResponse
  * @see
  */
-public class CommonFindingsResponse extends ResponseFather {
+public class CommonDisnetConceptsResponse extends ResponseFather {
 
     private int disnetConceptsCount;
     private List<DisnetConcept> disnetConcepts;

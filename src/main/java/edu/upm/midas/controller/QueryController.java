@@ -9,9 +9,9 @@ import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
 import edu.upm.midas.data.relational.service.helperNative.SourceHelperNative;
 import edu.upm.midas.enums.ApiErrorEnum;
 import edu.upm.midas.model.Disease;
-import edu.upm.midas.model.DiseaseDisnetConcepts;
 import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.response.ApiResponseError;
+import edu.upm.midas.model.response.Configuration;
 import edu.upm.midas.model.response.Parameter;
 import edu.upm.midas.model.response.ResponseFather;
 import edu.upm.midas.model.response.particular.*;
@@ -98,7 +98,7 @@ public class QueryController {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         //ANTES SE COGIA EL TOKEN DEL HEADER String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         //System.out.println("token en el header: " + token);
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         SourcesResponse response = new SourcesResponse();
         //Se forma la respuesta
         List<ApiResponseError> errorsFound = new ArrayList<>();
@@ -106,6 +106,9 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setSources(sources);
+        response.setSourceCount(sources.size());
         //</editor-fold>
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()) {
@@ -121,23 +124,23 @@ public class QueryController {
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                     saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }else{
-                    response.setSources(sources);
-                    response.setSourceCount(sources.size());
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                     saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                    errorService.insertApiErrorEnumGenericError(errorsFound, ApiErrorEnum.RESOURCES_NOT_FOUND, "Source list empty.","No sources were found in the DISNET database.", true, null);
+                    errorService.insertApiErrorEnumGenericError(
+                            errorsFound,
+                            ApiErrorEnum.RESOURCES_NOT_FOUND,
+                            "Source list empty.",
+                            "No sources were found in the DISNET database.",
+                            true,
+                            null);
                 }
             }catch (Exception e){
-                response.setSources(sources);
-                response.setSourceCount(sources.size());
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
                 errorService.insertInternatServerError(errorsFound, e, true);
             }
         }else {
-            response.setSources(sources);
-            response.setSourceCount(sources.size());
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
             errorService.insertAuthorizationError(errorsFound, true);
@@ -168,7 +171,7 @@ public class QueryController {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         //String token = httpRequest.getHeader(constants.HEADER_PARAM_TOKEN_NAME);
         VersionsResponse response = new VersionsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<String> versions = new ArrayList<>();
@@ -176,6 +179,9 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setVersions(versions);
+        response.setVersionsCount(versions.size());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()) {
             try {
@@ -189,8 +195,6 @@ public class QueryController {
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                     saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 } else {
-                    response.setVersions(versions);
-                    response.setVersionsCount(versions.size());
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                     saveQueryRuntime(responseFather.getInfoToken(), start, end);
@@ -203,15 +207,11 @@ public class QueryController {
                             new Parameter(Constants.SOURCE, true, false, source, ""));
                 }
             }catch (Exception e){
-                response.setVersions(versions);
-                response.setVersionsCount(versions.size());
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
                 errorService.insertInternatServerError(errorsFound, e, true);
             }
         }else {
-            response.setVersions(versions);
-            response.setVersionsCount(versions.size());
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
             errorService.insertAuthorizationError(errorsFound, true);
@@ -222,6 +222,16 @@ public class QueryController {
     }
 
 
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param validated
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(path = { "/query/diseaseList" },//disease name OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
@@ -232,7 +242,7 @@ public class QueryController {
                                            HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
         List<Disease> diseaseList = new ArrayList<>();
@@ -241,6 +251,9 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setDiseaseList(diseaseList);
+        response.setDiseaseCount(diseaseList.size());
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
@@ -259,8 +272,6 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setDiseaseList(diseaseList);
-                        response.setDiseaseCount(diseaseList.size());
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
@@ -273,21 +284,15 @@ public class QueryController {
                                 null);
                     }
                 }else{
-                    response.setDiseaseList(diseaseList);
-                    response.setDiseaseCount(diseaseList.size());
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
-                response.setDiseaseList(diseaseList);
-                response.setDiseaseCount(diseaseList.size());
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
                 errorService.insertInternatServerError(errorsFound, e, true);
             }
         }else {
-            response.setDiseaseList(diseaseList);
-            response.setDiseaseCount(diseaseList.size());
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
             errorService.insertAuthorizationError(errorsFound, true);
@@ -301,6 +306,22 @@ public class QueryController {
     }
 
 
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param diseaseName
+     * @param diseaseCode
+     * @param typeCode
+     * @param validated
+     * @param excludeSemanticTypes
+     * @param forceSemanticTypes
+     * @param matchExactName
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(path = { "/query/disnetConceptList" },//disease name | Before path: findingList OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
@@ -317,7 +338,7 @@ public class QueryController {
                                               HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
@@ -326,6 +347,9 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setDiseaseCount(diseases.size());
+        response.setDiseaseList(diseases);
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
@@ -344,8 +368,6 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setDiseaseCount(diseases.size());
-                        response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
@@ -358,21 +380,15 @@ public class QueryController {
                                 null );
                     }
                 }else{
-                    response.setDiseaseCount(diseases.size());
-                    response.setDiseaseList(diseases);
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
-                response.setDiseaseCount(diseases.size());
-                response.setDiseaseList(diseases);
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
                 errorService.insertInternatServerError(errorsFound, e, true);
             }
         }else {
-            response.setDiseaseCount(diseases.size());
-            response.setDiseaseList(diseases);
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
             errorService.insertAuthorizationError(errorsFound, true);
@@ -383,6 +399,15 @@ public class QueryController {
     }
 
 
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(path = { "/query/diseaseCount" },//disease name OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
@@ -392,7 +417,7 @@ public class QueryController {
                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         CountResponse response = new CountResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
@@ -401,6 +426,8 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setCount(numberOfDiseases);
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
@@ -418,23 +445,19 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setCount(numberOfDiseases);
                         response.setResponseCode(HttpStatus.NOT_FOUND.toString());
                         response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
-                    response.setCount(numberOfDiseases);
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
-                response.setCount(numberOfDiseases);
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase() + e.getMessage());
             }
         }else {
-            response.setCount(numberOfDiseases);
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
@@ -444,6 +467,19 @@ public class QueryController {
     }
 
 
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param validated
+     * @param excludeSemanticTypes
+     * @param forceSemanticTypes
+     * @param limit
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(path = { "/query/diseaseWithMoreDisnetConcepts" },//OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
@@ -457,7 +493,7 @@ public class QueryController {
                                         HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
@@ -466,6 +502,9 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setDiseaseCount(diseases.size());
+        response.setDiseaseList(diseases);
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
@@ -484,8 +523,6 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setDiseaseCount(diseases.size());
-                        response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
@@ -498,20 +535,14 @@ public class QueryController {
                                 null );
                     }
                 }else{
-                    response.setDiseaseCount(diseases.size());
-                    response.setDiseaseList(diseases);
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
-                response.setDiseaseCount(diseases.size());
-                response.setDiseaseList(diseases);
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
             }
         }else {
-            response.setDiseaseCount(diseases.size());
-            response.setDiseaseList(diseases);
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
@@ -521,7 +552,20 @@ public class QueryController {
     }
 
 
-    @RequestMapping(path = { "/query/diseaseWithFewerDisnetConcepts" },//disease name
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param validated
+     * @param excludeSemanticTypes
+     * @param forceSemanticTypes
+     * @param limit
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = { "/query/diseaseWithFewerDisnetConcepts" },//OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
     public DiseaseListResponse diseaseWithFewerSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
@@ -534,7 +578,7 @@ public class QueryController {
                                                            HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
@@ -543,6 +587,9 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setDiseaseCount(diseases.size());
+        response.setDiseaseList(diseases);
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
@@ -561,8 +608,6 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setDiseaseCount(diseases.size());
-                        response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
@@ -575,20 +620,14 @@ public class QueryController {
                                 null );
                     }
                 }else{
-                    response.setDiseaseCount(diseases.size());
-                    response.setDiseaseList(diseases);
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
-                response.setDiseaseCount(diseases.size());
-                response.setDiseaseList(diseases);
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
             }
         }else {
-            response.setDiseaseCount(diseases.size());
-            response.setDiseaseList(diseases);
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
@@ -598,52 +637,69 @@ public class QueryController {
     }
 
 
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param validated
+     * @param excludeSemanticTypes
+     * @param forceSemanticTypes
+     * @param limit
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(path = { "/query/mostCommonDisnetConcepts" },//disease name
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
-    public CommonFindingsResponse mostCommonSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
-                                                     @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
-                                                     @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
-                                                     @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
-                                                     @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
-                                                     @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
-                                                     @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
-                                                     HttpServletRequest httpRequest, Device device) throws Exception {
+    public CommonDisnetConceptsResponse mostCommonSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                           @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
+                                                           @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
+                                                           @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                                           @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
+                                                           @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
+                                                           @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+                                                           HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
-        CommonFindingsResponse response = new CommonFindingsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        CommonDisnetConceptsResponse response = new CommonDisnetConceptsResponse();
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
+        List<DisnetConcept> symptoms = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setDisnetConceptsCount(symptoms.size());
+        response.setDisnetConcepts(symptoms);
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
                 Date dataVersion = timeProvider.getSdf().parse(version);
                 //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
                 //Validar versión y fuente
-                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionAndSemanticTypesValidation(errorsFound, parameters, source, dataVersion, excludeSemanticTypes, forceSemanticTypes);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    List<DisnetConcept> symptoms = diseaseHelper.getMostCommonSymptoms(source, dataVersion, validated, limit);
+                    symptoms = diseaseHelper.getMostOrLessCommonDisnetConcepts(errorsFound, source, dataVersion, validated, limit, true, validation);
                     String end = timeProvider.getTimestampFormat();
-                    if (symptoms != null) {
+                    if (symptoms.size() > 0) {
                         response.setDisnetConceptsCount(symptoms.size());
                         response.setDisnetConcepts(symptoms);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -653,47 +709,61 @@ public class QueryController {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
-        if (errorsFound.size() > 0)
-            response.setErrorsFound(errorsFound);
-        if (parameters.size() > 0 && errorsFound.size() <= 0)
-            response.setExtraInfo(parameters);
+        response.setErrorsFound(errorsFound);
 
         return response;
     }
 
 
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param validated
+     * @param excludeSemanticTypes
+     * @param forceSemanticTypes
+     * @param limit
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(path = { "/query/lessCommonDisnetConcepts" },//disease name
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
-    public CommonFindingsResponse lessCommonSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
-                                                     @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
-                                                     @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
-                                                     @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
-                                                     @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
-                                                     @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
-                                                     @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
-                                                     HttpServletRequest httpRequest, Device device) throws Exception {
+    public CommonDisnetConceptsResponse lessCommonSymptoms(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                           @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
+                                                           @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
+                                                           @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                                           @RequestParam(value = "excludeSemanticTypes", required = false, defaultValue = "") String excludeSemanticTypes,
+                                                           @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
+                                                           @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+                                                           HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
-        CommonFindingsResponse response = new CommonFindingsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        CommonDisnetConceptsResponse response = new CommonDisnetConceptsResponse();
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
+        List<DisnetConcept> symptoms = new ArrayList<>();
         //Se forma la respuesta
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setDisnetConceptsCount(symptoms.size());
+        response.setDisnetConcepts(symptoms);
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
                 Date dataVersion = timeProvider.getSdf().parse(version);
                 //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
                 //Validar versión y fuente
-                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionAndSemanticTypesValidation(errorsFound, parameters, source, dataVersion, excludeSemanticTypes, forceSemanticTypes);
                 if (!validation.isErrors()) {
                     //String start = timeProvider.getTimestampFormat();String end = timeProvider.getTimestampFormat();
                     String start = timeProvider.getTimestampFormat();
-                    List<DisnetConcept> symptoms = diseaseHelper.getLessCommonSymptoms(source, dataVersion, validated, limit);
+                    symptoms = diseaseHelper.getMostOrLessCommonDisnetConcepts(errorsFound, source, dataVersion, validated, limit, false, validation);
                     String end = timeProvider.getTimestampFormat();
                     if (symptoms != null) {
                         response.setDisnetConceptsCount(symptoms.size());
@@ -702,13 +772,13 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
-                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
@@ -718,15 +788,24 @@ public class QueryController {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }
-        if (errorsFound.size() > 0)
-            response.setErrorsFound(errorsFound);
-        if (parameters.size() > 0 && errorsFound.size() <= 0)
-            response.setExtraInfo(parameters);
+        response.setErrorsFound(errorsFound);
 
         return response;
     }
 
 
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param diseaseName
+     * @param matchExactName
+     * @param limit
+     * @param httpRequest
+     * @param device
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(path = { "/query/searchByDiseaseName" },//disease name OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version", "diseaseName"})
@@ -739,7 +818,7 @@ public class QueryController {
                                                      HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DisnetConceptsResponse response = new DisnetConceptsResponse();
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getRequestURL().toString(), device);
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
         //</editor-fold>
         List<ApiResponseError> errorsFound = new ArrayList<>();
         List<Parameter> parameters = new ArrayList<>();
@@ -748,6 +827,9 @@ public class QueryController {
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
+
+        response.setDiseaseCount(diseases.size());
+        response.setDiseaseList(diseases);
         //Si la autorización es exitosa se completa la respuesta
         if (response.isAuthorized()){
             try {
@@ -767,27 +849,81 @@ public class QueryController {
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
-                        response.setDiseaseCount(diseases.size());
-                        response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.NOT_FOUND.toString());
                         response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
                         saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
-                    response.setDiseaseCount(diseases.size());
-                    response.setDiseaseList(diseases);
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
                 }
             }catch (Exception e){
-                response.setDiseaseCount(diseases.size());
-                response.setDiseaseList(diseases);
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
             }
         }else {
-            response.setDiseaseCount(diseases.size());
-            response.setDiseaseList(diseases);
+            response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
+            response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
+        }
+        response.setErrorsFound(errorsFound);
+
+        return response;
+    }
+
+
+    @RequestMapping(path = { "/query/metadata" },//disease name OKOK
+            method = RequestMethod.GET,
+            params = {"token", "source", "version"})
+    public ConfigurationResponse metadata(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                      @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
+                                                      @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
+                                                      HttpServletRequest httpRequest, Device device) throws Exception {
+        //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
+        ConfigurationResponse response = new ConfigurationResponse();
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
+        //</editor-fold>
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
+        List<Configuration> configurations = new ArrayList<>();
+        //Se forma la respuesta
+        response.setAuthorized(responseFather.isAuthorized());
+        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
+        response.setToken(responseFather.getToken());
+
+        response.setConfigurationsCount(configurations.size());
+        response.setConfigurationList(configurations);
+        //Si la autorización es exitosa se completa la respuesta
+        if (response.isAuthorized()){
+            try {
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                //System.out.println(String.format(" SOURCE: " + source + " VERSION: " + dataVersion + " VAL: " + validated));
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    //String start = timeProvider.getTimestampFormat();String end = timeProvider.getTimestampFormat();
+                    String start = timeProvider.getTimestampFormat();
+                    configurations = diseaseHelper.getConfigurationList(errorsFound, source, dataVersion);
+                    String end = timeProvider.getTimestampFormat();
+                    if (configurations != null) {
+                        response.setConfigurationsCount(configurations.size());
+                        response.setConfigurationList(configurations);
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.NOT_FOUND.toString());
+                        response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    }
+                }else{
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
+                }
+            }catch (Exception e){
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            }
+        }else {
             response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
             response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
         }

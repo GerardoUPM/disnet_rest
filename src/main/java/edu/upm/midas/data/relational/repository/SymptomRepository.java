@@ -32,7 +32,7 @@ public interface SymptomRepository {
 
     List<Symptom> findAllQuery();
 
-    List<Object[]> mostCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
+    List<Object[]> mostOrLessCommonBySourceAndVersionAndIsValidatedAndForceOrExludeSemanticTypes(String sourceName, Date version, boolean isValidated, int limit, boolean mostSymptoms, boolean forceSemanticTypes, List<String> semanticTypes);
 
     List<Object[]> lessCommonBySourceAndVersionAndValidated(String sourceName, Date version, boolean isValidated, int limit);
 

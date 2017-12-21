@@ -1,9 +1,11 @@
 package edu.upm.midas.data.relational.repository.impl;
 
+import edu.upm.midas.common.util.Common;
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.data.relational.repository.AbstractDao;
 import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
@@ -24,6 +26,8 @@ import java.util.List;
 public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
                                     implements DiseaseRepository {
 
+    @Autowired
+    private Common common;
 
     public Disease findById(String diseaseId) {
         Disease disease = getByKey(diseaseId);
@@ -186,9 +190,9 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> withMoreOrFewerSymptomsBySourceAndVersionAndIsValidated(String sourceName, Date version, boolean isValidated, int limit, boolean moreSymptoms) {
-        String moreOrFewer;
-        if (moreSymptoms) moreOrFewer = " ORDER BY COUNT(DISTINCT hsym.cui) DESC ";
-        else moreOrFewer = " ORDER BY COUNT(DISTINCT hsym.cui) ASC ";
+        String moreOrFewerQuery;
+        if (moreSymptoms) moreOrFewerQuery = " ORDER BY COUNT(DISTINCT hsym.cui) DESC ";
+        else moreOrFewerQuery = " ORDER BY COUNT(DISTINCT hsym.cui) ASC ";
         Query query = getEntityManager().createNativeQuery(
                 "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, u.url, COUNT(DISTINCT hsym.cui) 'disnetConceptCount' " +
                         "FROM disease d " +
@@ -208,7 +212,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
                         "AND hs.date = :version " +
                         "-- AND d.name LIKE 'Gastroenteritis' \n" +
                         "AND hsym.validated = :validated " +
-                        "GROUP BY d.disease_id, d.name, d.cui, u.url " + moreOrFewer);
+                        "GROUP BY d.disease_id, d.name, d.cui, u.url " + moreOrFewerQuery);
 
         List<Object[]> diseases = null;
         List<Object[]> diseaseList = (List<Object[]>) query
@@ -271,8 +275,8 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidatedAndForceOrExludeSemanticTypes(String sourceName, Date version, String diseaseId, boolean isValidated, boolean forceSemanticTypes, List<String> semanticTypes) {
         String semanticTypesQuery = "";
         if (semanticTypes.size() > 0) {
-            if (forceSemanticTypes) semanticTypesQuery = createForceSemanticTypesQuery(semanticTypes);
-            else semanticTypesQuery = createExcludeSemanticTypesQuery(semanticTypes);
+            if (forceSemanticTypes) semanticTypesQuery = common.createForceSemanticTypesQuery(semanticTypes);
+            else semanticTypesQuery = common.createExcludeSemanticTypesQuery(semanticTypes);
         }
         Query query = getEntityManager().createNativeQuery(
                 "SELECT DISTINCT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
@@ -393,7 +397,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes) {
-        String semanticTypesQuery = createForceSemanticTypesQuery(semanticTypes);
+        String semanticTypesQuery = common.createForceSemanticTypesQuery(semanticTypes);
         Query query = getEntityManager().createNativeQuery(
                 "SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
                 "FROM disease d " +
@@ -430,7 +434,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes) {
-        String semanticTypesQuery = createExcludeSemanticTypesQuery(semanticTypes);
+        String semanticTypesQuery = common.createExcludeSemanticTypesQuery(semanticTypes);
         Query query = getEntityManager().createNativeQuery("SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
                 "FROM disease d " +
                 "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
@@ -466,7 +470,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
-        String semanticTypesQuery = createForceSemanticTypesQuery(semanticTypes);
+        String semanticTypesQuery = common.createForceSemanticTypesQuery(semanticTypes);
         Query query = getEntityManager().createNativeQuery("SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', u.url, d.name 'diseaseName', getSemanticTypesBySymptom(sym.cui) 'semantic_types'-- ht.text_id \n" +
                 "FROM disease d \n" +
                 "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id \n" +
@@ -511,7 +515,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     @SuppressWarnings("unchecked")
     @Override
     public List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
-        String semanticTypesQuery = createExcludeSemanticTypesQuery(semanticTypes);
+        String semanticTypesQuery = common.createExcludeSemanticTypesQuery(semanticTypes);
         Query query = getEntityManager().createNativeQuery("SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', u.url, d.name 'diseaseName', getSemanticTypesBySymptom(sym.cui) 'semantic_types'-- ht.text_id \n" +
                 "FROM disease d \n" +
                 "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id \n" +
@@ -553,39 +557,57 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
         return diseases;
     }
 
-    public String createForceSemanticTypesQuery(List<String> semanticTypes){
-        String query = "";
-        int count = 1;
-        for (String semanticType: semanticTypes) {
-            if(count == 1)
-                query = " hst.semantic_type = '" + semanticType +"' ";
-            else
-                query = query + " OR hst.semantic_type = '" + semanticType + "' ";
-
-            count++;
-        }
-        if (query.length() > 0){
-            query = "AND ( " + query + ")";
-        }
-        return query;
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findAllBySourceAndVersionAndSymptomsCountNative(String sourceName, Date version, int numberSymptom) {
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findAllBySourceAndVersionAndSymptomsCountNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("numberSymptom", numberSymptom)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
     }
 
-
-    public String createExcludeSemanticTypesQuery(List<String> semanticTypes){System.out.println("HOLA");
-        String query = "";
-        int count = 1;
-        for (String semanticType: semanticTypes) {
-            if (count == 1)
-                query = " hst.semantic_type != '" + semanticType +"' ";
-            else
-                query = query + " AND hst.semantic_type != '" + semanticType +"' ";
-            count++;
-        }
-        if (query.length() > 0){
-            query = "AND ( " + query + ")";
-        }System.out.println("HOLA" + query);
-        return query;
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findTermsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId) {
+        List<Object[]> terms = null;
+        List<Object[]> termList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findTermsBySourceAndVersionAndDocumentAndDiseaseNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("documentId", documentId)
+                .setParameter("diseaseId", diseaseId)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(termList))
+            terms = termList;
+        return terms;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findTextsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId, String cui) {
+        List<Object[]> texts = null;
+        List<Object[]> textList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findTextsBySourceAndVersionAndDocumentAndDiseaseNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("documentId", documentId)
+                .setParameter("diseaseId", diseaseId)
+                .setParameter("cui", cui)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(textList))
+            texts = textList;
+        return texts;
+    }
+
 
     public void persist(Disease disease) {
         super.persist(disease);

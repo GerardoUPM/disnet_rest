@@ -1,5 +1,6 @@
 package edu.upm.midas.common.util;
 
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashSet;
@@ -17,8 +18,9 @@ import java.util.regex.Pattern;
  * @className Validations
  * @see
  */
-@Service
+@Component
 public class Common {
+
 
     public boolean isEmpty(String string) {
         if (string == null) {
@@ -34,6 +36,42 @@ public class Common {
 
         }
     }
+
+
+    public String createForceSemanticTypesQuery(List<String> semanticTypes){
+        String query = "";
+        int count = 1;
+        for (String semanticType: semanticTypes) {
+            if(count == 1)
+                query = " hst.semantic_type = '" + semanticType +"' ";
+            else
+                query = query + " OR hst.semantic_type = '" + semanticType + "' ";
+
+            count++;
+        }
+        if (query.length() > 0){
+            query = "AND ( " + query + ")";
+        }
+        return query;
+    }
+
+
+    public String createExcludeSemanticTypesQuery(List<String> semanticTypes){System.out.println("HOLA");
+        String query = "";
+        int count = 1;
+        for (String semanticType: semanticTypes) {
+            if (count == 1)
+                query = " hst.semantic_type != '" + semanticType +"' ";
+            else
+                query = query + " AND hst.semantic_type != '" + semanticType +"' ";
+            count++;
+        }
+        if (query.length() > 0){
+            query = "AND ( " + query + ")";
+        }System.out.println("HOLA" + query);
+        return query;
+    }
+
 
     public String cutString(String str) {
         return str = str.substring(0, str.length()-2);
@@ -65,14 +103,12 @@ public class Common {
     }
 
 
-
     public void removeRepetedElementsList(List<String> elementsList){
         Set<String> linkedHashSet = new LinkedHashSet<String>();
         linkedHashSet.addAll(elementsList);
         elementsList.clear();
         elementsList.addAll(linkedHashSet);
     }
-
 
 
     public boolean itsFound(String originalStr, String findStr){

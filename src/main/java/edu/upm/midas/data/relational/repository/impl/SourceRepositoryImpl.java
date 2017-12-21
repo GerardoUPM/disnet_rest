@@ -125,6 +125,20 @@ public class SourceRepositoryImpl extends AbstractDao<String, Source> implements
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<Object[]> findSourceAndVersionConfigurationBySourceAndVersion(String sourceName, Date version) {
+        List<Object[]> configurations = null;
+        List<Object[]> configurationList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Source.findSourceAndVersionConfigurationBySourceAndVersionNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(configurationList))
+            configurations = configurationList;
+        return configurations;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<Source> findAllQuery() {
         /*List_<Source> sources = getEntityManager()
                 .createNamedQuery("Source.findAll")

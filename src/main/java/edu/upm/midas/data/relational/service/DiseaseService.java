@@ -4,6 +4,7 @@ import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.model.DiseaseDisnetConcepts;
 import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.response.Code;
+import edu.upm.midas.model.response.Text;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -75,6 +76,14 @@ public interface DiseaseService {
     List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes);
 
     List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes);
+
+
+    List<edu.upm.midas.model.Disease> findAllBySourceAndVersionAndSymptomsCountNative(String sourceName, Date version, int numberSymptom);
+
+    List<DisnetConcept> findTermsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId);
+
+    List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId, String cui);
+
 
     List<Disease> findAll();
 

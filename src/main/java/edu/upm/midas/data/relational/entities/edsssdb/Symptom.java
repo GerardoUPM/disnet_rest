@@ -87,7 +87,7 @@ import java.util.Objects;
 
 
 
-        //-- <<<mostCommonSymptoms>>> SINTOMAS MAS COMUNES
+        //-- "YA NO SE USARÁ AQUÍ" <<<mostCommonSymptoms>>> SINTOMAS MAS COMUNES
         @NamedNativeQuery(
                 name = "Symptom.mostCommonBySourceAndVersionAndValidated",
                 query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common', getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
@@ -107,7 +107,7 @@ import java.util.Objects;
                         "GROUP BY sym.cui, sym.name " +
                         "ORDER BY COUNT(hsym.cui) DESC "
         ),
-        //-- -- <<<lessCommonSymptoms>>> SINTOMAS MENOS COMUNES
+        //-- "YA NO SE USARÁ AQUÍ" <<<lessCommonSymptoms>>> SINTOMAS MENOS COMUNES
         @NamedNativeQuery(
                 name = "Symptom.lessCommonBySourceAndVersionAndValidated",
                 query = "SELECT DISTINCT sym.cui, sym.name, COUNT(hsym.cui) 'common', getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
