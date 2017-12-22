@@ -7,15 +7,10 @@ import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.entities.edsssdb.SemanticType;
 import edu.upm.midas.data.relational.service.*;
 import edu.upm.midas.enums.ApiErrorEnum;
-import edu.upm.midas.model.Disease;
-import edu.upm.midas.model.DisnetConcept;
-import edu.upm.midas.model.DiseaseDisnetConcepts;
+import edu.upm.midas.model.*;
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.UniqueId;
-import edu.upm.midas.model.response.ApiResponseError;
-import edu.upm.midas.model.response.Code;
-import edu.upm.midas.model.response.Configuration;
-import edu.upm.midas.model.response.Parameter;
+import edu.upm.midas.model.response.*;
 import edu.upm.midas.model.response.validations.CodeAndTypeCodeValidation;
 import edu.upm.midas.model.response.validations.SemanticTypesValidation;
 import edu.upm.midas.model.response.validations.TypeSearchValidation;
@@ -242,6 +237,32 @@ public class DiseaseHelperNative {
         //REGRESA LA MISMA LISTA PERO CON INFORMACIÓN DE SUS SINTOMAS... QUE CON LA PRIMER CONSULTA NO SE CONSIGUE
         //List<DiseaseDisnetConcepts> diseaseList = getDiseaseWithSymptomsList(sourceName, version, isValidated, limit, diseases);
         return diseaseList;
+    }
+
+    public void excelExport(String sourceName, Date version, int symtomsCount){
+        List<Disease> diseaseList = new ArrayList<>();
+        List<Disease> diseases = diseaseService.findAllBySourceAndVersionAndSymptomsCountNative(sourceName, version, symtomsCount);
+        if (diseases != null){
+            for (Disease dis: diseases) {
+                if (dis.getDocumentList() != null) {
+                    for (Document doc : dis.getDocumentList()) {
+                        List<DisnetConcept> disnetConcepts = diseaseService.findTermsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, doc.getDocumentId(), dis.getDiseaseId());
+                        if (disnetConcepts != null) {
+                            for (DisnetConcept disnetConcept : disnetConcepts) {
+                                List<Text> texts = diseaseService.findTextsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, doc.getDocumentId(), dis.getDiseaseId(), disnetConcept.getCui());
+                                if (texts != null) {
+                                    doc.setTextList(texts);
+                                    doc.setTextsCount(texts.size());
+                                    for (Text txt: texts) {
+                                        txt.setDisnetConceptList();
+                                    }
+                                }
+                            }
+                        }//
+                    }//documents of disease
+                }//documents!=null
+            }//diseases
+        }//disease!=null
     }
 
 
