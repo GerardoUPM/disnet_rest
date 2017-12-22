@@ -239,30 +239,36 @@ public class DiseaseHelperNative {
         return diseaseList;
     }
 
-    public void excelExport(String sourceName, Date version, int symtomsCount){
+    public List<Disease> excelExport(String sourceName, Date version, int symtomsCount){
         List<Disease> diseaseList = new ArrayList<>();
         List<Disease> diseases = diseaseService.findAllBySourceAndVersionAndSymptomsCountNative(sourceName, version, symtomsCount);
         if (diseases != null){
+            diseaseList = diseases;
             for (Disease dis: diseases) {
                 if (dis.getDocumentList() != null) {
                     for (Document doc : dis.getDocumentList()) {
-                        List<DisnetConcept> disnetConcepts = diseaseService.findTermsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, doc.getDocumentId(), dis.getDiseaseId());
+                        List<DisnetConcept> disnetConcepts = diseaseService.findTermsBySourceAndVersionAndDocumentAndDiseaseIdNative(sourceName, version, doc.getDocumentId(), dis.getDiseaseId());
                         if (disnetConcepts != null) {
+                            dis.setDisnetConceptList(disnetConcepts);
+                            dis.setDisnetConceptsCount(disnetConcepts.size());
                             for (DisnetConcept disnetConcept : disnetConcepts) {
-                                List<Text> texts = diseaseService.findTextsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, doc.getDocumentId(), dis.getDiseaseId(), disnetConcept.getCui());
+                                List<Text> texts = diseaseService.findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative(sourceName, version, doc.getDocumentId(), dis.getDiseaseId(), disnetConcept.getCui());
                                 if (texts != null) {
-                                    doc.setTextList(texts);
-                                    doc.setTextsCount(texts.size());
-                                    for (Text txt: texts) {
-                                        txt.setDisnetConceptList();
-                                    }
+                                    disnetConcept.setTexts(texts);
+                                    disnetConcept.setTextsCount(texts.size());
                                 }
                             }
-                        }//
+                        }//disnetConcepts!=null
+                        List<Text> texts_ = diseaseService.findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(sourceName, version, doc.getDocumentId(), dis.getDiseaseId());
+                        if (texts_ != null){
+                            doc.setTextList(texts_);
+                            doc.setTextsCount(texts_.size());
+                        }
                     }//documents of disease
                 }//documents!=null
             }//diseases
         }//disease!=null
+        return diseaseList;
     }
 
 

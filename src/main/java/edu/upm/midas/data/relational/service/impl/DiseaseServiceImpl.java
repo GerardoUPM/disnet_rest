@@ -361,15 +361,22 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<DisnetConcept> findTermsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId) {
-        List<Object[]> terms = daoDisease.findTermsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, documentId, diseaseId);
+    public List<DisnetConcept> findTermsBySourceAndVersionAndDocumentAndDiseaseIdNative(String sourceName, Date version, String documentId, String diseaseId) {
+        List<Object[]> terms = daoDisease.findTermsBySourceAndVersionAndDocumentAndDiseaseIdNative(sourceName, version, documentId, diseaseId);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
         return createDisnetConceptList(terms, true);
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
-    public List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId, String cui) {
-        List<Object[]> texts = daoDisease.findTextsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, documentId, diseaseId, cui);
+    public List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative(String sourceName, Date version, String documentId, String diseaseId, String cui) {
+        List<Object[]> texts = daoDisease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative(sourceName, version, documentId, diseaseId, cui);
+        //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
+        return createTextList(texts);
+    }
+
+    @Override
+    public List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(String sourceName, Date version, String documentId, String diseaseId) {
+        List<Object[]> texts = daoDisease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(sourceName, version, documentId, diseaseId);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
         return createTextList(texts);
     }
@@ -381,13 +388,13 @@ public class DiseaseServiceImpl implements DiseaseService {
             textList = new ArrayList<>();
             for (Object[] txt : texts) {
                 Text text = new Text();
-                text.setSection((String) txt[1]);
-                text.setTextId((String) txt[3]);
-                text.setText((String) txt[4]);
+                text.setSection((String) txt[0]);
+                text.setTextId((String) txt[2]);
+                text.setText((String) txt[3]);
                 try {
-                    text.setTextOrder((Integer) txt[2]);
+                    text.setTextOrder((Integer) txt[1]);
                 } catch (Exception e){
-                    BigInteger count = (BigInteger) txt[2];
+                    BigInteger count = (BigInteger) txt[1];
                     text.setTextOrder(count.intValue());
                 }
                 textList.add(text);

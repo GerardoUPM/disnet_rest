@@ -575,10 +575,10 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Object[]> findTermsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId) {
+    public List<Object[]> findTermsBySourceAndVersionAndDocumentAndDiseaseIdNative(String sourceName, Date version, String documentId, String diseaseId) {
         List<Object[]> terms = null;
         List<Object[]> termList = (List<Object[]>) getEntityManager()
-                .createNamedQuery("Disease.findTermsBySourceAndVersionAndDocumentAndDiseaseNative")
+                .createNamedQuery("Disease.findTermsBySourceAndVersionAndDocumentAndDiseaseIdNative")
                 .setParameter("source", sourceName)
                 .setParameter("version", version)
                 .setParameter("documentId", documentId)
@@ -592,10 +592,10 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Object[]> findTextsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId, String cui) {
+    public List<Object[]> findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative(String sourceName, Date version, String documentId, String diseaseId, String cui) {
         List<Object[]> texts = null;
         List<Object[]> textList = (List<Object[]>) getEntityManager()
-                .createNamedQuery("Disease.findTextsBySourceAndVersionAndDocumentAndDiseaseNative")
+                .createNamedQuery("Disease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative")
                 .setParameter("source", sourceName)
                 .setParameter("version", version)
                 .setParameter("documentId", documentId)
@@ -607,6 +607,22 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
             texts = textList;
         return texts;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(String sourceName, Date version, String documentId, String diseaseId) {
+        List<Object[]> texts = null;
+        List<Object[]> textList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("documentId", documentId)
+                .setParameter("diseaseId", diseaseId)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(textList))
+            texts = textList;
+        return texts;    }
 
 
     public void persist(Disease disease) {

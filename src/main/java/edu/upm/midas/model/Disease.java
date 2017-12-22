@@ -31,6 +31,8 @@ public class Disease {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<DisnetConcept> disnetConceptList;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer documentsCount;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Document> documentList;
 
 
@@ -104,6 +106,18 @@ public class Disease {
 
     public void setDisnetConceptList(List<DisnetConcept> disnetConceptList) {
         this.disnetConceptList = disnetConceptList;
+    }
+
+    public Integer getDocumentsCount() {
+        if (documentList != null){
+            if (documentList.size() > 0)
+                documentsCount = documentList.size();
+        }
+        return documentsCount;
+    }
+
+    public void setDocumentsCount(Integer documentsCount) {
+        this.documentsCount = documentsCount;
     }
 
     public List<Document> getDocumentList() {
