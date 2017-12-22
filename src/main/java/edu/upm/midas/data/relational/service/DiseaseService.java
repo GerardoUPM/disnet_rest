@@ -3,10 +3,9 @@ package edu.upm.midas.data.relational.service;
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.model.DiseaseDisnetConcepts;
 import edu.upm.midas.model.DisnetConcept;
-import edu.upm.midas.model.response.Code;
-import edu.upm.midas.model.response.Text;
+import edu.upm.midas.model.Code;
+import edu.upm.midas.model.Text;
 
-import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 

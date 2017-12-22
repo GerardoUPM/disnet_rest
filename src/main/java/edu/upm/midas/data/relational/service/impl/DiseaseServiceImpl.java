@@ -4,7 +4,9 @@ import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import edu.upm.midas.data.relational.service.DiseaseService;
 import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.DiseaseDisnetConcepts;
-import edu.upm.midas.model.response.Code;
+import edu.upm.midas.model.Code;
+import edu.upm.midas.model.Document;
+import edu.upm.midas.model.Text;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -153,17 +155,17 @@ public class DiseaseServiceImpl implements DiseaseService {
     public List<DisnetConcept> findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(String sourceName, Date version, String diseaseId, boolean isValidated) {
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(sourceName, version, diseaseId, isValidated);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
-        return createDisnetConceptList(symptoms);
+        return createDisnetConceptList(symptoms, false);
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<DisnetConcept> findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidatedAndForceOrExludeSemanticTypes(String sourceName, Date version, String diseaseId, boolean isValidated, boolean forceSemanticTypes, List<String> semanticTypes) {
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidatedAndForceOrExludeSemanticTypes(sourceName, version, diseaseId, isValidated, forceSemanticTypes, semanticTypes);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
-        return createDisnetConceptList(symptoms);
+        return createDisnetConceptList(symptoms, false);
     }
 
-    public List<DisnetConcept> createDisnetConceptList(List<Object[]> symptoms){
+    public List<DisnetConcept> createDisnetConceptList(List<Object[]> symptoms, boolean setValidatedParam){
         List<DisnetConcept> disnetConcepts = new ArrayList<>();
         if (symptoms != null) {
             //disnetConcepts = new ArrayList<>();
@@ -171,7 +173,11 @@ public class DiseaseServiceImpl implements DiseaseService {
                 DisnetConcept disnetConcept = new DisnetConcept();
                 disnetConcept.setCui((String) symptom[0]);
                 disnetConcept.setName((String) symptom[1]);
-                disnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[5]));
+                if (setValidatedParam){
+                    disnetConcept.setValidated((boolean) symptom[2]);
+                    disnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[3]));
+                }else disnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[5]));
+
                 disnetConcepts.add(disnetConcept);
             }
         }
@@ -251,6 +257,41 @@ public class DiseaseServiceImpl implements DiseaseService {
         return disease;
     }
 
+
+    public List<edu.upm.midas.model.Disease> createDiseaseWithDocInfoList(List<Object[]> diseases, Date version){
+        List<edu.upm.midas.model.Disease> diseaseList = null;
+        if (diseases != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] dis : diseases) {
+                edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
+                disease.setDiseaseId((String) dis[1]);
+                disease.setName((String) dis[0]);
+                disease.setDisnetConceptsCount((Integer) dis[3]);
+                disease.setDocumentList( getDocument((String) dis[4], version) );//Obtiene el documento del
+                diseaseList.add(disease);
+            }
+        }
+        return diseaseList;
+    }
+
+
+    public List<Document> getDocument(String documentInfo, Date version){
+        List<Document> documentList = new ArrayList<>();
+        String[] info = documentInfo.split(",");
+        if (info != null){
+            for (String doc: info) {
+                String[] docment = doc.split("-");
+                Document document = new Document();
+                document.setDocumentId(docment[0].trim());
+                document.setVersion(version);
+                document.setUrl(docment[1].trim());
+                documentList.add(document);
+            }
+        }
+        return documentList;
+    }
+
+
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<edu.upm.midas.model.Disease> findCodesBySourceAndVersionAndDiseaseNameNative(String sourceName, Date version, String diseaseName, int limit) {
         List<edu.upm.midas.model.Disease> diseaseList = null;
@@ -291,26 +332,70 @@ public class DiseaseServiceImpl implements DiseaseService {
         return createDiseasesWithDisnetConcept(symptoms);
     }
 
-    @Override
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String diseaseName, boolean isValidated, List<String> semanticTypes) {
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndDiseaseNameAndValidatedAndExcludeSemanticTypesNative( sourceName, version, diseaseName, isValidated, semanticTypes );
         //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
         return createDiseasesWithDisnetConcept(symptoms);
     }
 
-    @Override
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndForceSemanticTypesNative( sourceName, version, code, typeCode, isValidated, semanticTypes );
         //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
         return createDiseasesWithDisnetConcept(symptoms);
     }
 
-    @Override
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes) {
         List<Object[]> symptoms = daoDisease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative( sourceName, version, code, typeCode, isValidated, semanticTypes );
         //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
         return createDiseasesWithDisnetConcept(symptoms);
     }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<edu.upm.midas.model.Disease> findAllBySourceAndVersionAndSymptomsCountNative(String sourceName, Date version, int symptoms) {
+        List<Object[]> diseases = daoDisease.findAllBySourceAndVersionAndSymptomsCountNative( sourceName, version, symptoms );
+        //System.out.println(sourceName+" | "+version+" | "+diseaseName+" | "+isValidated+" | "+symptoms.size() );
+        return createDiseaseWithDocInfoList(diseases, version);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<DisnetConcept> findTermsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId) {
+        List<Object[]> terms = daoDisease.findTermsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, documentId, diseaseId);
+        //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
+        return createDisnetConceptList(terms, true);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId, String cui) {
+        List<Object[]> texts = daoDisease.findTextsBySourceAndVersionAndDocumentAndDiseaseNative(sourceName, version, documentId, diseaseId, cui);
+        //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
+        return createTextList(texts);
+    }
+
+
+    public List<Text> createTextList(List<Object[]> texts){
+        List<Text> textList = null;
+        if (texts != null) {
+            textList = new ArrayList<>();
+            for (Object[] txt : texts) {
+                Text text = new Text();
+                text.setSection((String) txt[1]);
+                text.setTextId((String) txt[3]);
+                text.setText((String) txt[4]);
+                try {
+                    text.setTextOrder((Integer) txt[2]);
+                } catch (Exception e){
+                    BigInteger count = (BigInteger) txt[2];
+                    text.setTextOrder(count.intValue());
+                }
+                textList.add(text);
+            }
+        }
+        return textList;
+    }
+
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public List<edu.upm.midas.model.Disease> findSymptomsBySourceAndVersionAndDiseaseNameAndIsValidated(String sourceName, Date version, String diseaseName, boolean isValidated) {

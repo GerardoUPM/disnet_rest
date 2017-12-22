@@ -1,4 +1,7 @@
-package edu.upm.midas.model.response;
+package edu.upm.midas.model;
+
+import java.util.List;
+
 /**
  * Created by gerardo on 21/12/2017.
  *
@@ -14,6 +17,8 @@ public class Text {
     private Integer textOrder;
     private String text;
     private String section;
+    private Integer disnetConceptsCount;
+    private List<DisnetConcept> disnetConceptList;
 
 
     public String getTextId() {
@@ -46,5 +51,21 @@ public class Text {
 
     public void setSection(String section) {
         this.section = section;
+    }
+
+    public Integer getDisnetConceptsCount() {
+        return disnetConceptsCount;
+    }
+
+    public void setDisnetConceptsCount(Integer disnetConceptsCount) {
+        this.disnetConceptsCount = disnetConceptsCount;
+    }
+
+    public List<DisnetConcept> getDisnetConceptList() {
+        return disnetConceptList;
+    }
+
+    public void setDisnetConceptList(List<DisnetConcept> disnetConceptList) {
+        this.disnetConceptList = disnetConceptList;
     }
 }

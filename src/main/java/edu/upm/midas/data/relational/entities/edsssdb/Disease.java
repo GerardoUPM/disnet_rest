@@ -209,7 +209,7 @@ import java.util.Objects;
         // (1) OBTIENE ENFERMEDADES CON MAS DE 20 SINTOMAS (SIN REPETIR ENFERMEDAD) CON EL ANTERIOR DE REPITE PORQUE LA URL ES DIFERENTE
         @NamedNativeQuery(
                 name = "Disease.findAllBySourceAndVersionAndSymptomsCountNative",
-                query = "SELECT DISTINCT d.name 'diseaseName', d.disease_id 'diseaseCode', d.cui, getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount', getDocumentInfo(sce.name, doc.date, d.disease_id) 'urls' " +
+                query = "SELECT DISTINCT d.name 'diseaseName', d.disease_id 'diseaseCode', d.cui, getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount', getDocumentInfo(sce.name, doc.date, d.disease_id) 'docInfo' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
@@ -217,7 +217,7 @@ import java.util.Objects;
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "WHERE sce.name = :source " +
                         "AND hs.date = :version  " +
-                        "AND getDisnetConceptsCount(sce.name, doc.date, d.disease_id) > :numberSymptom " +
+                        "AND getDisnetConceptsCount(sce.name, doc.date, d.disease_id) > :symptoms " +
                         "ORDER BY getDisnetConceptsCount(sce.name, doc.date, d.disease_id) DESC "
         ),
         // (2) TERMINOS DE UNA ENFERMEDAD VALIDADOS Y NO. SEGUN UN DOCUMENTO, PORQUE HAY DOCUMENTOS DE LOS QUE SE HABLA DE UNA MISMA ENFERMEDAD

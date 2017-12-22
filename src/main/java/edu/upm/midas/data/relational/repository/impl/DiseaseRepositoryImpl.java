@@ -559,13 +559,13 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Object[]> findAllBySourceAndVersionAndSymptomsCountNative(String sourceName, Date version, int numberSymptom) {
+    public List<Object[]> findAllBySourceAndVersionAndSymptomsCountNative(String sourceName, Date version, int symptoms) {
         List<Object[]> diseases = null;
         List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
                 .createNamedQuery("Disease.findAllBySourceAndVersionAndSymptomsCountNative")
                 .setParameter("source", sourceName)
                 .setParameter("version", version)
-                .setParameter("numberSymptom", numberSymptom)
+                .setParameter("symptoms", symptoms)
                 //.setMaxResults(100)
                 .getResultList();
         if (CollectionUtils.isNotEmpty(diseaseList))

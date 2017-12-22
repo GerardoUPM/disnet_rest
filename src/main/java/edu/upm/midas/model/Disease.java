@@ -1,7 +1,6 @@
 package edu.upm.midas.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import edu.upm.midas.model.response.Code;
 
 import java.util.List;
 
@@ -31,6 +30,8 @@ public class Disease {
     private Integer disnetConceptsCount;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<DisnetConcept> disnetConceptList;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Document> documentList;
 
 
     public String getDiseaseId() {
@@ -103,5 +104,13 @@ public class Disease {
 
     public void setDisnetConceptList(List<DisnetConcept> disnetConceptList) {
         this.disnetConceptList = disnetConceptList;
+    }
+
+    public List<Document> getDocumentList() {
+        return documentList;
+    }
+
+    public void setDocumentList(List<Document> documentList) {
+        this.documentList = documentList;
     }
 }

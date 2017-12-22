@@ -26,6 +26,10 @@ public class DisnetConcept {
     private Integer common;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> semanticTypes;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer textsCount;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Text> texts;
 
 
     public String getCui() {
@@ -74,6 +78,22 @@ public class DisnetConcept {
 
     public void setSemanticTypes(List<String> semanticTypes) {
         this.semanticTypes = semanticTypes;
+    }
+
+    public Integer getTextsCount() {
+        return textsCount;
+    }
+
+    public void setTextsCount(Integer textsCount) {
+        this.textsCount = textsCount;
+    }
+
+    public List<Text> getTexts() {
+        return texts;
+    }
+
+    public void setTexts(List<Text> texts) {
+        this.texts = texts;
     }
 
     @Override

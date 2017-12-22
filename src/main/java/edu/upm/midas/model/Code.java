@@ -1,4 +1,4 @@
-package edu.upm.midas.model.response;
+package edu.upm.midas.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**

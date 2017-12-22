@@ -77,7 +77,7 @@ public interface DiseaseRepository {
     List<Object[]> findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedAndExcludeSemanticTypesNative(String sourceName, Date version, String code, String typeCode, boolean isValidated, List<String> semanticTypes);
 
 
-    List<Object[]> findAllBySourceAndVersionAndSymptomsCountNative(String sourceName, Date version, int numberSymptom);
+    List<Object[]> findAllBySourceAndVersionAndSymptomsCountNative(String sourceName, Date version, int symptoms);
 
     List<Object[]> findTermsBySourceAndVersionAndDocumentAndDiseaseNative(String sourceName, Date version, String documentId, String diseaseId);
 
