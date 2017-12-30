@@ -53,8 +53,11 @@ public class ExportController {
         Date dataVersion = timeProvider.getSdf().parse(version);
         List<Disease> diseases = diseaseHelperNative.excelExport(source, dataVersion, symptomsNumber);
         if (diseases != null){
+            int i = 1;
             for (Disease disease: diseases) {
-                excel.buildExcelDocument(disease);
+                System.out.println(i + " " + disease.getName());
+                i++;
+                //excel.buildExcelDocument(disease);
             }
         }
 
