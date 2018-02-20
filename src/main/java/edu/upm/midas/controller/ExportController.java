@@ -61,6 +61,6 @@ public class ExportController {
             }
         }
 
-        return "Done";
+        return "Succes export";
     }
 }
