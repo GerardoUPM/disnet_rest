@@ -8,7 +8,6 @@ import edu.upm.midas.model.Text;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +38,6 @@ public class Excel {
         CellStyle generalStyle = workbook.createCellStyle();
         generalStyle.setAlignment(HorizontalAlignment.LEFT);
         generalStyle.setVerticalAlignment(VerticalAlignment.TOP);
-
-        CellStyle styleWrapText = workbook.createCellStyle();
-        styleWrapText.setWrapText(true);
-
         int rowCount = 0;
         //sheet.setDefaultColumnWidth(30);
 
@@ -90,7 +85,7 @@ public class Excel {
                 if (showOne == 1){
                     if (doc.getTextList() != null) {
                         for (Text txt:doc.getTextList()){
-                            Row documentBodyRow = sheet.createRow(rowCount);
+                            Row documentBodyRow = sheet.createRow(rowCount++);
                             documentBodyRow.createCell(0).setCellValue(txt.getTextId());
                             documentBodyRow.getCell(0).setCellStyle(generalStyle);
                             documentBodyRow.createCell(1).setCellValue(txt.getSection());
@@ -98,16 +93,7 @@ public class Excel {
                             documentBodyRow.createCell(2).setCellValue(txt.getTextOrder());
                             documentBodyRow.getCell(2).setCellStyle(generalStyle);
                             documentBodyRow.createCell(3).setCellValue(txt.getText());
-                            documentBodyRow.getCell(3).setCellStyle(generalStyle);
-                            documentBodyRow.getCell(3).setCellStyle(styleWrapText);
-                            sheet.addMergedRegion(new CellRangeAddress(
-                                    rowCount, // mention first row here
-                                    rowCount, //mention last row here, it is 1 as we are doing a column wise merging
-                                    3, //mention first column of merging
-                                    13  //mention last column to include in merge
-                            ));
-                            //documentBodyRow.setHeight((short) 30);
-                            rowCount++;
+                            documentBodyRow.getCell(0).setCellStyle(generalStyle);
                         }
                     }
                     showOne++;
@@ -117,7 +103,7 @@ public class Excel {
         }
 
         if (disease.getDisnetConceptList() != null){
-            Row disnetConceptHeadRow = sheet.createRow(50);
+            Row disnetConceptHeadRow = sheet.createRow(60);
             disnetConceptHeadRow.createCell(0).setCellValue("TextsId");
             disnetConceptHeadRow.createCell(1).setCellValue("CUI");
             disnetConceptHeadRow.createCell(2).setCellValue("Name");
@@ -129,11 +115,17 @@ public class Excel {
             disnetConceptHeadRow.createCell(7).setCellValue("FN");
             disnetConceptHeadRow.createCell(8).setCellValue("TN");
 
-            rowCount = 51;
+            rowCount = 61;
 
             for (DisnetConcept term: disease.getDisnetConceptList()) {
                 String texts = "";
-                for (Text text: term.getTexts()) {texts = texts + text.getTextId() + "\n";}
+                for (Text text: term.getTexts()) {
+                    texts = texts + text.getTextId() +
+                        "\nLocation => Word(s): " + text.getMatchedWords() +
+                        " | Position: " + text.getPositionalInfo() + "\n";
+                }
+                CellStyle styleWrapText = workbook.createCellStyle();
+                styleWrapText.setWrapText(true);
 
                 Row disnetConceptBodyRow = sheet.createRow(rowCount++);
                 disnetConceptBodyRow.createCell(0).setCellValue(texts);

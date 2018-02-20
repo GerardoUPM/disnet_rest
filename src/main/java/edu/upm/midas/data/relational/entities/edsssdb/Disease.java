@@ -248,7 +248,7 @@ import java.util.Objects;
         // (3) OBTIENE LOS TEXTOS DE DONDE FUE OBTENIDO EL TERMINO
         @NamedNativeQuery(
                 name = "Disease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative",
-                query = "SELECT sec.description, ht.text_order, t.text_id, t.text " +
+                query = "SELECT sec.description, ht.text_order, t.text_id, t.text, hsym.matched_words, hsym.positional_info " +
                         "FROM symptom sym " +
                         "INNER JOIN has_symptom hsym ON hsym.cui = sym.cui " +
                         "INNER JOIN text t ON t.text_id = hsym.text_id " +

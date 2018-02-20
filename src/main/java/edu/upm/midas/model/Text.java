@@ -19,6 +19,9 @@ public class Text {
     private String section;
     private Integer disnetConceptsCount;
     private List<DisnetConcept> disnetConceptList;
+    //Para los casos en los que se obtienen de donde fue obtenido un DISNET_CONCEPT
+    private String matchedWords;
+    private String positionalInfo;
 
 
     public String getTextId() {
@@ -67,5 +70,21 @@ public class Text {
 
     public void setDisnetConceptList(List<DisnetConcept> disnetConceptList) {
         this.disnetConceptList = disnetConceptList;
+    }
+
+    public String getMatchedWords() {
+        return matchedWords;
+    }
+
+    public void setMatchedWords(String matchedWords) {
+        this.matchedWords = matchedWords;
+    }
+
+    public String getPositionalInfo() {
+        return positionalInfo;
+    }
+
+    public void setPositionalInfo(String positionalInfo) {
+        this.positionalInfo = positionalInfo;
     }
 }

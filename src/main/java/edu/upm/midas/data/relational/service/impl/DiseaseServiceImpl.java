@@ -371,18 +371,18 @@ public class DiseaseServiceImpl implements DiseaseService {
     public List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative(String sourceName, Date version, String documentId, String diseaseId, String cui) {
         List<Object[]> texts = daoDisease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative(sourceName, version, documentId, diseaseId, cui);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
-        return createTextList(texts);
+        return createTextList(texts, true);
     }
 
     @Override
     public List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(String sourceName, Date version, String documentId, String diseaseId) {
         List<Object[]> texts = daoDisease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(sourceName, version, documentId, diseaseId);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
-        return createTextList(texts);
+        return createTextList(texts, false);
     }
 
 
-    public List<Text> createTextList(List<Object[]> texts){
+    public List<Text> createTextList(List<Object[]> texts, boolean positionalInfo){
         List<Text> textList = null;
         if (texts != null) {
             textList = new ArrayList<>();
@@ -396,6 +396,10 @@ public class DiseaseServiceImpl implements DiseaseService {
                 } catch (Exception e){
                     BigInteger count = (BigInteger) txt[1];
                     text.setTextOrder(count.intValue());
+                }
+                if (positionalInfo){
+                    text.setMatchedWords((String) txt[4]);
+                    text.setPositionalInfo((String) txt[5]);
                 }
                 textList.add(text);
             }
