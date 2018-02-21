@@ -497,6 +497,51 @@ import java.util.Objects;
         )
 
 
+        ,
+        //-- <<<getDocumentId>>> ID DE DOCUMENTO DE UNA ENFERMEDAD, RETORNA EL PRIMER DOCUMENTO EN CASO
+        // DE QUE LA ENFERMEDAD TENGA UN REDIRECCIONAMIENTO (DOS DOCUMENTOS ASOCIADOS)
+        @NamedNativeQuery(
+                name = "Disease.findDocumentIdBySourceAndVersionAndDiseaseIdNative",
+                query = "SELECT doc.document_id " +
+                        "FROM disease dis " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = dis.disease_id  " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "-- source\n" +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date  " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "WHERE sce.name = :source " +
+                        "AND doc.date = :version " +
+                        "AND dis.disease_id = :diseaseId " +
+                        "ORDER BY CAST( SUBSTRING( doc.document_id , 9) AS UNSIGNED) ASC LIMIT 1 "
+        )
+
+
+        ,
+        //-- <<<getDetectionInformationTheDISNETConcept>>> Obtiene la información de por cuales palabras
+        // fue encontrado el concepto y en que posiciones se encuentra
+        @NamedNativeQuery(
+                name = "Disease.findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedNative",
+                query = "SELECT hsym.text_id, hsym.matched_words, hsym.positional_info  " +
+                        "FROM disease d  " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id  " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date  " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id  " +
+                        "-- section  \n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date  " +
+                        "-- texts \\n \n" +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "-- symptom\\n \n" +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "WHERE sce.name = :source  " +
+                        "AND hs.date = :version  " +
+                        "AND doc.document_id = :documentId " +
+                        "AND d.disease_id = :diseaseId " +
+                        "AND hsym.cui = :cui " +
+                        "AND hsym.validated = :validated "
+        )
+
+
 
 
 })

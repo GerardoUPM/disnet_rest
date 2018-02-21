@@ -85,6 +85,10 @@ public interface DiseaseRepository {
 
     List<Object[]> findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(String sourceName, Date version, String documentId, String diseaseId);
 
+    String findDocumentIdBySourceAndVersionAndDiseaseIdNative(String sourceName, Date version, String diseaseId);
+
+    List<Object[]> findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedNative(String sourceName, Date version, String documentId, String diseaseId, String cui, boolean isValidated);
+
 
     List<Disease> findAllQuery();
 

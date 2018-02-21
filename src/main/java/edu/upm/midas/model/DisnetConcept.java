@@ -27,6 +27,8 @@ public class DisnetConcept {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<String> semanticTypes;
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    private DetectionInformation detectionInformation;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer textsCount;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<Text> texts;
@@ -80,6 +82,14 @@ public class DisnetConcept {
         this.semanticTypes = semanticTypes;
     }
 
+    public DetectionInformation getDetectionInformation() {
+        return detectionInformation;
+    }
+
+    public void setDetectionInformation(DetectionInformation detectionInformation) {
+        this.detectionInformation = detectionInformation;
+    }
+
     public Integer getTextsCount() {
         return textsCount;
     }
@@ -95,6 +105,8 @@ public class DisnetConcept {
     public void setTexts(List<Text> texts) {
         this.texts = texts;
     }
+
+
 
     @Override
     public String toString() {

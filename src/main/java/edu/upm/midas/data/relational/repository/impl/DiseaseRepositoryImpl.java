@@ -622,7 +622,42 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
                 .getResultList();
         if (CollectionUtils.isNotEmpty(textList))
             texts = textList;
-        return texts;    }
+        return texts;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public String findDocumentIdBySourceAndVersionAndDiseaseIdNative(String sourceName, Date version, String diseaseId) {
+        String documentId = null;
+        List<String> documentList = (List<String>) getEntityManager()
+                .createNamedQuery("Disease.findDocumentIdBySourceAndVersionAndDiseaseIdNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("diseaseId", diseaseId)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(documentList))
+            documentId = documentList.get(0);
+        return documentId;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedNative(String sourceName, Date version, String documentId, String diseaseId, String cui, boolean isValidated) {
+        List<Object[]> detectionInformation = null;
+        List<Object[]> detectionInformationList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("documentId", documentId)
+                .setParameter("diseaseId", diseaseId)
+                .setParameter("cui", cui)
+                .setParameter("validated", isValidated)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(detectionInformationList))
+            detectionInformation = detectionInformationList;
+        return detectionInformation;
+    }
 
 
     public void persist(Disease disease) {

@@ -1,10 +1,7 @@
 package edu.upm.midas.data.relational.service;
 
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
-import edu.upm.midas.model.DiseaseDisnetConcepts;
-import edu.upm.midas.model.DisnetConcept;
-import edu.upm.midas.model.Code;
-import edu.upm.midas.model.Text;
+import edu.upm.midas.model.*;
 
 import java.util.Date;
 import java.util.List;
@@ -84,6 +81,10 @@ public interface DiseaseService {
     List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseIdAndCuiNative(String sourceName, Date version, String documentId, String diseaseId, String cui);
 
     List<Text> findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(String sourceName, Date version, String documentId, String diseaseId);
+
+    String findDocumentIdBySourceAndVersionAndDiseaseIdNative(String sourceName, Date version, String diseaseId);
+
+    DetectionInformation findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedToDisnetConceptNative(String sourceName, Date version, String documentId, String diseaseId, String cui, boolean isValidated);
 
 
     List<Disease> findAll();

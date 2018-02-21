@@ -55,6 +55,8 @@ public class Constants {
 
     public final static String MESSAGE_PARAM_NOT_USED = "Parameter not used.";
 
+    public final static String AMPERSAND = "&";
+
 
 
     @Value("${my.header.param.token.name}")

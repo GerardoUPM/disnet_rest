@@ -135,7 +135,8 @@ public class DiseaseHelperNative {
                                                              String code, String typeCode,
                                                              boolean isValidated,
                                                              TypeSearchValidation validation,
-                                                             boolean matchExactName) {
+                                                             boolean matchExactName,
+                                                             boolean detectionInformation) {
         List<Disease> diseaseList = new ArrayList<>();
         try {
             //Primero se busca la lista de las enfermedades que coincidan con los parametros
@@ -151,9 +152,9 @@ public class DiseaseHelperNative {
                 if (validation.getTypeSearch().equals(Constants.TYPE_QUERY_CODES)){
                     diseases = diseaseService.findBySourceAndVersionAndCodeAndTypeCodeNative(sourceName, version, code, typeCode);
             }
-            //Con la lista de las enfermedades cargada, se buscan sus códigos, si los tiene
+            //Con la lista de las enfermedades cargada, se buscan sus conceptos, si los tiene
             if (diseases != null) {
-                diseaseList = getDisnetConcepts(apiResponseErrors, validation, sourceName, version, isValidated, diseases);
+                diseaseList = getDisnetConcepts(apiResponseErrors, validation, sourceName, version, isValidated, detectionInformation, diseases);
             }
         }catch (Exception e){
             //Se agrega el error en la lista principal de la respuesta
@@ -216,13 +217,13 @@ public class DiseaseHelperNative {
     }
 
 
-    public List<Disease> getDiseasesWithMoreOrFewerDisnetConcepts(List<ApiResponseError> apiResponseErrors, String sourceName, Date version, boolean isValidated, int limit, boolean moreDisnetConcepts, TypeSearchValidation validation){
+    public List<Disease> getDiseasesWithMoreOrFewerDisnetConcepts(List<ApiResponseError> apiResponseErrors, String sourceName, Date version, boolean isValidated, int limit, boolean moreDisnetConcepts, TypeSearchValidation validation, boolean detectionInformation){
         List<Disease> diseaseList = new ArrayList<>();
         try {
             List<Disease> diseases = diseaseService.withMoreOrFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit, moreDisnetConcepts);
             //Con la lista de las enfermedades cargada, se buscan sus códigos, si los tiene
             if (diseases != null) {
-                diseaseList = getDisnetConcepts(apiResponseErrors, validation, sourceName, version, isValidated, diseases);
+                diseaseList = getDisnetConcepts(apiResponseErrors, validation, sourceName, version, isValidated, detectionInformation, diseases);
             }
         }catch (Exception e){
             //Se agrega el error en la lista principal de la respuesta
@@ -327,6 +328,7 @@ public class DiseaseHelperNative {
                                            TypeSearchValidation validation,
                                            String sourceName, Date version,
                                            boolean isValidated,
+                                           boolean detectionInformation,
                                            List<Disease> diseases){
         if (diseases != null) {
             try {
@@ -340,6 +342,31 @@ public class DiseaseHelperNative {
                     }else{
                         disnetConcepts = diseaseService.findSymptomsBySourceAndVersionAndDiseaseIdAndIsValidated(sourceName, version, disease.getDiseaseId(), isValidated);
                     }
+
+                    //Buscará por cada concepto su información de detección, es decir y de momento, el número de veces que
+                    // se encontró el concepto en todos los textos del artículo relacionado con una enfermedad
+                    if (detectionInformation){
+                        if (disnetConcepts.size()>0) {
+                            try {
+                                String documentId = diseaseService.findDocumentIdBySourceAndVersionAndDiseaseIdNative(sourceName, version, disease.getDiseaseId());
+                                for (DisnetConcept disnetConcept : disnetConcepts) {
+                                    DetectionInformation detectInfo = diseaseService.findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedToDisnetConceptNative(sourceName, version, documentId, disease.getDiseaseId(), disnetConcept.getCui(), isValidated);
+                                    disnetConcept.setDetectionInformation(detectInfo);
+                                }
+                            }catch (Exception e){
+                                //Se agrega el error en la lista principal de la respuesta
+                                errorService.insertApiErrorEnumGenericError(
+                                        apiResponseErrors,
+                                        ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                                        Throwables.getRootCause(e).getClass().getName(),
+                                        "Data could not be obtained from the detection of information: " + e.getMessage(),
+                                        true,
+                                        null);
+                            }
+                        }
+                    }
+                    //Agregar validación para obtener información la busqueda del concepto "detectionInformation"
+
                     disease.setDisnetConceptList(disnetConcepts);
                     disease.setDisnetConceptsCount(disnetConcepts.size());
                 }

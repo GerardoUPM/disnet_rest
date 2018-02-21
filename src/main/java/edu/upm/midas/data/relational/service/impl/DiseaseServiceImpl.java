@@ -1,12 +1,9 @@
 package edu.upm.midas.data.relational.service.impl;
+import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.entities.edsssdb.Disease;
 import edu.upm.midas.data.relational.repository.DiseaseRepository;
 import edu.upm.midas.data.relational.service.DiseaseService;
-import edu.upm.midas.model.DisnetConcept;
-import edu.upm.midas.model.DiseaseDisnetConcepts;
-import edu.upm.midas.model.Code;
-import edu.upm.midas.model.Document;
-import edu.upm.midas.model.Text;
+import edu.upm.midas.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -379,6 +376,32 @@ public class DiseaseServiceImpl implements DiseaseService {
         List<Object[]> texts = daoDisease.findTextsBySourceAndVersionAndDocumentAndDiseaseIdNative(sourceName, version, documentId, diseaseId);
         //System.out.println(sourceName+" - "+version+" - "+diseaseId +" - "+isValidated);
         return createTextList(texts, false);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public String findDocumentIdBySourceAndVersionAndDiseaseIdNative(String sourceName, Date version, String diseaseId) {
+        return daoDisease.findDocumentIdBySourceAndVersionAndDiseaseIdNative(sourceName, version, diseaseId);
+    }
+
+    @Override
+    public DetectionInformation findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedToDisnetConceptNative(String sourceName, Date version, String documentId, String diseaseId, String cui, boolean isValidated) {
+        List<Object[]> detectionInformationList =daoDisease.findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedNative(sourceName,version, documentId, diseaseId, cui, isValidated);
+        return createDetectionInformation(detectionInformationList);
+    }
+
+
+    public DetectionInformation createDetectionInformation(List<Object[]> detectionInformationList){
+        DetectionInformation detectionInformation = null;
+        Integer timesFoundInTexts = 0;
+        for (Object[] detectInfo: detectionInformationList) {
+            String matchedWords = (String) detectInfo[1];
+            String[] matchedWordList = matchedWords.split(Constants.AMPERSAND);
+            timesFoundInTexts = timesFoundInTexts + matchedWordList.length;
+        }
+        if (timesFoundInTexts > 0){
+            detectionInformation = new DetectionInformation();
+            detectionInformation.setTimesFoundInTexts(timesFoundInTexts);}
+        return detectionInformation;
     }
 
 
