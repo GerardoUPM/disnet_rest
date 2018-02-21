@@ -56,7 +56,7 @@ public class Common {
     }
 
 
-    public String createExcludeSemanticTypesQuery(List<String> semanticTypes){System.out.println("HOLA");
+    public String createExcludeSemanticTypesQuery(List<String> semanticTypes){//System.out.println("HOLA");
         String query = "";
         int count = 1;
         for (String semanticType: semanticTypes) {
@@ -68,7 +68,7 @@ public class Common {
         }
         if (query.length() > 0){
             query = "AND ( " + query + ")";
-        }System.out.println("HOLA" + query);
+        }//System.out.println("HOLA" + query);
         return query;
     }
 
