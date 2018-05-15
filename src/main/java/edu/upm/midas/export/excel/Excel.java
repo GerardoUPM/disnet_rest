@@ -15,6 +15,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 
 /**
  * Created by gerardo on 22/12/2017.
@@ -28,9 +30,10 @@ import java.io.InputStream;
 @Service
 public class Excel {
 
-    public void buildExcelDocument(Disease disease) throws Exception {
+    public void buildExcelDocument(String path, Disease disease) throws Exception {
 
-        String PATH = Constants.EXPORT_FOLDER +disease.getName()+".xlsx";
+
+        String PATH = path +disease.getName()+".xlsx";
 
         // create excel xls sheet
         XSSFWorkbook workbook = new XSSFWorkbook();
@@ -106,23 +109,32 @@ public class Excel {
             Row disnetConceptHeadRow = sheet.createRow(60);
             disnetConceptHeadRow.createCell(0).setCellValue("TextsId");
             disnetConceptHeadRow.createCell(1).setCellValue("CUI");
-            disnetConceptHeadRow.createCell(2).setCellValue("Name");
-            disnetConceptHeadRow.createCell(3).setCellValue("SemanticTypes");
-            disnetConceptHeadRow.createCell(4).setCellValue("Validated");
+            disnetConceptHeadRow.createCell(2).setCellValue("MatchedWords");
+            disnetConceptHeadRow.createCell(3).setCellValue("Name");
+            disnetConceptHeadRow.createCell(4).setCellValue("SemanticTypes");
+            disnetConceptHeadRow.createCell(5).setCellValue("Validated");
 
-            disnetConceptHeadRow.createCell(5).setCellValue("TP");
-            disnetConceptHeadRow.createCell(6).setCellValue("FP");
-            disnetConceptHeadRow.createCell(7).setCellValue("FN");
-            disnetConceptHeadRow.createCell(8).setCellValue("TN");
+            disnetConceptHeadRow.createCell(6).setCellValue("TP");
+            disnetConceptHeadRow.createCell(7).setCellValue("FP");
+            disnetConceptHeadRow.createCell(8).setCellValue("FN");
+            disnetConceptHeadRow.createCell(9).setCellValue("TN");
 
             rowCount = 61;
 
             for (DisnetConcept term: disease.getDisnetConceptList()) {
                 String texts = "";
+                String matchedWords = "";
+                int count = 1;
                 for (Text text: term.getTexts()) {
                     texts = texts + text.getTextId() +
                         "\nLocation => Word(s): " + text.getMatchedWords() +
                         " | Position: " + text.getPositionalInfo() + "\n";
+                    if (count == 1) {
+                        matchedWords = matchedWords + text.getMatchedWords();
+                    }else{
+                        matchedWords = matchedWords + ", " + text.getMatchedWords();
+                    }
+                    count++;
                 }
                 CellStyle styleWrapText = workbook.createCellStyle();
                 styleWrapText.setWrapText(true);
@@ -133,12 +145,14 @@ public class Excel {
                 //disnetConceptBodyRow.getCell(0).setCellStyle(generalStyle);
                 disnetConceptBodyRow.createCell(1).setCellValue(term.getCui());
                 disnetConceptBodyRow.getCell(1).setCellStyle(generalStyle);
-                disnetConceptBodyRow.createCell(2).setCellValue(term.getName());
+                disnetConceptBodyRow.createCell(2).setCellValue(deDup(matchedWords.replace("[", "").replace("]", "").replace("&", ", ")));
                 disnetConceptBodyRow.getCell(2).setCellStyle(generalStyle);
-                disnetConceptBodyRow.createCell(3).setCellValue(term.getSemanticTypes().toString());
+                disnetConceptBodyRow.createCell(3).setCellValue(term.getName());
                 disnetConceptBodyRow.getCell(3).setCellStyle(generalStyle);
-                disnetConceptBodyRow.createCell(4).setCellValue(term.getValidated());
+                disnetConceptBodyRow.createCell(4).setCellValue(term.getSemanticTypes().toString());
                 disnetConceptBodyRow.getCell(4).setCellStyle(generalStyle);
+                disnetConceptBodyRow.createCell(5).setCellValue(term.getValidated());
+                disnetConceptBodyRow.getCell(5).setCellStyle(generalStyle);
 
             }
 
@@ -188,6 +202,10 @@ public class Excel {
         header.createCell(8).setCellValue("Phone Number");
         header.getCell(8).setCellStyle(style);*/
 
+    }
+
+    public String deDup(String s) {
+        return new LinkedHashSet<String>(Arrays.asList(s.split(", "))).toString().replaceAll("(^\\[|\\]$)", "");//.replace(", ", "-");
     }
 
 }

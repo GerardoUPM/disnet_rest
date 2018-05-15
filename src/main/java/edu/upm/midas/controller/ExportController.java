@@ -1,6 +1,7 @@
 package edu.upm.midas.controller;
 
 import edu.upm.midas.common.util.TimeProvider;
+import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
 import edu.upm.midas.export.excel.Excel;
 import edu.upm.midas.model.Disease;
@@ -56,11 +57,15 @@ public class ExportController {
             int count = 1;
             for (Disease disease: diseases) {
                 System.out.println("Disease ("+count+") " + disease.getName());
-                excel.buildExcelDocument(disease);
+                if (source.trim().equals(Constants.WIKIPEDIA_SOURCE)) excel.buildExcelDocument(Constants.EXPORT_WIKIPEDIA_FOLDER, disease);
+                else excel.buildExcelDocument(Constants.EXPORT_PUBMED_FOLDER, disease);
                 count++;
             }
         }
 
         return "Succes export";
     }
+
+
+
 }

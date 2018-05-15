@@ -194,15 +194,15 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
         if (moreSymptoms) moreOrFewerQuery = " ORDER BY COUNT(DISTINCT hsym.cui) DESC ";
         else moreOrFewerQuery = " ORDER BY COUNT(DISTINCT hsym.cui) ASC ";
         Query query = getEntityManager().createNativeQuery(
-                "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, u.url, COUNT(DISTINCT hsym.cui) 'disnetConceptCount' " +
+                "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', COUNT(DISTINCT hsym.cui) 'disnetConceptCount' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "-- url\n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "-- symptoms--\n" +
                         "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
                         "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
@@ -212,7 +212,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
                         "AND hs.date = :version " +
                         "-- AND d.name LIKE 'Gastroenteritis' \n" +
                         "AND hsym.validated = :validated " +
-                        "GROUP BY d.disease_id, d.name, d.cui, u.url " + moreOrFewerQuery);
+                        "GROUP BY d.disease_id, d.name, d.cui, -- u.url " + moreOrFewerQuery);
 
         List<Object[]> diseases = null;
         List<Object[]> diseaseList = (List<Object[]>) query

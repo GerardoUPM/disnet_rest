@@ -31,7 +31,12 @@ public class Constants {
     public final static String RESPONSE_INVALID_SOURCES = "Invalid source list";
     public final static String RESPONSE_SEMANTIC_TYPES = "Invalid semantic type list";
 
+    public static final String WIKIPEDIA_SOURCE = "wikipedia";
+    public static final String PUBMED_SOURCE = "pubmed";
+
     public static final String EXPORT_FOLDER = "tmp/excel/";
+    public static final String EXPORT_WIKIPEDIA_FOLDER = "tmp/excel/wikipedia/";
+    public static final String EXPORT_PUBMED_FOLDER = "tmp/excel/pubmed/";
 
     public final static String TOKEN = "token";
     public final static String SOURCE = "source";

@@ -55,30 +55,30 @@ import java.util.Objects;
 
         @NamedNativeQuery(
                 name = "Disease.findBySourceAndVersionAndMatchExactNameTrueNative",
-                query = "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, u.url, getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount' " +
+                query = "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
-                        "-- url\\n \n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- url \n" +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "WHERE sce.name = :source " +
                         "AND hs.date = :version " +
                         "AND d.name COLLATE utf8_bin = :disease "
         ),
         @NamedNativeQuery(
                 name = "Disease.findBySourceAndVersionAndMatchExactNameFalseNative",
-                query = " SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, u.url, getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount' " +
+                query = " SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
-                        "-- url\\n \n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- url \n" +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "WHERE sce.name = :source " +
                         "AND hs.date = :version " +
                         "AND d.name LIKE :disease "
@@ -96,18 +96,19 @@ import java.util.Objects;
                         + "VALUES (:documentId, :date, :diseaseId)"
         ),
 
+        // DiseaseHelperNative getDiseasesAndTheirDisnetConcepts <SIN USAR>
         // -- <<<findingsList>>> (POR NOMBRE DE ENFERMEDAD) CUALES SITOMAS CON SUS SEMANTIC TYPES TIENE UNA ENFERMEDAD "nombre exacto" POR FUENTE Y VERSION Y SI ESTAN VALIDADOS
         @NamedNativeQuery(
                 name = "Disease.findSymptomsBySourceAndVersionAndMatchExactNameTrueAndValidatedNative",
-                query = "SELECT DISTINCT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types'-- , ht.text_id \n" +
+                query = "SELECT DISTINCT hsym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', getSemanticTypesBySymptom(sym.cui) 'semantic_types'-- , ht.text_id \n" +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "-- url\n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "-- symptoms\n" +
                         "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date  " +
                         "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
@@ -137,18 +138,20 @@ import java.util.Objects;
                         "AND d.disease_id = :diseaseId " +
                         "AND hsym.validated = :validated -- filtering "
         ),
+
+        // DiseaseHelperNative getDiseasesAndTheirDisnetConcepts <SIN USAR>
         // -- <<<findingsList>>> (POR CODIGOS DE ENFERMEDAD) CUALES SITOMAS CON SUS SEMANTIC TYPES TIENE UNA ENFERMEDAD "code y typeCode" POR FUENTE Y VERSION Y SI ESTAN VALIDADOS
         @NamedNativeQuery(
                 name = "Disease.findSymptomsBySourceAndVersionAndCodeAndTypeCodeAndValidatedNative",
-                query = "SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
+                query = "SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "-- url\n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id " +
                         "-- symptoms\n" +
                         "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
                         "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
@@ -168,15 +171,15 @@ import java.util.Objects;
         // AQUI NO SE USARÁ. SINO EN EL REPOSITORY-- <<<findingsList>>> (POR CODIGOS DE ENFERMEDAD) CUALES SITOMAS CON SUS SEMANTIC TYPES TIENE UNA ENFERMEDAD "code y typeCode" POR FUENTE Y VERSION Y SI ESTAN VALIDADOS Y POR SEMANTICS TYPES
         @NamedNativeQuery(
                 name = "Disease.findSymptomsBySourceAndVersionAndCodeAndDiseaseNameAndValidatedAndSemanticTypesNative",
-                query = "SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', u.url, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
+                query = "SELECT DISTINCT sym.cui 'symptom', sym.name 'symptomName', hsym.validated, d.disease_id 'diseaseCode', d.name 'diseaseName', getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "-- url\n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "-- symptoms\n" +
                         "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
                         "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
@@ -193,15 +196,15 @@ import java.util.Objects;
 
         @NamedNativeQuery(
                 name = "Disease.findAllBySourceAndVersionNative",
-                query = "SELECT d.disease_id, d.name, d.cui, u.url, getDisnetConceptsCount(s.name, doc.date, d.disease_id) 'disnetConceptCount' " +
+                query = "SELECT d.disease_id, d.name, d.cui, getDocumentUrl(s.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(s.name, doc.date, d.disease_id) 'disnetConceptCount' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source s ON s.source_id = hs.source_id " +
                         "-- url\n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id\n " +
                         "WHERE s.name COLLATE utf8_bin = :source " +
                         "AND doc.date = :version " +
                         "ORDER BY d.name ASC"
@@ -368,14 +371,15 @@ import java.util.Objects;
         //-- <<<diseaseList>>> LISTA DE ENFERMEDADES, SUS URLS Y EL NUMERO DE SINTOMAS
         @NamedNativeQuery(
                 name = "Disease.findAllWithUrlAndSymptomsCountBySourceAndVersionNative",
-                query = "SELECT d.disease_id, d.name, u.url, COUNT(DISTINCT hsym.cui) 'symptoms' " +
+                query = "SELECT d.disease_id, d.name, getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', COUNT(DISTINCT hsym.cui) 'symptoms' " +
                         "FROM disease d  " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
-                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id" +
+                        "-- url  " +
                         "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "-- symptoms\n" +
                         "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
                         "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
@@ -411,15 +415,15 @@ import java.util.Objects;
         //-- <<<diseaseWithMoreSymptoms>>> 10 ENFERMEDADES CON MAS SINTOMAS "NO SE USARÁ AQUÍ"
         @NamedNativeQuery(
                 name = "Disease.withMoreSymptomsBySourceAndVersionAndValidatedNative",
-                query = "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, u.url, COUNT(DISTINCT hsym.cui) 'disnetConceptCount' " +
+                query = "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', COUNT(DISTINCT hsym.cui) 'disnetConceptCount' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "-- url\n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "-- symptoms--\n" +
                         "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
                         "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
@@ -456,15 +460,15 @@ import java.util.Objects;
         //-- <<<diseaseList>>> LISTA DE ENFERMEDADES SEGUN SUS CODIGOS
         @NamedNativeQuery(
                 name = "Disease.findBySourceAndVersionAndCodeAndTypeCodeNative",
-                query = "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, u.url, getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount', c.code, r.name " +
+                query = "SELECT DISTINCT d.disease_id 'diseaseCode', d.name 'diseaseName', d.cui, getDocumentUrl(sce.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount', c.code, r.name " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "-- url \n" +
-                        "INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
-                        "INNER JOIN url u ON u.url_id = docu.url_id " +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "-- code \n" +
                         "INNER JOIN has_code hc ON hc.document_id = doc.document_id AND hc.date = doc.date " +
                         "INNER JOIN code c ON c.code = hc.code AND c.resource_id = hc.resource_id " +

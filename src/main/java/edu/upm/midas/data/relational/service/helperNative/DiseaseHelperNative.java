@@ -541,7 +541,7 @@ public class DiseaseHelperNative {
                                                                    String forceSemanticTypes,
                                                                    boolean matchExactName) throws Exception {
         TypeSearchValidation validation = new TypeSearchValidation();
-        System.out.println(diseaseCode +"|"+typeCode);
+        //System.out.println(diseaseCode +"|"+typeCode);
         boolean diseaseNameEmpty = common.isEmpty(diseaseName);
         boolean diseaseCodeEmpty = common.isEmpty(diseaseCode);
         boolean typeCodeEmpty = common.isEmpty(typeCode);
