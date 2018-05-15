@@ -41,7 +41,7 @@ public class ExportController {
     @Autowired
     private TimeProvider timeProvider;
 
-    @RequestMapping(path = { "/export/diseaseList" },//disease name OKOK
+    @RequestMapping(path = { "/export/wikipedia/diseaseList" },//disease name OKOK
             method = RequestMethod.GET,
             params = {"source", "version", "symptomsNumber"})
     public String diseaseList(@RequestParam(value = "symptomsNumber") @Valid @NotBlank @NotNull @NotEmpty int symptomsNumber,
@@ -53,6 +53,32 @@ public class ExportController {
 
         Date dataVersion = timeProvider.getSdf().parse(version);
         List<Disease> diseases = diseaseHelperNative.excelExport(source, dataVersion, symptomsNumber);
+        if (diseases != null){
+            int count = 1;
+            for (Disease disease: diseases) {
+                System.out.println("Disease ("+count+") " + disease.getName());
+                if (source.trim().equals(Constants.WIKIPEDIA_SOURCE)) excel.buildExcelDocument(Constants.EXPORT_WIKIPEDIA_FOLDER, disease);
+                else excel.buildExcelDocument(Constants.EXPORT_PUBMED_FOLDER, disease);
+                count++;
+            }
+        }
+
+        return "Succes export";
+    }
+
+
+    @RequestMapping(path = { "/export/pubmed/textList" },
+            method = RequestMethod.GET,
+            params = {"source", "version", "textNumber"})
+    public String textList(@RequestParam(value = "textNumber") @Valid @NotBlank @NotNull @NotEmpty int textNumber,
+                              @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
+                              @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
+                              HttpServletRequest httpRequest,
+                              Device device,
+                              Model model) throws Exception {
+
+        Date dataVersion = timeProvider.getSdf().parse(version);
+        List<Disease> diseases = diseaseHelperNative.excelExport(source, dataVersion, textNumber);
         if (diseases != null){
             int count = 1;
             for (Disease disease: diseases) {
