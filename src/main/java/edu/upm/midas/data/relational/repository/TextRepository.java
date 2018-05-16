@@ -30,6 +30,14 @@ public interface TextRepository {
 
     List<Object[]> findBySourceAndVersionNative(Date version, String source);
 
+    List<Object[]> findAllBySourceAndVersionAndTextCountNative(String sourceName, Date version, boolean validated, int textCount);
+
+    List<Object[]> findTermsBySourceAndVersionAndDocumentAndTextIdNative(String sourceName, Date version, String textId);
+
+    List<Object[]> findDiseaseBySourceAndVersionAndDocumentIdNative(String sourceName, Date version, String documentId);
+
+    Object[] findPaperByIdNative(String paperId);
+
     List<Text> findAllQuery();
 
     void persist(Text text);

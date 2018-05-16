@@ -2,12 +2,17 @@ package edu.upm.midas.data.relational.service.impl;
 import edu.upm.midas.data.relational.entities.edsssdb.Text;
 import edu.upm.midas.data.relational.repository.TextRepository;
 import edu.upm.midas.data.relational.service.TextService;
+import edu.upm.midas.model.Disease;
+import edu.upm.midas.model.DisnetConcept;
+import edu.upm.midas.model.Document;
+import edu.upm.midas.model.Paper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +57,101 @@ public class TextServiceImpl implements TextService {
             Hibernate.initialize(source.getVersionList());
 */
         return txt;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<Paper> findAllBySourceAndVersionAndTextCountNative(String sourceName, Date version, boolean validated, int textCount) {
+        List<Paper> paperList = null;
+        List<Object[]> papers = daoText.findAllBySourceAndVersionAndTextCountNative(sourceName, version, validated, textCount);
+        if(papers!=null){
+            paperList = new ArrayList<>();
+            for (Object[] paperObject: papers) {
+                Paper paper = new Paper((String) paperObject[5]);
+
+                Document document = new Document((String) paperObject[4], version);
+                edu.upm.midas.model.Text text = new edu.upm.midas.model.Text();
+                text.setTextId((String) paperObject[0]);
+                text.setSection((String) paperObject[1]);
+                text.setTextOrder((int) paperObject[2]);
+                text.setText((String) paperObject[3]);
+                text.setDisnetConceptsCount((int) paperObject[6]);
+                text.setDocument(document);
+                paper.setText(text);
+                paperList.add(paper);
+            }
+        }
+        return paperList;
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<DisnetConcept> findTermsBySourceAndVersionAndDocumentAndTextIdNative(String sourceName, Date version, String textId) {
+        List<Object[]> terms = daoText.findTermsBySourceAndVersionAndDocumentAndTextIdNative(sourceName, version, textId);
+        return createDisnetConceptList(terms, true);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<Disease> findDiseaseBySourceAndVersionAndDocumentIdNative(String sourceName, Date version, String documentId) {
+        List<Object[]> diseases = daoText.findDiseaseBySourceAndVersionAndDocumentIdNative(sourceName, version, documentId);
+        return createDiseaseList(diseases, version);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public Paper findPaperByIdNative(String paperId) {
+        Object[] paper = daoText.findPaperByIdNative(paperId);
+        return createPaper(paper);
+    }
+
+    public Paper createPaper(Object[] paperObject){
+        Paper paper = null;
+        if(paperObject!=null){
+            paper = new Paper();
+            paper.setTitle((String) paperObject[0]);
+            paper.setAuthors((String) paperObject[1]);
+            paper.setKeywords((String) paperObject[2]);
+            paper.setUrl((String) paperObject[3]);
+        }
+        return paper;
+    }
+
+    public List<DisnetConcept> createDisnetConceptList(List<Object[]> symptoms, boolean setValidatedParam){
+        List<DisnetConcept> disnetConcepts = new ArrayList<>();
+        if (symptoms != null) {
+            for (Object[] symptom : symptoms) {
+                DisnetConcept disnetConcept = new DisnetConcept();
+                disnetConcept.setCui((String) symptom[0]);
+                disnetConcept.setName((String) symptom[1]);
+                if (setValidatedParam){
+                    disnetConcept.setValidated((boolean) symptom[2]);
+                    disnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[3]));
+                }else disnetConcept.setSemanticTypes(setSemanticTypes((String) symptom[5]));
+
+                disnetConcepts.add(disnetConcept);
+            }
+        }
+        return disnetConcepts;
+    }
+
+    public List<Disease> createDiseaseList(List<Object[]> diseases, Date version){
+        List<Disease> diseaseList = null;
+        if (diseases != null) {
+            diseaseList = new ArrayList<>();
+            for (Object[] dis : diseases) {
+                Disease disease = new Disease();
+                disease.setDiseaseId((String) dis[0]);
+                disease.setName((String) dis[1]);
+                diseaseList.add(disease);
+            }
+        }
+        return diseaseList;
+    }
+
+    public List<String> setSemanticTypes(String semanticTypes){
+        List<String> semanticTypesList = new ArrayList<>();
+        String[] parts = semanticTypes.split(",");
+        for (String semanticType: parts) {
+            semanticTypesList.add(semanticType);
+        }
+        return semanticTypesList;
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)

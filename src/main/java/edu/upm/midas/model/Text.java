@@ -22,6 +22,7 @@ public class Text {
     //Para los casos en los que se obtienen de donde fue obtenido un DISNET_CONCEPT
     private String matchedWords;
     private String positionalInfo;
+    private Document document;
 
 
     public String getTextId() {
@@ -86,5 +87,13 @@ public class Text {
 
     public void setPositionalInfo(String positionalInfo) {
         this.positionalInfo = positionalInfo;
+    }
+
+    public Document getDocument() {
+        return document;
+    }
+
+    public void setDocument(Document document) {
+        this.document = document;
     }
 }

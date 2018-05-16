@@ -107,8 +107,8 @@ public class CodeServiceImpl implements CodeService {
 /*
             if(StringUtils.isNotBlank(code.getCodePK()))
                 cod.setSourceId(code.getSourceId());
-            if(StringUtils.isNotBlank(code.getDisease()))
-                cod.setDisease(code.getDisease());
+            if(StringUtils.isNotBlank(code.getDiseases()))
+                cod.setDiseases(code.getDiseases());
 */
             //if(CollectionUtils.isNotEmpty(source.getDiseasesBySidsource()))
             //    sour.setDiseasesBySidsource(source.getDiseasesBySidsource());

@@ -6,12 +6,14 @@ import edu.upm.midas.data.relational.service.TextService;
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.UniqueId;
 import edu.upm.midas.model.Disease;
-import edu.upm.midas.model.Text;
+import edu.upm.midas.model.DisnetConcept;
+import edu.upm.midas.model.Paper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,8 +49,27 @@ public class TextHelperNative {
     ObjectMapper objectMapper;
 
 
-    public List<Text> excelExport(String sourceName, Date version, int textCount){
-        return null;
+    public List<Paper> excelExport(String sourceName, Date version, int textCount){
+        List<Paper> paperList = new ArrayList<>();
+        List<Paper> papers = textService.findAllBySourceAndVersionAndTextCountNative(sourceName, version, true, textCount);
+        if (papers!=null) {
+            for (Paper paper : papers) {
+                Paper existPaper = textService.findPaperByIdNative(paper.getPaperId());
+                paper.setTitle(existPaper.getTitle());
+                paper.setAuthors(existPaper.getAuthors());
+                paper.setKeywords(existPaper.getKeywords());
+                paper.setUrl(existPaper.getUrl());
+
+                List<Disease> diseases = textService.findDiseaseBySourceAndVersionAndDocumentIdNative(sourceName, version, paper.getText().getDocument().getDocumentId());
+                paper.setDiseases(diseases);
+
+                List<DisnetConcept> disnetConcepts = textService.findTermsBySourceAndVersionAndDocumentAndTextIdNative(sourceName, version, paper.getText().getTextId());
+                paper.getText().setDisnetConceptsCount(disnetConcepts.size());
+                paper.getText().setDisnetConceptList(disnetConcepts);
+            }
+        }
+
+        return paperList;
     }
 
 

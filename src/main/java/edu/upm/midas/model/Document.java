@@ -20,6 +20,14 @@ public class Document {
     private List<Text> textList;
 
 
+    public Document() {
+    }
+
+    public Document(String documentId, Date version) {
+        this.documentId = documentId;
+        this.version = version;
+    }
+
     public String getDocumentId() {
         return documentId;
     }

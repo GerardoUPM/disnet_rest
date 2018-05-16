@@ -1,6 +1,9 @@
 package edu.upm.midas.data.relational.service;
 
 import edu.upm.midas.data.relational.entities.edsssdb.Text;
+import edu.upm.midas.model.Disease;
+import edu.upm.midas.model.DisnetConcept;
+import edu.upm.midas.model.Paper;
 
 import java.util.Date;
 import java.util.List;
@@ -21,6 +24,14 @@ public interface TextService {
     Text findByContentTypeQuery(String contentType);
 
     Text findByTextQuery(String text);
+
+    List<Paper> findAllBySourceAndVersionAndTextCountNative(String sourceName, Date version, boolean validated, int symptoms);
+
+    List<DisnetConcept> findTermsBySourceAndVersionAndDocumentAndTextIdNative(String sourceName, Date version, String textId);
+
+    List<Disease> findDiseaseBySourceAndVersionAndDocumentIdNative(String sourceName, Date version, String documentId);
+
+    Paper findPaperByIdNative(String paperId);
 
     List<Text> findAll();
 

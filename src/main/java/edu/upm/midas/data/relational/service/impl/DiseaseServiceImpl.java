@@ -524,8 +524,8 @@ public class DiseaseServiceImpl implements DiseaseService {
 /*
             if(StringUtils.isNotBlank(disease.getDocumentId()))
                 dis.setDocumentId(disease.getDocumentId());
-            if(StringUtils.isNotBlank(disease.getDisease()))
-                dis.setDisease(disease.getDisease());
+            if(StringUtils.isNotBlank(disease.getDiseases()))
+                dis.setDiseases(disease.getDiseases());
 */
 
             //dis.setDocumentList( disease.getDocumentList() );

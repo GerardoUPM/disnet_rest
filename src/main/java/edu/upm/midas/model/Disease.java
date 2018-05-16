@@ -127,4 +127,21 @@ public class Disease {
     public void setDocumentList(List<Document> documentList) {
         this.documentList = documentList;
     }
+
+
+    @Override
+    public String toString() {
+        return "Disease{" +
+                "diseaseId='" + diseaseId + '\'' +
+                ", name='" + name + '\'' +
+                ", cui='" + cui + '\'' +
+                ", url='" + url + '\'' +
+                ", codesCount=" + codesCount +
+                ", codes=" + codes +
+                ", disnetConceptsCount=" + disnetConceptsCount +
+                ", disnetConceptList=" + disnetConceptList +
+                ", documentsCount=" + documentsCount +
+                ", documentList=" + documentList +
+                '}';
+    }
 }

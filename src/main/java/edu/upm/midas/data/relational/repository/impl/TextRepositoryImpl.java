@@ -98,6 +98,68 @@ public class TextRepositoryImpl extends AbstractDao<String, Text>
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<Object[]> findAllBySourceAndVersionAndTextCountNative(String sourceName, Date version, boolean validated, int textCount) {
+        List<Object[]> texts = null;
+        List<Object[]> textList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Text.findAllBySourceAndVersionAndTextCountNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("validated", validated)
+                .setMaxResults(textCount)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(textList))
+            texts = textList;
+        return texts;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findTermsBySourceAndVersionAndDocumentAndTextIdNative(String sourceName, Date version, String textId) {
+        List<Object[]> terms = null;
+        List<Object[]> termList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Text.findTermsBySourceAndVersionAndDocumentAndTextIdNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("textId", textId)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(termList))
+            terms = termList;
+        return terms;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findDiseaseBySourceAndVersionAndDocumentIdNative(String sourceName, Date version, String documentId) {
+        List<Object[]> diseases = null;
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Text.findDiseaseBySourceAndVersionAndDocumentIdNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("documentId", documentId)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(diseaseList))
+            diseases = diseaseList;
+        return diseases;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object[] findPaperByIdNative(String paperId) {
+        Object[] paper = null;
+        List<Object[]> paperList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Text.findPaperByIdNative")
+                .setParameter("paperId", paperId)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(paperList))
+            paper = paperList.get(0);
+        return paper;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public List<Text> findAllQuery() {
         return (List<Text>) getEntityManager()
                 .createNamedQuery("Text.findAll")

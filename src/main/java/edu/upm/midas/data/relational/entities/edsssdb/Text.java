@@ -69,6 +69,75 @@ import java.util.Objects;
                         "LEFT JOIN source s ON s.source_id = hs.source_id " +
                         "WHERE ht.date = :version " +
                         "AND s.name = :source"
+        ),
+
+
+
+        // (1) OBTIENE LOS TEXTOS Y EL NÚMERO DE TERMINOS (DISNETCONCEPTS) POR FUENTE Y VERSION ORDENADOS DE MAYOR A MENOS
+        @NamedNativeQuery(
+                name = "Text.findAllBySourceAndVersionAndTextCountNative",
+                query = "SELECT DISTINCT ht.text_id, sec.name, ht.text_order, t.text, doc.document_id, SUBSTRING_INDEX( SUBSTRING_INDEX(ht.text_id, 'PAPERID', 2), 'PAPERID', -1) 'paper_id', COUNT(DISTINCT hsym.cui) 'disnetConceptsCount' -- getDisnetConceptsCountInAText(sce.name, doc.date, ht.text_id, true) 'disnetConceptsCount' \n" +
+                        "FROM document doc  " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "-- section\n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN section sec ON sec.section_id = hsec.section_id " +
+                        "-- text\n" +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN text t ON t.text_id = ht.text_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = t.text_id " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version " +
+                        "AND hsym.validated = :validated " +
+                        "GROUP BY ht.text_id, sec.name, ht.text_order, t.text, doc.document_id " +
+                        "ORDER BY COUNT(DISTINCT hsym.cui) DESC "
+        ),
+        // (2) TERMINOS DE UN TEXTO VALIDADOS Y NO. SEGUN UN ID DE TEXTO
+        @NamedNativeQuery(
+                name = "Text.findTermsBySourceAndVersionAndDocumentAndTextIdNative",
+                query = "SELECT DISTINCT sym.cui, sym.name, hsym.validated, getSemanticTypesBySymptom(sym.cui) 'semantic_types' " +
+                        "FROM document doc " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "-- section \n" +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "-- texts \n" +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "-- symptom\n" +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "INNER JOIN symptom sym ON sym.cui = hsym.cui " +
+                        "-- semantic_types\n" +
+                        "INNER JOIN has_semantic_type hst ON hst.cui = sym.cui " +
+                        "WHERE sce.name = :source " +
+                        "AND hs.date = :version " +
+                        "AND ht.text_id = :textId " +
+                        "GROUP BY sym.cui, sym.name, hsym.validated " +
+                        "ORDER BY hsym.validated DESC "
+        ),
+        // (3) INFORMACIÓN DE UNA ENFERMEDAD SEGUN UN TEXTO, FUENTE Y VERSIÓN Y DOCUMENTO
+        @NamedNativeQuery(
+                name = "Text.findDiseaseBySourceAndVersionAndDocumentIdNative",
+                query = "SELECT d.disease_id, d.name " +
+                        "FROM document doc " +
+                        "INNER JOIN has_disease hd ON hd.document_id = doc.document_id AND hd.date = doc.date " +
+                        "INNER JOIN disease d ON d.disease_id = hd.disease_id " +
+                        "-- source\n" +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "WHERE doc.document_id = :documentId " +
+                        "AND sce.name = :source " +
+                        "AND doc.date = :version "
+        )
+        ,
+        // (4) INFORMACIÓN DE UNA PAPER SEGÚN EL PAPER ID
+        @NamedNativeQuery(
+                name = "Text.findPaperByIdNative",
+                query = "SELECT p.title, p.authors, p.keywords, u.url " +
+                        "FROM paper p " +
+                        "INNER JOIN paper_url pu ON pu.paper_id = p.paper_id " +
+                        "INNER JOIN url u ON u.url_id = pu.url_id " +
+                        "WHERE p.paper_id = :paperId "
         )
 
 
