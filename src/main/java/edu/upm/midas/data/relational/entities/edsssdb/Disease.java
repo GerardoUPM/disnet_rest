@@ -196,7 +196,7 @@ import java.util.Objects;
 
         @NamedNativeQuery(
                 name = "Disease.findAllBySourceAndVersionNative",
-                query = "SELECT d.disease_id, d.name, d.cui, getDocumentUrl(s.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(s.name, doc.date, d.disease_id) 'disnetConceptCount' " +
+                query = "SELECT DISTINCT d.disease_id, d.name, d.cui, getDocumentUrl(s.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(s.name, doc.date, d.disease_id) 'disnetConceptCount' " +
                         "FROM disease d " +
                         "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
                         "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
