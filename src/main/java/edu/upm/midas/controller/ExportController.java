@@ -3,8 +3,10 @@ package edu.upm.midas.controller;
 import edu.upm.midas.common.util.TimeProvider;
 import edu.upm.midas.constants.Constants;
 import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
+import edu.upm.midas.data.relational.service.helperNative.TextHelperNative;
 import edu.upm.midas.export.excel.Excel;
 import edu.upm.midas.model.Disease;
+import edu.upm.midas.model.Paper;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ public class ExportController {
     @Autowired
     private DiseaseHelperNative diseaseHelperNative;
     @Autowired
+    private TextHelperNative textHelperNative;
+    @Autowired
     private Excel excel;
     @Autowired
     private TimeProvider timeProvider;
@@ -57,8 +61,7 @@ public class ExportController {
             int count = 1;
             for (Disease disease: diseases) {
                 System.out.println("Disease ("+count+") " + disease.getName());
-                if (source.trim().equals(Constants.WIKIPEDIA_SOURCE)) excel.buildExcelDocument(Constants.EXPORT_WIKIPEDIA_FOLDER, disease);
-                else excel.buildExcelDocument(Constants.EXPORT_PUBMED_FOLDER, disease);
+                excel.buildDiseaseExcelDocument(Constants.EXPORT_WIKIPEDIA_FOLDER, disease);
                 count++;
             }
         }
@@ -78,15 +81,16 @@ public class ExportController {
                               Model model) throws Exception {
 
         Date dataVersion = timeProvider.getSdf().parse(version);
-        List<Disease> diseases = diseaseHelperNative.excelExport(source, dataVersion, textNumber);
-        if (diseases != null){
+        List<Paper> papers = textHelperNative.excelExport(source, dataVersion, textNumber);
+        if (papers != null){
             int count = 1;
-            for (Disease disease: diseases) {
-                System.out.println("Disease ("+count+") " + disease.getName());
-                if (source.trim().equals(Constants.WIKIPEDIA_SOURCE)) excel.buildExcelDocument(Constants.EXPORT_WIKIPEDIA_FOLDER, disease);
-                else excel.buildExcelDocument(Constants.EXPORT_PUBMED_FOLDER, disease);
+            for (Paper paper: papers) {
+                System.out.println("Text ("+count+") " + paper.getPaperId() + " - " + paper.getTitle());
+                excel.buildTextExcelDocument(Constants.EXPORT_PUBMED_FOLDER, paper);
                 count++;
             }
+        }else{
+            System.out.println("Error");
         }
 
         return "Succes export";

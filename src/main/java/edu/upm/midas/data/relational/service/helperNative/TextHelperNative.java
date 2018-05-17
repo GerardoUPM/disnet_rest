@@ -8,6 +8,7 @@ import edu.upm.midas.common.util.UniqueId;
 import edu.upm.midas.model.Disease;
 import edu.upm.midas.model.DisnetConcept;
 import edu.upm.midas.model.Paper;
+import edu.upm.midas.model.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,16 @@ public class TextHelperNative {
                 List<DisnetConcept> disnetConcepts = textService.findTermsBySourceAndVersionAndDocumentAndTextIdNative(sourceName, version, paper.getText().getTextId());
                 paper.getText().setDisnetConceptsCount(disnetConcepts.size());
                 paper.getText().setDisnetConceptList(disnetConcepts);
+
+                for (DisnetConcept disnetConcept : disnetConcepts) {
+                    List<Text> texts = textService.findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative(sourceName, version, paper.getText().getDocument().getDocumentId(), paper.getText().getTextId(), disnetConcept.getCui());
+                    if (texts != null) {
+                        disnetConcept.setTexts(texts);
+                        disnetConcept.setTextsCount(texts.size());
+                    }
+                }
+
+                paperList.add(paper);
             }
         }
 

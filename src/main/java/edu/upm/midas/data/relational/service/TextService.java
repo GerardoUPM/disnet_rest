@@ -33,6 +33,8 @@ public interface TextService {
 
     Paper findPaperByIdNative(String paperId);
 
+    List<edu.upm.midas.model.Text> findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative(String sourceName, Date version, String documentId, String textId, String cui);
+
     List<Text> findAll();
 
     List<Object[]> findBySourceAndVersionNative(Date version, String source);

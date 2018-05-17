@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -72,9 +73,14 @@ public class TextServiceImpl implements TextService {
                 edu.upm.midas.model.Text text = new edu.upm.midas.model.Text();
                 text.setTextId((String) paperObject[0]);
                 text.setSection((String) paperObject[1]);
-                text.setTextOrder((int) paperObject[2]);
                 text.setText((String) paperObject[3]);
-                text.setDisnetConceptsCount((int) paperObject[6]);
+                text.setTextOrder((Integer) paperObject[2]);
+                try {
+                    text.setDisnetConceptsCount((Integer) paperObject[6]);
+                } catch (Exception e){
+                    BigInteger count = (BigInteger) paperObject[6];
+                    text.setDisnetConceptsCount(count.intValue());
+                }
                 text.setDocument(document);
                 paper.setText(text);
                 paperList.add(paper);
@@ -99,6 +105,37 @@ public class TextServiceImpl implements TextService {
     public Paper findPaperByIdNative(String paperId) {
         Object[] paper = daoText.findPaperByIdNative(paperId);
         return createPaper(paper);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<edu.upm.midas.model.Text> findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative(String sourceName, Date version, String documentId, String textId, String cui) {
+        List<Object[]> texts = daoText.findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative(sourceName, version, documentId, textId, cui);
+        return createTextList(texts, true);
+    }
+
+    public List<edu.upm.midas.model.Text> createTextList(List<Object[]> texts, boolean positionalInfo){
+        List<edu.upm.midas.model.Text> textList = null;
+        if (texts != null) {
+            textList = new ArrayList<>();
+            for (Object[] txt : texts) {
+                edu.upm.midas.model.Text text = new edu.upm.midas.model.Text();
+                text.setSection((String) txt[0]);
+                text.setTextId((String) txt[2]);
+                text.setText((String) txt[3]);
+                try {
+                    text.setTextOrder((Integer) txt[1]);
+                } catch (Exception e){
+                    BigInteger count = (BigInteger) txt[1];
+                    text.setTextOrder(count.intValue());
+                }
+                if (positionalInfo){
+                    text.setMatchedWords((String) txt[4]);
+                    text.setPositionalInfo((String) txt[5]);
+                }
+                textList.add(text);
+            }
+        }
+        return textList;
     }
 
     public Paper createPaper(Object[] paperObject){
@@ -139,6 +176,7 @@ public class TextServiceImpl implements TextService {
                 Disease disease = new Disease();
                 disease.setDiseaseId((String) dis[0]);
                 disease.setName((String) dis[1]);
+                disease.setDisnetConceptsCount((Integer) dis[2]);
                 diseaseList.add(disease);
             }
         }

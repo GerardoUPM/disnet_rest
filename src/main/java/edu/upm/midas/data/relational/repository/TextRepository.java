@@ -36,6 +36,8 @@ public interface TextRepository {
 
     List<Object[]> findDiseaseBySourceAndVersionAndDocumentIdNative(String sourceName, Date version, String documentId);
 
+    List<Object[]> findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative(String sourceName, Date version, String documentId, String textId, String cui);
+
     Object[] findPaperByIdNative(String paperId);
 
     List<Text> findAllQuery();

@@ -146,6 +146,24 @@ public class TextRepositoryImpl extends AbstractDao<String, Text>
 
     @SuppressWarnings("unchecked")
     @Override
+    public List<Object[]> findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative(String sourceName, Date version, String documentId, String textId, String cui) {
+        List<Object[]> texts = null;
+        List<Object[]> textList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Text.findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("documentId", documentId)
+                .setParameter("textId", textId)
+                .setParameter("cui", cui)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(textList))
+            texts = textList;
+        return texts;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public Object[] findPaperByIdNative(String paperId) {
         Object[] paper = null;
         List<Object[]> paperList = (List<Object[]>) getEntityManager()

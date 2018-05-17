@@ -118,7 +118,7 @@ import java.util.Objects;
         // (3) INFORMACIÓN DE UNA ENFERMEDAD SEGUN UN TEXTO, FUENTE Y VERSIÓN Y DOCUMENTO
         @NamedNativeQuery(
                 name = "Text.findDiseaseBySourceAndVersionAndDocumentIdNative",
-                query = "SELECT d.disease_id, d.name " +
+                query = "SELECT d.disease_id, d.name, getDisnetConceptsCount(sce.name, doc.date, d.disease_id) 'disnetConceptCount' " +
                         "FROM document doc " +
                         "INNER JOIN has_disease hd ON hd.document_id = doc.document_id AND hd.date = doc.date " +
                         "INNER JOIN disease d ON d.disease_id = hd.disease_id " +
@@ -128,8 +128,7 @@ import java.util.Objects;
                         "WHERE doc.document_id = :documentId " +
                         "AND sce.name = :source " +
                         "AND doc.date = :version "
-        )
-        ,
+        ),
         // (4) INFORMACIÓN DE UNA PAPER SEGÚN EL PAPER ID
         @NamedNativeQuery(
                 name = "Text.findPaperByIdNative",
@@ -138,7 +137,29 @@ import java.util.Objects;
                         "INNER JOIN paper_url pu ON pu.paper_id = p.paper_id " +
                         "INNER JOIN url u ON u.url_id = pu.url_id " +
                         "WHERE p.paper_id = :paperId "
+        ),
+        // (5) OBTIENE LOS TEXTOS DE DONDE FUE OBTENIDO EL TERMINO
+        @NamedNativeQuery(
+                name = "Text.findTextsBySourceAndVersionAndDocumentAndTextIdAndCuiNative",
+                query = "SELECT sec.description, ht.text_order, t.text_id, t.text, hsym.matched_words, hsym.positional_info " +
+                        "FROM symptom sym " +
+                        "INNER JOIN has_symptom hsym ON hsym.cui = sym.cui " +
+                        "INNER JOIN text t ON t.text_id = hsym.text_id " +
+                        "INNER JOIN has_text ht ON ht.text_id = t.text_id " +
+                        "INNER JOIN has_section hsec ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN section sec ON sec.section_id = hsec.section_id " +
+                        "-- source\n" +
+                        "INNER JOIN document doc ON doc.document_id = hsec.document_id AND doc.date = hsec.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "WHERE sce.name = :source " +
+                        "AND ht.date = :version " +
+                        "AND ht.document_id = :documentId " +
+                        "AND t.text_id = :textId " +
+                        "AND sym.cui = :cui " +
+                        "ORDER BY sec.description, ht.text_order ASC "
         )
+
 
 
 
