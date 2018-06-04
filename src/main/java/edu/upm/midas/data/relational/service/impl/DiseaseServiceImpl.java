@@ -383,10 +383,22 @@ public class DiseaseServiceImpl implements DiseaseService {
         return daoDisease.findDocumentIdBySourceAndVersionAndDiseaseIdNative(sourceName, version, diseaseId);
     }
 
-    @Override
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public DetectionInformation findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedToDisnetConceptNative(String sourceName, Date version, String documentId, String diseaseId, String cui, boolean isValidated) {
         List<Object[]> detectionInformationList =daoDisease.findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedNative(sourceName,version, documentId, diseaseId, cui, isValidated);
         return createDetectionInformation(detectionInformationList);
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public List<String> findPaperUrlsBySourceAndVersionAndDiseaseIdNative(String sourceName, Date version, String diseaseId) {
+        List<String> urls = new ArrayList<>();
+        List<Object[]> paperUrls = daoDisease.findPaperUrlsBySourceAndVersionAndDiseaseIdNative(sourceName, version, diseaseId);
+        if (paperUrls!=null){
+            for (Object[] paperUrl: paperUrls) {
+                urls.add((String) paperUrl[1]);
+            }
+        }
+        return urls;
     }
 
 

@@ -86,6 +86,8 @@ public interface DiseaseService {
 
     DetectionInformation findDetectionInformationBySourceAndVersionAndDocumentIdAndDiseaseIdAndCuiAndValidatedToDisnetConceptNative(String sourceName, Date version, String documentId, String diseaseId, String cui, boolean isValidated);
 
+    List<String> findPaperUrlsBySourceAndVersionAndDiseaseIdNative(String sourceName, Date version, String diseaseId);
+
 
     List<Disease> findAll();
 

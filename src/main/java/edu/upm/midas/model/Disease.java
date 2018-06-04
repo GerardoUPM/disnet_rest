@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by gerardo on 22/11/2017.
@@ -15,13 +16,18 @@ import java.util.List;
  */
 public class Disease {
 
-    @JsonIgnore
+    //@JsonIgnore
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String diseaseId;
     private String name;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String cui;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String url;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Integer urlsCount;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<String> urls;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Integer codesCount;
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -49,7 +55,7 @@ public class Disease {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = name.trim();
     }
 
     public String getCui() {
@@ -58,6 +64,25 @@ public class Disease {
 
     public void setCui(String cui) {
         this.cui = cui;
+    }
+
+    public Integer getUrlsCount() {
+        if (urls != null){
+            urlsCount = urls.size();
+        }
+        return urlsCount;
+    }
+
+    public void setUrlsCount(Integer urlsCount) {
+        this.urlsCount = urlsCount;
+    }
+
+    public List<String> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(List<String> urls) {
+        this.urls = urls;
     }
 
     public String getUrl() {
@@ -128,6 +153,19 @@ public class Disease {
         this.documentList = documentList;
     }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Disease)) return false;
+        Disease disease = (Disease) o;
+        return Objects.equals(getName().toLowerCase(), disease.getName().toLowerCase());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
+    }
 
     @Override
     public String toString() {

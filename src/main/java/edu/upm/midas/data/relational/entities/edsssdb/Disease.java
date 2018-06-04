@@ -543,7 +543,26 @@ import java.util.Objects;
                         "AND d.disease_id = :diseaseId " +
                         "AND hsym.cui = :cui " +
                         "AND hsym.validated = :validated "
+        ),
+        //Busca las urls de todos los papers pertenecientes a una enfermedad, de una fuente, de una version
+        @NamedNativeQuery(
+                name = "Disease.findPaperUrlsBySourceAndVersionAndDiseaseIdNative",
+                query = "SELECT docset.paper_id, u.url " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "-- source\n" +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source s ON s.source_id = hs.source_id " +
+                        "-- papers\n" +
+                        "INNER JOIN document_set docset ON docset.document_id = doc.document_id AND docset.date = doc.date " +
+                        "INNER JOIN paper_url pu ON pu.paper_id = docset.paper_id " +
+                        "INNER JOIN url u ON u.url_id = pu.url_id " +
+                        "WHERE s.name COLLATE utf8_bin = :source " +
+                        "AND doc.date = :version " +
+                        "AND d.disease_id = :diseaseId "
         )
+
 
 
 

@@ -659,6 +659,22 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
         return detectionInformation;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object[]> findPaperUrlsBySourceAndVersionAndDiseaseIdNative(String sourceName, Date version, String diseaseId) {
+        List<Object[]> paperUrls = null;
+        List<Object[]> paperUrlList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findPaperUrlsBySourceAndVersionAndDiseaseIdNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setParameter("diseaseId", diseaseId)
+                //.setMaxResults(100)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(paperUrlList))
+            paperUrls = paperUrlList;
+        return paperUrls;
+    }
+
 
     public void persist(Disease disease) {
         super.persist(disease);

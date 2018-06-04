@@ -336,6 +336,7 @@ public class QueryController {
                                               @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                               @RequestParam(value = "matchExactName", required = false, defaultValue = "false") boolean matchExactName,
                                               @RequestParam(value = "detectionInformation", required = false, defaultValue = "false") boolean detectionInformation,
+                                              @RequestParam(value = "includeCode", required = false, defaultValue = "false") boolean includeCode,
                                               HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
@@ -360,7 +361,7 @@ public class QueryController {
                 TypeSearchValidation validation = diseaseHelper.validateDiseaseSearchingParameters(errorsFound, parameters, source, dataVersion, diseaseName, diseaseCode, typeCode, excludeSemanticTypes, forceSemanticTypes, matchExactName);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    diseases = diseaseHelper.getDiseasesAndTheirDisnetConcepts_2(errorsFound, source, dataVersion, diseaseName, diseaseCode, typeCode, validated, validation, matchExactName, detectionInformation);
+                    diseases = diseaseHelper.getDiseasesAndTheirDisnetConcepts_2(errorsFound, source, dataVersion, diseaseName, diseaseCode, typeCode, validated, validation, matchExactName, detectionInformation, includeCode);
                     String end = timeProvider.getTimestampFormat();
                     if (diseases.size() > 0) {
                         response.setDiseaseCount(diseases.size());
@@ -492,6 +493,7 @@ public class QueryController {
                                         @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                         @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                         @RequestParam(value = "detectionInformation", required = false, defaultValue = "false") boolean detectionInformation,
+                                        @RequestParam(value = "includeCode", required = false, defaultValue = "false") boolean includeCode,
                                         HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
@@ -516,7 +518,7 @@ public class QueryController {
                 TypeSearchValidation validation = diseaseHelper.sourceAndVersionAndSemanticTypesValidation(errorsFound, parameters, source, dataVersion, excludeSemanticTypes, forceSemanticTypes);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    diseases = diseaseHelper.getDiseasesWithMoreOrFewerDisnetConcepts(errorsFound, source, dataVersion, validated, limit, true, validation, detectionInformation);
+                    diseases = diseaseHelper.getDiseasesWithMoreOrFewerDisnetConcepts(errorsFound, source, dataVersion, validated, limit, true, validation, detectionInformation, includeCode);
                     String end = timeProvider.getTimestampFormat();
                     if (diseases.size() > 0) {
                         response.setDiseaseCount(diseases.size());
@@ -578,6 +580,7 @@ public class QueryController {
                                                            @RequestParam(value = "forceSemanticTypes", required = false, defaultValue = "") String forceSemanticTypes,
                                                            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                                                            @RequestParam(value = "detectionInformation", required = false, defaultValue = "false") boolean detectionInformation,
+                                                           @RequestParam(value = "includeCode", required = false, defaultValue = "false") boolean includeCode,
                                                            HttpServletRequest httpRequest, Device device) throws Exception {
         //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
         DiseaseListResponse response = new DiseaseListResponse();
@@ -602,7 +605,7 @@ public class QueryController {
                 TypeSearchValidation validation = diseaseHelper.sourceAndVersionAndSemanticTypesValidation(errorsFound, parameters, source, dataVersion, excludeSemanticTypes, forceSemanticTypes);
                 if (!validation.isErrors()) {
                     String start = timeProvider.getTimestampFormat();
-                    diseases = diseaseHelper.getDiseasesWithMoreOrFewerDisnetConcepts(errorsFound, source, dataVersion, validated, limit, false, validation, detectionInformation);
+                    diseases = diseaseHelper.getDiseasesWithMoreOrFewerDisnetConcepts(errorsFound, source, dataVersion, validated, limit, false, validation, detectionInformation, includeCode);
                     String end = timeProvider.getTimestampFormat();
                     if (diseases.size() > 0) {
                         response.setDiseaseCount(diseases.size());

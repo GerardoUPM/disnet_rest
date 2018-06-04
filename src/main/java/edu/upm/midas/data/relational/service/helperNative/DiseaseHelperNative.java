@@ -136,7 +136,8 @@ public class DiseaseHelperNative {
                                                              boolean isValidated,
                                                              TypeSearchValidation validation,
                                                              boolean matchExactName,
-                                                             boolean detectionInformation) {
+                                                             boolean detectionInformation,
+                                                             boolean includeCode) {
         List<Disease> diseaseList = new ArrayList<>();
         try {
             //Primero se busca la lista de las enfermedades que coincidan con los parametros
@@ -154,7 +155,16 @@ public class DiseaseHelperNative {
             }
             //Con la lista de las enfermedades cargada, se buscan sus conceptos, si los tiene
             if (diseases != null) {
+                diseases = removeRepetedDiseases(diseases);
                 diseaseList = getDisnetConcepts(apiResponseErrors, validation, sourceName, version, isValidated, detectionInformation, diseases);
+                //Se buscan los códigos de las enfermedades si includeCode es true
+                if (includeCode){
+                    diseaseList = findCodes(apiResponseErrors, sourceName, version, diseases);
+                }
+                //Si es pubmed obtendrá las url de los artículos (papers)
+                if (sourceName.equals(Constants.PUBMED_SOURCE)){
+                    diseaseList = findPaperUrls(apiResponseErrors, sourceName, version, diseases);
+                }
             }
         }catch (Exception e){
             //Se agrega el error en la lista principal de la respuesta
@@ -180,7 +190,13 @@ public class DiseaseHelperNative {
             else diseases = diseaseService.findBySourceAndVersionAndMatchExactNameFalseNative(sourceName, version, diseaseName);
             //Con la lista de las enfermedades cargada, se buscan sus códigos, si los tiene
             if (diseases != null) {
+                diseases = removeRepetedDiseases(diseases);
                 diseaseList = findCodes(apiResponseErrors, sourceName, version, diseases);
+
+                //Si es pubmed obtendrá las url de los artículos (papers)
+                if (sourceName.equals(Constants.PUBMED_SOURCE)){
+                    diseaseList = findPaperUrls(apiResponseErrors, sourceName, version, diseases);
+                }
             }
         }catch (Exception e){
             //Se agrega el error en la lista principal de la respuesta
@@ -200,7 +216,13 @@ public class DiseaseHelperNative {
         try {
             List<Disease> diseases = diseaseService.findAllBySourceAndVersion(sourceName, version);
             if (diseases != null) {
+                //eliminar las enfermedades repetidas por nombre (depurar después las que tienen mismo nombre y diferente id)
+                diseases = removeRepetedDiseases(diseases);
                 diseaseList = findCodes(apiResponseErrors, sourceName, version, diseases);
+                //Si es pubmed obtendrá las url de los artículos (papers)
+                if (sourceName.equals(Constants.PUBMED_SOURCE)){
+                    diseaseList = findPaperUrls(apiResponseErrors, sourceName, version, diseases);
+                }
             }
         }catch (Exception e){
             //Se agrega el error en la lista principal de la respuesta
@@ -217,13 +239,30 @@ public class DiseaseHelperNative {
     }
 
 
-    public List<Disease> getDiseasesWithMoreOrFewerDisnetConcepts(List<ApiResponseError> apiResponseErrors, String sourceName, Date version, boolean isValidated, int limit, boolean moreDisnetConcepts, TypeSearchValidation validation, boolean detectionInformation){
+    public List<Disease> getDiseasesWithMoreOrFewerDisnetConcepts(List<ApiResponseError> apiResponseErrors,
+                                                                  String sourceName,
+                                                                  Date version,
+                                                                  boolean isValidated,
+                                                                  int limit,
+                                                                  boolean moreDisnetConcepts,
+                                                                  TypeSearchValidation validation,
+                                                                  boolean detectionInformation,
+                                                                  boolean includeCode){
         List<Disease> diseaseList = new ArrayList<>();
         try {
             List<Disease> diseases = diseaseService.withMoreOrFewerSymptomsBySourceAndVersionAndIsValidated(sourceName, version, isValidated, limit, moreDisnetConcepts);
             //Con la lista de las enfermedades cargada, se buscan sus códigos, si los tiene
             if (diseases != null) {
+                diseases = removeRepetedDiseases(diseases);
                 diseaseList = getDisnetConcepts(apiResponseErrors, validation, sourceName, version, isValidated, detectionInformation, diseases);
+                //Se buscan los códigos de las enfermedades si includeCode es true
+                if (includeCode){
+                    diseaseList = findCodes(apiResponseErrors, sourceName, version, diseases);
+                }
+                //Si es pubmed obtendrá las url de los artículos (papers)
+                if (sourceName.equals(Constants.PUBMED_SOURCE)){
+                    diseaseList = findPaperUrls(apiResponseErrors, sourceName, version, diseases);
+                }
             }
         }catch (Exception e){
             //Se agrega el error en la lista principal de la respuesta
@@ -288,6 +327,29 @@ public class DiseaseHelperNative {
                 if (codes != null)
                     disease.setCodes(codes);
                 else disease.setCodes(new ArrayList<>());
+            }
+        }catch (Exception e){
+            //Se agrega el error en la lista principal de la respuesta
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    null);
+        }
+        return diseases;
+    }
+
+
+    public List<Disease> findPaperUrls(List<ApiResponseError> apiResponseErrors, String sourceName, Date version, List<Disease> diseases){
+        try {
+            for (Disease disease : diseases) {
+                List<String> urls = diseaseService.findPaperUrlsBySourceAndVersionAndDiseaseIdNative(sourceName, version, disease.getDiseaseId());
+                if (urls != null) {
+                    disease.setUrl(null);
+                    disease.setUrls(urls);
+                } else disease.setUrls(new ArrayList<>());
             }
         }catch (Exception e){
             //Se agrega el error en la lista principal de la respuesta
@@ -979,6 +1041,17 @@ public class DiseaseHelperNative {
         linkedHashSet.addAll(elements);
         elements.clear();
         elements.addAll(linkedHashSet);
+        return resList;
+    }
+
+
+    public List<Disease> removeRepetedDiseases(List<Disease> elements){
+        List<Disease> resList = elements;
+        Set<Disease> linkedHashSet = new LinkedHashSet<>();
+        linkedHashSet.addAll(elements);
+        elements.clear();
+        elements.addAll(linkedHashSet);
+
         return resList;
     }
 
