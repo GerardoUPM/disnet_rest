@@ -41,9 +41,9 @@ public class ValidatorController {
     public String validator(@RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source) throws IOException, InvalidFormatException {
 
         if (source.equals(Constants.WIKIPEDIA_SOURCE))
-            validator.validator(Constants.WIKIPEDIA_VALIDATION_FOLDER);
+            validator.validator(Constants.WIKIPEDIA_VALIDATION_FOLDER, 1);
         else if (source.equals(Constants.PUBMED_SOURCE))
-            validator.validator(Constants.PUBMED_VALIDATION_FOLDER);
+            validator.validator(Constants.PUBMED_VALIDATION_FOLDER, 0);
         else
             System.out.println("Invalid option (source)");
 

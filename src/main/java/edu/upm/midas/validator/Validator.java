@@ -16,6 +16,7 @@ import java.util.Iterator;
 public class Validator {
 
     public static final int VALIDATION_SHEET = 1;
+    public static final int VALIDATION_SHEET_0 = 0;
     public static final int TVP_COL_NUM = 7;
     public static final int RELEVANT_COL_NUM = 8;
     public static final String TVP_COL_NAME = "TVP";
@@ -31,7 +32,7 @@ public class Validator {
     private static double globalFalseNegativeTvpCount;
     private static double globalTotal;
 
-    public void validator(String validationFolder) throws IOException, InvalidFormatException {
+    public void validator(String validationFolder, int validationSheet) throws IOException, InvalidFormatException {
 
 
         File dir = new File(validationFolder);
@@ -41,7 +42,7 @@ public class Validator {
         if (directoryListing != null) {
             for (File file : directoryListing) {
                 try {
-                    readExcel(file);
+                    readExcel(file, validationSheet);
                 }
                 catch(NotOLE2FileException exception){
                     System.out.println("File " + file.getAbsolutePath() + " is not OLE");
@@ -58,36 +59,54 @@ public class Validator {
         
         double globalPrecision =
                 globalTruePositiveCount / (globalTruePositiveCount + (globalFalsePositiveRealCount + globalFalsePositiveContextCount) );
+
+        double globalPrecision_FPREAL = globalTruePositiveCount / ( globalTruePositiveCount + globalFalsePositiveRealCount);
+        double globalPrecision_FPCONTEXT = globalTruePositiveCount / ( globalTruePositiveCount + globalFalsePositiveContextCount);
+
+        double globalRecallMetamap = globalTruePositiveCount / (globalTruePositiveCount + globalFalseNegativeMetamapCount);
+        double globalRecallTvp = globalTruePositiveCount / (globalTruePositiveCount + globalFalseNegativeTvpCount);
+        double globalRecall = globalTruePositiveCount / (globalTruePositiveCount + (globalFalseNegativeMetamapCount + globalFalseNegativeTvpCount));
+
+        double f1Score = 2 * ( (globalPrecision * globalRecall) / (globalPrecision + globalRecall) );
+
         System.out.println("GLOBAL PRECISION: " + globalPrecision);
-        System.out.println("GLOBAL RESULT: "
-                + " TP: " + globalTruePositiveCount + ";"
-                + " FP_REAL: " + globalFalsePositiveRealCount + ";"
-                + " FP_CONTEXT: " + globalFalsePositiveContextCount + ";"
-                + " FP: " + globalFalsePositiveCount + ";"
-                + " TN: " + globalTrueNegativeCount + ";"
-                + " FN_TVP: " + globalFalseNegativeTvpCount + ";"
-                + " FN_METAMAP: " + globalFalseNegativeMetamapCount + ";"
-                + " FN: " + globalFalseNegativeCount + ";"
-                + " PRECISION: " + globalPrecision + ";"
+        System.out.println("GLOBAL RESULT: \n"
+                + " TP: " + globalTruePositiveCount + ";\n"
+                + " FP_REAL: " + globalFalsePositiveRealCount + ";\n"
+                + " FP_CONTEXT: " + globalFalsePositiveContextCount + ";\n"
+                + " FP: " + globalFalsePositiveCount + ";\n"
+                + " TN: " + globalTrueNegativeCount + ";\n"
+                + " FN_TVP: " + globalFalseNegativeTvpCount + ";\n"
+                + " FN_METAMAP: " + globalFalseNegativeMetamapCount + ";\n"
+                + " FN: " + globalFalseNegativeCount + ";\n"
+                + " TOTAL: " + globalTotal + ";\n"
+                + " PRECISION: " + globalPrecision + ";\n"
+                + " ADDITIONAL MEASURES: \n"
+                + " PRECISION_FPREAL: " + globalPrecision_FPREAL + ";\n"
+                + " PRECISION_REPCONTEXT: " + globalPrecision_FPCONTEXT + ";\n"
+                + " RECALL_METAMAP: " + globalRecallMetamap + ";\n"
+                + " RECALL_TVP: " + globalRecallTvp + ";\n"
+                + " RECALL: " + globalRecall + ";\n"
+                + " F1_SCORE: " + f1Score + ";\n"
         );
     }
 
-    private void readExcel(File file) throws InvalidFormatException, IOException {
+    private void readExcel(File file, int validationSheet) throws InvalidFormatException, IOException {
 
 
         System.out.println("Disease: " + file.getName());
         // Creating a Workbook from an Excel file (.xls or .xlsx)
         Workbook workbook = WorkbookFactory.create(file);
 
-        if (workbook.getNumberOfSheets() <= VALIDATION_SHEET) {
+        if (workbook.getNumberOfSheets() <= validationSheet) {/*if (workbook.getNumberOfSheets() <= VALIDATION_SHEET) {*/
             System.out.println("File " + file.getAbsolutePath() + " has wrong number of sheets");
         }
 
         // Getting the Sheet at index 1
-        Sheet sheet = workbook.getSheetAt(VALIDATION_SHEET);
+        Sheet sheet = workbook.getSheetAt(validationSheet);/*Sheet sheet = workbook.getSheetAt(VALIDATION_SHEET);*/
 
         // 1. You can obtain a rowIterator and columnIterator and iterate over them
-        System.out.println("Processing file " + file.getAbsolutePath());
+        //System.out.println("Processing file " + file.getAbsolutePath());
 
         Iterator<Row> rowIterator = sheet.rowIterator();
 
@@ -189,6 +208,7 @@ public class Validator {
             System.out.println("ERROR: " + falsePositiveErrorCount);
         }
 
+
         if (expectedTotal != total) {
             System.out.println(truePositiveCount + " + " + trueNegativeCount + " + " +
                     falsePositiveCount + " + " + falsePositiveContextCount + " + " +
@@ -197,6 +217,58 @@ public class Validator {
 
             return false;
         }
+
+        //TP=15.0; TN=9.0; FP=0.0; FPCONTEXT=7.0; FPREAL=2.0; FNTVP=2.0; FNMETAMAP=6.0; TOTAL=41.0; PRECISION=0.625; NPV=0.5294117647058824; RECALL=0.6521739130434783; SPEC=0.5
+
+
+        double precision =
+                truePositiveCount / (truePositiveCount + (falsePositiveRealCount + falsePositiveContextCount) );
+
+        double precision_FPREAL = truePositiveCount / ( truePositiveCount + falsePositiveRealCount);
+        double precision_FPCONTEXT = truePositiveCount / ( truePositiveCount + falsePositiveContextCount);
+
+        double recallMetamap = truePositiveCount / (truePositiveCount + falseNegativeMetamapCount);
+        double recallTvp = truePositiveCount / (truePositiveCount + falseNegativeTvpCount);
+        double recall = truePositiveCount / (truePositiveCount + (falseNegativeMetamapCount + falseNegativeTvpCount));
+
+        double f1Score = 2 * ( (precision * recall) / (precision + recall) );
+
+        System.out.println(
+//                " TP="
+                ";"
+                        + truePositiveCount + ";"
+//                + " TN="
+                        + trueNegativeCount + ";"
+//                + " FP="
+                        + (falsePositiveContextCount + falsePositiveRealCount) + ";"
+//                + " FPCONTEXT="
+                        + falsePositiveContextCount + ";"
+//                + " FPREAL="
+                        + falsePositiveRealCount + ";"
+//                + " FN="
+                        + (falseNegativeMetamapCount + falseNegativeTvpCount) + ";"
+//                + " FNTVP="
+                        + falseNegativeTvpCount + ";"
+//                + " FNMETAMAP="
+                        + falseNegativeMetamapCount + ";"
+//                + " TOTAL="
+                        + total + ";"
+//                + " PRECISION: "
+                        + precision + ";"
+//                + " ADDITIONAL MEASURES: "
+//                + " PRECISION_FPREAL: "
+                        + precision_FPREAL + ";"
+//                + " PRECISION_REPCONTEXT: "
+                        + precision_FPCONTEXT + ";"
+//                + " RECALL_METAMAP: "
+                        + recallMetamap + ";"
+//                + " RECALL_TVP: "
+                        + recallTvp + ";"
+//                + " RECALL: "
+                        + recall + ";"
+//                + " F1_SCORE: "
+                        + f1Score + ";"
+        );
 
         return true;
     }

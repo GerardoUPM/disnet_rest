@@ -37,8 +37,8 @@ public class Constants {
     public static final String EXPORT_FOLDER = "tmp/excel/";
     public static final String EXPORT_WIKIPEDIA_FOLDER = "tmp/excel/wikipedia/";
     public static final String EXPORT_PUBMED_FOLDER = "tmp/excel/pubmed/";
-    public static final String WIKIPEDIA_VALIDATION_FOLDER = "tmp/excel/wikipedia/1.Validated/OK_DISNET_VALIDATION_(100)_v0.6/";
-    public static final String PUBMED_VALIDATION_FOLDER = "tmp/excel/pubmed/1.Validated/";
+    public static final String WIKIPEDIA_VALIDATION_FOLDER = "tmp/excel/wikipedia/1.Validated/OK_DISNET_VALIDATION_(100)_v0.8/";
+    public static final String PUBMED_VALIDATION_FOLDER = "tmp/excel/pubmed/1.Validated/OK_DISNET_VALIDATION_PUBMED_(100)_v0.2/";
 
     public final static String TOKEN = "token";
     public final static String SOURCE = "source";
