@@ -108,7 +108,7 @@ import java.util.Objects;
                         "INNER JOIN source s ON s.source_id = c.source_id " +
                         "WHERE s.name COLLATE utf8_bin = :source " +
                         "AND c.version = :version " +
-                        "ORDER BY c.conf_id "
+                        "ORDER BY c.tool DESC "
         )
 })
 

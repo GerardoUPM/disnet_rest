@@ -13,25 +13,35 @@ import com.google.gson.annotations.SerializedName;
  */
 public class TvpConfiguration {
 
-    @JsonProperty("numDisnetConceptsFound")
-    private int numSymptomsFound;
-    @JsonProperty("numDisnetConceptsFoundValidated")
-    private int numSymptomsFoundValidated;
+    @JsonProperty("numDisnetConcepts")
+    private int termsFound;
+    @JsonProperty("numNonRepeatedDisnetConcepts")
+    private int nonRepetedTerms;
+    @JsonProperty("numValidatedNonRepeatedDisnetConcepts")
+    private int validatedNonRepetedTerms;
 
 
-    public int getNumSymptomsFound() {
-        return numSymptomsFound;
+    public int getTermsFound() {
+        return termsFound;
     }
 
-    public void setNumSymptomsFound(int numSymptomsFound) {
-        this.numSymptomsFound = numSymptomsFound;
+    public void setTermsFound(int termsFound) {
+        this.termsFound = termsFound;
     }
 
-    public int getNumSymptomsFoundValidated() {
-        return numSymptomsFoundValidated;
+    public int getNonRepetedTerms() {
+        return nonRepetedTerms;
     }
 
-    public void setNumSymptomsFoundValidated(int numSymptomsFoundValidated) {
-        this.numSymptomsFoundValidated = numSymptomsFoundValidated;
+    public void setNonRepetedTerms(int nonRepetedTerms) {
+        this.nonRepetedTerms = nonRepetedTerms;
+    }
+
+    public int getValidatedNonRepetedTerms() {
+        return validatedNonRepetedTerms;
+    }
+
+    public void setValidatedNonRepetedTerms(int validatedNonRepetedTerms) {
+        this.validatedNonRepetedTerms = validatedNonRepetedTerms;
     }
 }
