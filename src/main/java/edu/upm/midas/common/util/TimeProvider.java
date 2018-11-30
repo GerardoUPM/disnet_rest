@@ -69,4 +69,13 @@ public class TimeProvider {
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
+    public String getNowFormatyyyyMMdd(){
+        //return new Date(117, 05, 29);
+        return new SimpleDateFormat("yyyy-MM-dd").format(new Date(new java.util.Date().getTime()));
+    }
+
+    public java.util.Date stringToDate(String date) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+    }
+
 }

@@ -2,9 +2,9 @@ package edu.upm.midas.controller;
 
 import edu.upm.midas.common.util.TimeProvider;
 import edu.upm.midas.constants.Constants;
-import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
-import edu.upm.midas.data.relational.service.helperNative.TextHelperNative;
-import edu.upm.midas.export.excel.Excel;
+import edu.upm.midas.service.jpa.helperNative.DiseaseHelperNative;
+import edu.upm.midas.service.jpa.helperNative.TextHelperNative;
+import edu.upm.midas.service.export.excel.Excel;
 import edu.upm.midas.model.Disease;
 import edu.upm.midas.model.Paper;
 import org.hibernate.validator.constraints.NotBlank;

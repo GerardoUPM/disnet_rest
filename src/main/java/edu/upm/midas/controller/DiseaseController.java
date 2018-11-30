@@ -1,15 +1,11 @@
 package edu.upm.midas.controller;
 
-import edu.upm.midas.authorization.token.service.TokenAuthorization;
+import edu.upm.midas.client_modules.authorization.token.service.TokenAuthorization;
 import edu.upm.midas.constants.Constants;
-import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
-import edu.upm.midas.model.response.particular.DisnetConceptsResponse;
+import edu.upm.midas.service.jpa.helperNative.DiseaseHelperNative;
 import edu.upm.midas.common.util.TimeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mobile.device.Device;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by gerardo on 28/08/2017.

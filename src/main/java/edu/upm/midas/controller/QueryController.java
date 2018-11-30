@@ -1,12 +1,12 @@
 package edu.upm.midas.controller;
 
-import edu.upm.midas.authorization.token.component.JwtTokenUtil;
-import edu.upm.midas.authorization.token.service.TokenAuthorization;
+import edu.upm.midas.client_modules.authorization.token.component.JwtTokenUtil;
+import edu.upm.midas.client_modules.authorization.token.service.TokenAuthorization;
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.TimeProvider;
 import edu.upm.midas.constants.Constants;
-import edu.upm.midas.data.relational.service.helperNative.DiseaseHelperNative;
-import edu.upm.midas.data.relational.service.helperNative.SourceHelperNative;
+import edu.upm.midas.service.jpa.helperNative.DiseaseHelperNative;
+import edu.upm.midas.service.jpa.helperNative.SourceHelperNative;
 import edu.upm.midas.enums.ApiErrorEnum;
 import edu.upm.midas.model.Disease;
 import edu.upm.midas.model.DisnetConcept;
@@ -64,22 +64,6 @@ public class QueryController {
     private Constants constants;
 
 
-    /**
-     * @param token
-     * @param start
-     * @param end
-     * @throws Exception
-     */
-    public void saveQueryRuntime(String token, String start, String end) throws Exception {
-        try {
-            //Aunque exista problema al insertar el runtime no hay problema con la ejecución de la consulta
-            String queryId = jwtTokenUtil.getQueryIdJWTDecode(token);
-            if (!common.isEmpty(queryId)) {
-                HttpStatus response = tokenAuthorization.updateQueryRuntime(queryId, start, end);
-                System.out.println(response);
-            }
-        }catch (Exception e){}
-    }
 
 
     /**
@@ -122,11 +106,11 @@ public class QueryController {
                     response.setSourceCount(sources.size());
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 }else{
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     errorService.insertApiErrorEnumGenericError(
                             errorsFound,
                             ApiErrorEnum.RESOURCES_NOT_FOUND,
@@ -193,11 +177,11 @@ public class QueryController {
                     response.setVersionsCount(versions.size());
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                 } else {
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     errorService.insertApiErrorEnumGenericError(
                             errorsFound,
                             ApiErrorEnum.RESOURCES_NOT_FOUND,
@@ -270,11 +254,11 @@ public class QueryController {
                         response.setDiseaseCount(diseaseList.size());
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                         errorService.insertApiErrorEnumGenericError(
                                 errorsFound,
                                 ApiErrorEnum.RESOURCE_NOT_FOUND,
@@ -368,11 +352,11 @@ public class QueryController {
                         response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                         errorService.insertApiErrorEnumGenericErrorWithParameters(
                                 errorsFound,
                                 ApiErrorEnum.RESOURCES_NOT_FOUND,
@@ -445,11 +429,11 @@ public class QueryController {
                         response.setCount(numberOfDiseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.NOT_FOUND.toString());
                         response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
                     response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
@@ -525,11 +509,11 @@ public class QueryController {
                         response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                         errorService.insertApiErrorEnumGenericErrorWithParameters(
                                 errorsFound,
                                 ApiErrorEnum.RESOURCES_NOT_FOUND,
@@ -612,11 +596,11 @@ public class QueryController {
                         response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                         errorService.insertApiErrorEnumGenericErrorWithParameters(
                                 errorsFound,
                                 ApiErrorEnum.RESOURCES_NOT_FOUND,
@@ -697,11 +681,11 @@ public class QueryController {
                         response.setDisnetConcepts(symptoms);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
                     response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
@@ -776,11 +760,11 @@ public class QueryController {
                         response.setDisnetConcepts(symptoms);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
                     response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
@@ -853,11 +837,11 @@ public class QueryController {
                         response.setDiseaseList(diseases);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.NOT_FOUND.toString());
                         response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
                     response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
@@ -915,11 +899,11 @@ public class QueryController {
                         response.setConfigurationList(configurations);
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     } else {
                         response.setResponseCode(HttpStatus.NOT_FOUND.toString());
                         response.setResponseMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
-                        saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
                     }
                 }else{
                     response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());

@@ -1,6 +1,6 @@
 package edu.upm.midas.controller;
 import edu.upm.midas.constants.Constants;
-import edu.upm.midas.validator.Validator;
+import edu.upm.midas.service.validator.Validator;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;

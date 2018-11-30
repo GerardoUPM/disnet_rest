@@ -39,8 +39,11 @@ public class Constants {
     public static final String EXPORT_PUBMED_FOLDER = "tmp/excel/pubmed/";
     public static final String WIKIPEDIA_VALIDATION_FOLDER = "tmp/excel/wikipedia/1.Validated/OK_DISNET_VALIDATION_(100)_v0.8/";
     public static final String PUBMED_VALIDATION_FOLDER = "tmp/excel/pubmed/1.Validated/OK_DISNET_VALIDATION_PUBMED_(100)_v0.2/";
+    public static final String STATISTICS_HISTORY_FOLDER = "tmp/statistics/";
+    public static final String DESCRIPTIVE_STATISTICS_FILE_NAME = "_descriptive_statistics";
 
     public final static String TOKEN = "token";
+    public static final String CLIENT_TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmFyZG9sYWdhckBob3RtYWlsLmNvbSIsImF1ZCI6IndlYiIsIm5hbWUiOiJHZXJhcmRvIExhZ3VuZXMiLCJ1c2VyIjp0cnVlLCJpYXQiOjE1MDk2MTQyNjh9.uVhDgfLrAgdnj02Hsbgfj9tkVlfni89i0hKVYW31eHApCHpheikK9ae1MhbzRhiyUcFGMKwtiyVgff5NCMY3PA";
     public final static String SOURCE = "source";
     public final static String VERSION = "version";
     public final static String DISEASE_NAME = "diseaseName";
@@ -63,6 +66,9 @@ public class Constants {
     public final static String MESSAGE_PARAM_NOT_USED = "Parameter not used.";
 
     public final static String AMPERSAND = "&";
+
+    public static final String DOT_JSON = ".json";
+    public static final String DOT_XML = ".xml";
 
 
 

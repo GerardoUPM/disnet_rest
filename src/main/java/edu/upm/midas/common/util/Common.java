@@ -1,13 +1,18 @@
 package edu.upm.midas.common.util;
 
+import com.google.gson.Gson;
+import edu.upm.midas.client_modules.authorization.token.component.JwtTokenUtil;
+import edu.upm.midas.client_modules.authorization.token.service.TokenAuthorization;
+import edu.upm.midas.constants.Constants;
+import edu.upm.midas.model.response.analysis.DatabaseStatisticsResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashSet;
+import java.io.*;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by gerardo on 10/05/2017.
@@ -20,6 +25,31 @@ import java.util.regex.Pattern;
  */
 @Component
 public class Common {
+
+    @Autowired
+    private TokenAuthorization tokenAuthorization;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    private static final Logger logger = LoggerFactory.getLogger(Common.class);
+
+
+    /**
+     * @param token
+     * @param start
+     * @param end
+     * @throws Exception
+     */
+    public void saveQueryRuntime(String token, String start, String end) throws Exception {
+        try {
+            //Aunque exista problema al insertar el runtime no hay problema con la ejecución de la consulta
+            String queryId = jwtTokenUtil.getQueryIdJWTDecode(token);
+            if (!isEmpty(queryId)) {
+                HttpStatus response = tokenAuthorization.updateQueryRuntime(queryId, start, end);
+                System.out.println(response);
+            }
+        }catch (Exception e){}
+    }
 
 
     public boolean isEmpty(String string) {
@@ -73,58 +103,44 @@ public class Common {
     }
 
 
-    public String cutString(String str) {
-        return str = str.substring(0, str.length()-2);
+    public void writeStatisticsJSONFile(String jsonBody, String snapshot, String file_name) throws IOException {
+        String fileName = snapshot + file_name + Constants.DOT_JSON;
+        String path = Constants.STATISTICS_HISTORY_FOLDER + fileName;
+        InputStream in = getClass().getResourceAsStream(path);
+        //BufferedReader bL = new BufferedReader(new InputStreamReader(in));
+        File file = new File(path);
+        BufferedWriter bW;
+
+        if (!file.exists()){
+            bW = new BufferedWriter(new FileWriter(file));
+            bW.write(jsonBody);
+            bW.close();
+        }
     }
 
 
     /**
-     * @param cutStart
-     * @param cutFinal
-     * @param str
+     * @param snapshot
      * @return
+     * @throws Exception
      */
-    public String cutStringPerformance(int cutStart, int cutFinal, String str) {
-        return str = str.substring(cutStart, str.length() - cutFinal);
-    }
-
-
-    public String replaceUTFCharacters(String data){
-
-        Pattern p = Pattern.compile("\\\\u(\\p{XDigit}{4})");
-        Matcher m = p.matcher(data);
-        StringBuffer buf = new StringBuffer(data.length());
-        while (m.find()) {
-            String ch = String.valueOf((char) Integer.parseInt(m.group(1), 16));
-            m.appendReplacement(buf, Matcher.quoteReplacement(ch));
+    public DatabaseStatisticsResponse readJSONFile(String snapshot, String file_name) throws Exception {
+        DatabaseStatisticsResponse response = null;
+        System.out.println("Read JSON!... ");
+        Gson gson = new Gson();
+        String fileName = snapshot + file_name + Constants.DOT_JSON;
+        String path = Constants.STATISTICS_HISTORY_FOLDER + fileName;
+        System.out.println(path);
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            response = gson.fromJson(br, DatabaseStatisticsResponse.class);
+//            gson = new GsonBuilder().setPrettyPrinting().create();
+//            System.out.println(gson.toJson(response));
+        }catch (Exception e){
+            logger.error("Error to read or convert JSON {}", path, e);
+//            System.out.println("Error to read or convert JSON!..." + e.getLocalizedMessage() + e.getMessage() + e.getCause());
         }
-        return m.appendTail(buf).toString();
-
-    }
-
-
-    public void removeRepetedElementsList(List<String> elementsList){
-        Set<String> linkedHashSet = new LinkedHashSet<String>();
-        linkedHashSet.addAll(elementsList);
-        elementsList.clear();
-        elementsList.addAll(linkedHashSet);
-    }
-
-
-    public boolean itsFound(String originalStr, String findStr){
-//        System.out.println("RECIBE itsFound: ORI:" + originalStr + " | FIND: " + findStr);
-        return originalStr.trim().indexOf(findStr.trim()) != -1;// Retorna true si ha encontrado la subcadena en la cadena
-    }
-
-    public boolean isAlfaNumeric(final String string) {
-        for(int i = 0; i < string.length(); ++i) {
-            char character = string.charAt(i);
-
-            if(!Character.isLetterOrDigit(character)) {
-                return false;
-            }
-        }
-        return true;
+        return response;
     }
 
 
