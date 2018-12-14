@@ -51,7 +51,7 @@ public class JwtTokenUtil implements Serializable {
     private String claim_name_transactionId;
 
     //Obtiene el código del servicio. Nota: Debe coincidir con el de la base de datos
-    @Value("${my.service.code}")
+    @Value("${my.api_response.code}")
     private String apiCode;
 
     public String getUsernameFromToken(String token) {

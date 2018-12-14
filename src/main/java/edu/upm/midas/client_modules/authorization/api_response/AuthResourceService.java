@@ -1,4 +1,4 @@
-package edu.upm.midas.client_modules.authorization.service;
+package edu.upm.midas.client_modules.authorization.api_response;
 
 import edu.upm.midas.client_modules.authorization.model.UpdateQueryRuntimeRequest;
 import edu.upm.midas.client_modules.authorization.model.ValidationResponse;

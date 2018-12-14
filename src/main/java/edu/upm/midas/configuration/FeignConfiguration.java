@@ -1,4 +1,4 @@
-package edu.upm.midas.client_modules.authorization.client.configuration;
+package edu.upm.midas.configuration;
 import feign.Logger;
 import feign.Request;
 import feign.auth.BasicAuthRequestInterceptor;
@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Bean;
  * @author Gerardo Lagunes G. ${EMAIL}
  * @version ${<VERSION>}
  * @project tvp_rest
- * @className FeignAuthConfiguration
+ * @className FeignConfiguration
  * @see
  */
-public class FeignAuthConfiguration {
+public class FeignConfiguration {
 
     @Bean
     public BasicAuthRequestInterceptor basicAuthRequestInterceptor() {

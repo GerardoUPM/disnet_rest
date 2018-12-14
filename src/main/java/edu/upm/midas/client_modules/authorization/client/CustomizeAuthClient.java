@@ -1,6 +1,6 @@
 package edu.upm.midas.client_modules.authorization.client;
 
-import edu.upm.midas.client_modules.authorization.client.configuration.FeignAuthConfiguration;
+import edu.upm.midas.configuration.FeignConfiguration;
 import edu.upm.midas.client_modules.authorization.client.fallback.AuthClientFallback;
 import edu.upm.midas.client_modules.authorization.model.UpdateQueryRuntimeRequest;
 import edu.upm.midas.client_modules.authorization.model.ValidationResponse;
@@ -21,10 +21,10 @@ import javax.validation.Valid;
  * @className CustomizeTvpClient
  * @see
  */
-@FeignClient(name = "${my.service.authorization.name}",
-        url = "${my.service.authorization.url}",
+@FeignClient(name = "${my.api_response.authorization.name}",
+        url = "${my.api_response.authorization.url}",
         fallback = AuthClientFallback.class,
-        configuration = FeignAuthConfiguration.class)
+        configuration = FeignConfiguration.class)
 public interface CustomizeAuthClient {
 
     @RequestMapping(value = "${my.service.authorization.path}", method = RequestMethod.POST)

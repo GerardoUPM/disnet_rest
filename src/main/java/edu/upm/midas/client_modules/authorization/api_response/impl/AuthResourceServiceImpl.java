@@ -1,9 +1,9 @@
-package edu.upm.midas.client_modules.authorization.service.impl;
+package edu.upm.midas.client_modules.authorization.api_response.impl;
 
 import edu.upm.midas.client_modules.authorization.client.AuthClient;
 import edu.upm.midas.client_modules.authorization.model.UpdateQueryRuntimeRequest;
 import edu.upm.midas.client_modules.authorization.model.ValidationResponse;
-import edu.upm.midas.client_modules.authorization.service.AuthResourceService;
+import edu.upm.midas.client_modules.authorization.api_response.AuthResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

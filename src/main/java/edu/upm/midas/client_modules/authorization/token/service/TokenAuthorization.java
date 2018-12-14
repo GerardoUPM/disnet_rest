@@ -2,7 +2,7 @@ package edu.upm.midas.client_modules.authorization.token.service;
 
 import edu.upm.midas.client_modules.authorization.model.UpdateQueryRuntimeRequest;
 import edu.upm.midas.client_modules.authorization.model.ValidationResponse;
-import edu.upm.midas.client_modules.authorization.service.AuthResourceService;
+import edu.upm.midas.client_modules.authorization.api_response.AuthResourceService;
 import edu.upm.midas.client_modules.authorization.token.component.JwtTokenUtil;
 import edu.upm.midas.model.response.ResponseFather;
 import org.springframework.beans.factory.annotation.Autowired;
