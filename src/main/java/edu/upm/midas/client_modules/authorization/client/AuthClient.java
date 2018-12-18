@@ -21,8 +21,8 @@ import javax.validation.Valid;
  * @className TvpClient
  * @see
  */
-@FeignClient(name = "${my.api_response.authorization.name}",
-        url = "${my.api_response.authorization.url}",
+@FeignClient(name = "${my.service.authorization.name}",
+        url = "${my.service.authorization.url}",
         fallback = AuthClientFallback.class,
         configuration = FeignConfiguration.class)
 public interface AuthClient {
