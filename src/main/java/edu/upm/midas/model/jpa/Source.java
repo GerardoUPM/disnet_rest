@@ -103,12 +103,12 @@ import java.util.Objects;
 
         @NamedNativeQuery(
                 name = "Source.findSourceAndVersionConfigurationBySourceAndVersionNative",
-                query = "SELECT c.conf_id, c.tool, c.configuration " +
+                query = "SELECT c.conf_id, c.tool_id, c.configuration " +
                         "FROM configuration c " +
                         "INNER JOIN source s ON s.source_id = c.source_id " +
                         "WHERE s.name COLLATE utf8_bin = :source " +
-                        "AND c.version = :version " +
-                        "ORDER BY c.tool DESC "
+                        "AND c.snapshot = :version " +
+                        "ORDER BY c.tool_id DESC "
         )
 })
 

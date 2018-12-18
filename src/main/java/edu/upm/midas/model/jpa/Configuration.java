@@ -19,8 +19,8 @@ import java.util.Objects;
 public class Configuration {
     private String confId;
     private String sourceId;
-    private Date version;
-    private String tool;
+    private Date snapshot;
+    private String toolId;
     private String configuration;
 
     @Id
@@ -45,22 +45,22 @@ public class Configuration {
 
     @Basic
     @Column(name = "version", nullable = false)
-    public Date getVersion() {
-        return version;
+    public Date getSnapshot() {
+        return snapshot;
     }
 
-    public void setVersion(Date version) {
-        this.version = version;
+    public void setSnapshot(Date version) {
+        this.snapshot = version;
     }
 
     @Basic
     @Column(name = "tool", nullable = false, length = 50)
-    public String getTool() {
-        return tool;
+    public String getToolId() {
+        return toolId;
     }
 
-    public void setTool(String tool) {
-        this.tool = tool;
+    public void setToolId(String tool) {
+        this.toolId = tool;
     }
 
     @Basic
@@ -82,12 +82,12 @@ public class Configuration {
         if (o == null || getClass() != o.getClass()) return false;
         Configuration that = (Configuration) o;
         return Objects.equals(confId, that.confId) &&
-                Objects.equals(tool, that.tool) &&
+                Objects.equals(toolId, that.toolId) &&
                 Objects.equals(configuration, that.configuration);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(confId, tool, configuration);
+        return Objects.hash(confId, toolId, configuration);
     }
 }
