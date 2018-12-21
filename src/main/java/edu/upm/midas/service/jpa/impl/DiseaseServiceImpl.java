@@ -259,7 +259,7 @@ public class DiseaseServiceImpl implements DiseaseService {
         List<edu.upm.midas.model.Disease> diseaseList = null;
         if (diseases != null) {
             diseaseList = new ArrayList<>();
-            for (Object[] dis : diseases) {
+            for (Object[] dis : diseases) {//System.out.println("RES: "+(String) dis[4]);
                 edu.upm.midas.model.Disease disease = new edu.upm.midas.model.Disease();
                 disease.setDiseaseId((String) dis[1]);
                 disease.setName((String) dis[0]);
@@ -274,7 +274,7 @@ public class DiseaseServiceImpl implements DiseaseService {
 
     public List<Document> getDocument(String documentInfo, Date version){
         List<Document> documentList = new ArrayList<>();
-        String[] info = documentInfo.split(",");
+        String[] info = documentInfo.split(";");
         if (info != null){
             for (String doc: info) {
                 String[] docment = doc.split("-");
