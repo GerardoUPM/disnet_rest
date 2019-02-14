@@ -66,6 +66,7 @@ import java.util.Objects;
                         "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "WHERE sce.name = :source " +
                         "AND hs.date = :version " +
+                        "AND d.relevant = true " +
                         "AND d.name COLLATE utf8_bin = :disease "
         ),
         @NamedNativeQuery(
@@ -81,6 +82,7 @@ import java.util.Objects;
                         "-- INNER JOIN url u ON u.url_id = docu.url_id \n " +
                         "WHERE sce.name = :source " +
                         "AND hs.date = :version " +
+                        "AND d.relevant = true " +
                         "AND d.name LIKE :disease "
         ),
 
@@ -220,6 +222,7 @@ import java.util.Objects;
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "WHERE sce.name = :source " +
                         "AND hs.date = :version  " +
+                        "AND d.relevant = true " +
                         "AND getDisnetConceptsCount(sce.name, doc.date, d.disease_id) > :symptoms " +
                         "ORDER BY getDisnetConceptsCount(sce.name, doc.date, d.disease_id) DESC "
         ),
@@ -354,6 +357,7 @@ import java.util.Objects;
                         "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
                         "INNER JOIN source sce ON sce.source_id = hs.source_id " +
                         "WHERE sce.name = :source " +
+                        "AND d.relevant = true " +
                         "AND hs.date = :version "
         ),
         //-- <<<diseaseList>>> LISTA DE ENFERMEDADES
@@ -477,6 +481,7 @@ import java.util.Objects;
                         "AND doc.date = :version " +
                         "AND c.code = :code " +
                         "AND r.name = :resource " +
+                        "AND d.relevant = true " +
                         "ORDER BY d.name ASC "
         )
 
@@ -749,7 +754,8 @@ import java.util.Objects;
                         fields = {
                                 @FieldResult(name = "diseaseId", column = "disease_id"),
                                 @FieldResult(name = "name", column = "name"),
-                                @FieldResult(name = "cui", column = "cui")
+                                @FieldResult(name = "cui", column = "cui"),
+                                @FieldResult(name = "relevant", column = "relevant")
                         }
                 )
         )
@@ -760,6 +766,7 @@ public class Disease {
     private String diseaseId;
     private String name;
     private String cui;
+    private Byte relevant;
     private List<HasDisease> hasDiseasesByDiseaseId;
 
     @Id
@@ -790,6 +797,16 @@ public class Disease {
 
     public void setCui(String cui) {
         this.cui = cui;
+    }
+
+    @Basic
+    @Column(name = "relevant", nullable = true)
+    public Byte getRelevant() {
+            return relevant;
+    }
+
+    public void setRelevant(Byte relevant) {
+            this.relevant = relevant;
     }
 
     @Override

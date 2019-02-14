@@ -146,6 +146,7 @@ public class SymptomRepositoryImpl extends AbstractDao<String, Symptom>
                         "WHERE sce.name = :source " +
                         "AND hs.date = :version " +
                         "AND hsym.validated = :validated " +
+                        "AND d.relevant = true " +
                         semanticTypesQuery +
                         "-- AND getSemanticTypesBySymptom(sym.cui) = 'dsyn'\n" +
                         "-- AND hst.semantic_type = 'dsyn'\n" +

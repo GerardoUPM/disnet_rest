@@ -212,6 +212,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
                         "AND hs.date = :version " +
                         "-- AND d.name LIKE 'Gastroenteritis' \n" +
                         "AND hsym.validated = :validated " +
+                        "AND d.relevant = true " +
                         "GROUP BY d.disease_id, d.name, d.cui, u.url " + moreOrFewerQuery);
 
         List<Object[]> diseases = null;
