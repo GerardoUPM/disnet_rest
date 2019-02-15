@@ -96,7 +96,8 @@ import java.util.Objects;
                 query = "SELECT DISTINCT hs.date 'version' " +
                         "FROM has_source hs " +
                         "INNER JOIN source s ON s.source_id = hs.source_id " +
-                        "WHERE s.name = :name "
+                        "WHERE s.name = :name " +
+                        "ORDER BY hs.date ASC "
         ),
 
 

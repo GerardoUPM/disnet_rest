@@ -136,5 +136,23 @@ public class AnalisysController {
         return descriptive.getLastDatabaseStatistics();
     }
 
+    @RequestMapping(path = { "/analysis/test" },
+            method = RequestMethod.GET)
+    public void test(){
+            File folder = new File(Constants.PUBMED_VALIDATION_FOLDER);
+            File[] listOfFiles = folder.listFiles();
+
+            for (int i = 0; i < listOfFiles.length; i++) {
+                if (listOfFiles[i].isFile()) {
+                    String[] file = listOfFiles[i].getName().split(" ");
+                    System.out.println(file[0]);
+                } else if (listOfFiles[i].isDirectory()) {
+//                System.out.println("Directory " + listOfFiles[i].getName());
+                }
+            }
+//        System.out.println("Tamaño: "+dates.size());
+
+    }
+
 
 }
