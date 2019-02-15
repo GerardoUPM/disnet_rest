@@ -94,6 +94,7 @@ public interface DiseaseRepository {
     //ANALYSIS
     BigInteger getExtractedDiseasesTotBySourceAndSnapshotNative(String sourceName, Date snapshot);
     BigInteger getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(String sourceName, Date snapshot, boolean isValidated);
+    BigInteger getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(String sourceName, Date snapshot, boolean isValidated, boolean isRelevant);
 
     BigInteger getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceNative(String sourceName, boolean isValidated);
 

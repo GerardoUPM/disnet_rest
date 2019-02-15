@@ -702,6 +702,19 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @SuppressWarnings("unchecked")
     @Override
+    public BigInteger getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(String sourceName, Date snapshot, boolean isValidated, boolean isRelevant) {
+        return (BigInteger) getEntityManager()
+                .createNamedQuery("Disease.getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative")
+                .setParameter("source", sourceName)
+                .setParameter("snapshot", snapshot)
+                .setParameter("validated", isValidated)
+                .setParameter("relevant", isRelevant)
+                //.setMaxResults(1)
+                .getSingleResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public BigInteger getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceNative(String sourceName, boolean isValidated) {
         return (BigInteger) getEntityManager()
                 .createNamedQuery("Disease.getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceNative")

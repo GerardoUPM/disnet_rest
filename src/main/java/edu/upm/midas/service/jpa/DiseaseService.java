@@ -92,6 +92,7 @@ public interface DiseaseService {
     //ANALYSIS
     int getExtractedDiseasesTotBySourceAndSnapshotNative(String sourceName, Date snapshot);
     int getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(String sourceName, Date snapshot, boolean isValidated);
+    int getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(String sourceName, Date snapshot, boolean isValidated, boolean isRelevant);
 
     int getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceNative(String sourceName, boolean isValidated);
 

@@ -412,6 +412,11 @@ public class DiseaseServiceImpl implements DiseaseService {
     }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    public int getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(String sourceName, Date snapshot, boolean isValidated, boolean isRelevant) {
+        return daoDisease.getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(sourceName, snapshot, isValidated, isRelevant).intValue();
+    }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public int getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceNative(String sourceName, boolean isValidated) {
         return daoDisease.getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceNative(sourceName, isValidated).intValue();
     }

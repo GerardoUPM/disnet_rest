@@ -71,6 +71,7 @@ public class Descriptive {
                 Snapshot _snapshot = new Snapshot();
                 int numTotDiseases = diseaseService.getExtractedDiseasesTotBySourceAndSnapshotNative(source, timeProvider.stringToDate(snapshot));
                 int numDisease = diseaseService.getDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(source, timeProvider.stringToDate(snapshot), true);
+                int numRelevantDisease = diseaseService.getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative(source, timeProvider.stringToDate(snapshot), true, true);
                 int numTotMedicalTerms = diseaseService.getTotalValidatedMedicalTermsNumberBySourceAndSnapshotNative(source, timeProvider.stringToDate(snapshot));
                 int numMedicalTerms = diseaseService.getValidatedMedicalTermsNumberBySourceAndSnapshotNative(source, timeProvider.stringToDate(snapshot), true);//Validated medical terms
                 int numTotTexts = diseaseService.getTotalTextsBySourceAndSnapshotNative(source, timeProvider.stringToDate(snapshot));
@@ -82,6 +83,7 @@ public class Descriptive {
 //                System.out.println(diseaseService.getExtractedDiseasesTotBySourceAndSnapshotNative(source, timeProvider.stringToDate(snapshot)));
                 _snapshot.setNumTotDiseases(numTotDiseases);
                 _snapshot.setNumDisease(numDisease);
+                _snapshot.setNumRelevantDisease(numRelevantDisease);
                 _snapshot.setNumTotMedicalTerms(numTotMedicalTerms);
                 _snapshot.setNumMedicalTerms(numMedicalTerms);
                 _snapshot.setNumTotTexts(numTotTexts);

@@ -599,6 +599,23 @@ import java.util.Objects;
                         "WHERE hsym.validated = :validated " +
                         "AND (sce.name COLLATE utf8_bin = :source AND doc.date = :snapshot) "
         ),
+        //Obtener el número de enfermedades relevantes (relevant = true) con al menos un termino médico validado
+        @NamedNativeQuery(
+                name = "Disease.getRelevantDiseasesNumberWithALeastOneValidatedMedicalTermsBySourceAndSnapshotNative",
+                query = "SELECT COUNT(distinct d.name) 'diseases_count' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "-- source \n" +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source sce ON sce.source_id = hs.source_id " +
+                        "INNER JOIN has_section hsec ON hsec.document_id = doc.document_id AND hsec.date = doc.date " +
+                        "INNER JOIN has_text ht ON ht.document_id = hsec.document_id AND ht.date = hsec.date AND ht.section_id = hsec.section_id " +
+                        "INNER JOIN has_symptom hsym ON hsym.text_id = ht.text_id " +
+                        "WHERE hsym.validated = :validated " +
+                        "AND d.relevant = :relevant " +
+                        "AND (sce.name COLLATE utf8_bin = :source AND doc.date = :snapshot) "
+        ),
 
 
 
