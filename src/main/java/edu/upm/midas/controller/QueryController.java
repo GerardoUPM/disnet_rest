@@ -20,6 +20,8 @@ import edu.upm.midas.service.error.ErrorService;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.mobile.device.Device;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +66,19 @@ public class QueryController {
     private Constants constants;
 
 
+    @RequestMapping(path = { "/query/diseaseListPageable" },
+            method = RequestMethod.GET,
+            params = {"token", "source", "version"})
+    public Page<Disease> diseaseListPageable(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                             @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
+                                             @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
+                                             @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                             HttpServletRequest httpRequest, Device device, Pageable pageable) throws Exception {
+
+        Date dataVersion = timeProvider.getSdf().parse(version);
+
+        return diseaseHelper.getDiseasePageWithTheirCodes(source, dataVersion, pageable);
+    }
 
 
     /**

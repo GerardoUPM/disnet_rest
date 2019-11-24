@@ -1,6 +1,8 @@
 package edu.upm.midas.repository.jpa;
 
 import edu.upm.midas.model.jpa.Disease;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -16,6 +18,8 @@ import java.util.List;
  * @see
  */
 public interface DiseaseRepository {
+
+    Page<Object[]> findBySourceAndVersion(String sourceName, Date version, Pageable pageable);
 
     Disease findById(String diseaseId);
 

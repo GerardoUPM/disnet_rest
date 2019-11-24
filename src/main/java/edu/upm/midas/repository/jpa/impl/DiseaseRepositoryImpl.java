@@ -6,6 +6,9 @@ import edu.upm.midas.repository.jpa.AbstractDao;
 import edu.upm.midas.repository.jpa.DiseaseRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
@@ -28,6 +31,30 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
 
     @Autowired
     private Common common;
+
+    @Override
+    public Page<Object[]> findBySourceAndVersion(String sourceName, Date version, Pageable pageable) {
+        BigInteger numberOfDiseases = null;
+        List<BigInteger> countList = (List<BigInteger>) getEntityManager()
+                .createNamedQuery("Disease.findBySourceAndVersionNative.count")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(countList))
+            numberOfDiseases = countList.get(0);
+        else
+            numberOfDiseases = BigInteger.ZERO;
+
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findBySourceAndVersionNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setFirstResult(pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+
+        return new PageImpl<>(diseaseList, pageable, numberOfDiseases.intValue());
+    }
 
     public Disease findById(String diseaseId) {
         Disease disease = getByKey(diseaseId);

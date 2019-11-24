@@ -30,6 +30,36 @@ import java.util.Objects;
 })
 
 @NamedNativeQueries({
+        //PAGEABLE
+        @NamedNativeQuery(
+                name = "Disease.findBySourceAndVersionNative",
+                query = "SELECT DISTINCT d.disease_id, d.name, d.cui, getDocumentUrl(s.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(s.name, doc.date, d.disease_id) 'disnetConceptCount' " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source s ON s.source_id = hs.source_id " +
+                        "-- url\n" +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id\n " +
+                        "WHERE s.name COLLATE utf8_bin = :source " +
+                        "AND doc.date = :version " +
+                        "ORDER BY d.name ASC"
+        ),
+        @NamedNativeQuery(
+                name = "Disease.findBySourceAndVersionNative.count",
+                query = "SELECT count(DISTINCT d.disease_id) " +
+                        "FROM disease d " +
+                        "INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "INNER JOIN source s ON s.source_id = hs.source_id " +
+                        "-- url\n" +
+                        "-- INNER JOIN document_url docu ON docu.document_id = doc.document_id AND docu.date = doc.date " +
+                        "-- INNER JOIN url u ON u.url_id = docu.url_id\n " +
+                        "WHERE s.name COLLATE utf8_bin = :source " +
+                        "AND doc.date = :version "
+        ),
         @NamedNativeQuery(
                 name = "Disease.findByIdNative",
                 query = "SELECT d.disease_id, d.name, d.cui "

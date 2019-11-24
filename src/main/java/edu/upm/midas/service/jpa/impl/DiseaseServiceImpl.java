@@ -5,6 +5,8 @@ import edu.upm.midas.repository.jpa.DiseaseRepository;
 import edu.upm.midas.service.jpa.DiseaseService;
 import edu.upm.midas.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,29 @@ public class DiseaseServiceImpl implements DiseaseService {
     @Autowired
     private DiseaseRepository daoDisease;
 
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    @Override
+    public Page<edu.upm.midas.model.Disease> findBySourceAndVersion(String sourceName, Date version, Pageable pageable) {
+        Page<Object[]> diseases = daoDisease.findBySourceAndVersion(sourceName, version, pageable);
+
+        return diseases.map(dis -> {
+            edu.upm.midas.model.Disease diseaseDto = new edu.upm.midas.model.Disease();
+
+            diseaseDto.setDiseaseId((String) dis[0]);
+            diseaseDto.setName((String) dis[1]);
+            diseaseDto.setUrl((String) dis[3]);
+
+            try {
+                diseaseDto.setDisnetConceptsCount((Integer) dis[4]);
+            } catch (Exception e){
+                BigInteger count = (BigInteger) dis[4];
+
+                diseaseDto.setDisnetConceptsCount(count.intValue());
+            }
+
+            return diseaseDto;
+        });
+    }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public Disease findById(String diseaseId) {
