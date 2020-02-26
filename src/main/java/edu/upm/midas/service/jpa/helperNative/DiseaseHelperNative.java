@@ -9,6 +9,8 @@ import edu.upm.midas.enums.ApiErrorEnum;
 import edu.upm.midas.model.*;
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.model.response.*;
+import edu.upm.midas.model.response.particular.DiseaseListPageResponse;
+import edu.upm.midas.model.response.particular.DiseaseListResponse;
 import edu.upm.midas.model.response.validations.CodeAndTypeCodeValidation;
 import edu.upm.midas.model.response.validations.SemanticTypesValidation;
 import edu.upm.midas.model.response.validations.TypeSearchValidation;
@@ -62,6 +64,46 @@ public class DiseaseHelperNative {
 
     public Page<Disease> getDiseasePageWithTheirCodes(String sourceName,  Date version, Pageable pageable){
         return diseaseService.findBySourceAndVersion(sourceName, version, pageable);
+    }
+
+
+    public DiseaseListPageResponse getDiseasePageWithTheirCodesPages(
+            List<ApiResponseError> apiResponseErrors
+            , String sourceName
+            , Date version
+            , boolean isValidated
+            , ResponseFather responseFather
+            , Pageable pageable
+    ){
+        DiseaseListPageResponse responsePage = diseaseService.findBySourceAndVersion2(sourceName, version, pageable);
+        try {
+            if (responsePage.getContent().size()>0) {
+                findCodes(apiResponseErrors, sourceName, version, responsePage.getContent());
+                //Si es pubmed obtendrá las url de los artículos (papers)
+                if (sourceName.equals(Constants.PUBMED_SOURCE)){
+                    findPaperUrls(apiResponseErrors, sourceName, version, responsePage.getContent());
+                }
+            }
+        }catch (Exception e){
+            //Se agrega el error en la lista principal de la respuesta
+            errorService.insertApiErrorEnumGenericError(
+                    apiResponseErrors,
+                    ApiErrorEnum.INTERNAL_SERVER_ERROR,
+                    Throwables.getRootCause(e).getClass().getName(),
+                    e.getMessage(),
+                    true,
+                    null);
+        }
+        convertResponse(responsePage, responseFather);
+        return responsePage;
+
+
+    }
+
+    public void convertResponse(DiseaseListPageResponse responsePage, ResponseFather responseFather){
+        responsePage.setAuthorized( responseFather.isAuthorized() );
+        responsePage.setAuthorizationMessage( responseFather.getAuthorizationMessage() );
+        responsePage.setToken( responseFather.getToken() );
     }
 
     /**

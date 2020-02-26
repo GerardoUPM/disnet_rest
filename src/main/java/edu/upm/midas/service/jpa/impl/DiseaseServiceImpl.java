@@ -1,6 +1,7 @@
 package edu.upm.midas.service.jpa.impl;
 import edu.upm.midas.constants.Constants;
 import edu.upm.midas.model.jpa.Disease;
+import edu.upm.midas.model.response.particular.DiseaseListPageResponse;
 import edu.upm.midas.repository.jpa.DiseaseRepository;
 import edu.upm.midas.service.jpa.DiseaseService;
 import edu.upm.midas.model.*;
@@ -54,6 +55,37 @@ public class DiseaseServiceImpl implements DiseaseService {
             return diseaseDto;
         });
     }
+
+    @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
+    @Override
+    public DiseaseListPageResponse findBySourceAndVersion2(String sourceName, Date version, Pageable pageable) {
+//        Page<edu.upm.midas.model.Disease> diseasesPage = findBySourceAndVersionTest(sourceName, version, pageable);
+//        DiseaseListPageResponse response = new DiseaseListPageResponse(diseasesPage.getContent());
+//        return response;
+        return daoDisease.findBySourceAndVersionNew(sourceName, version, pageable);
+    }
+
+    //    public Page<edu.upm.midas.model.Disease> findBySourceAndVersionTest(String sourceName, Date version, Pageable pageable) {
+//        Page<Object[]> diseases = daoDisease.findBySourceAndVersion(sourceName, version, pageable);
+//
+//        /*Page<edu.upm.midas.model.Disease> diseasePage =*/return diseases.map(dis -> {
+//            edu.upm.midas.model.Disease diseaseDto = new edu.upm.midas.model.Disease();
+//
+//            diseaseDto.setDiseaseId((String) dis[0]);
+//            diseaseDto.setName((String) dis[1]);
+//            diseaseDto.setUrl((String) dis[3]);
+//
+//            try {
+//                diseaseDto.setDisnetConceptsCount((Integer) dis[4]);
+//            } catch (Exception e){
+//                BigInteger count = (BigInteger) dis[4];
+//
+//                diseaseDto.setDisnetConceptsCount(count.intValue());
+//            }
+//
+//            return diseaseDto;
+//        });
+//    }
 
     @Transactional(propagation= Propagation.REQUIRED,readOnly=true)
     public Disease findById(String diseaseId) {

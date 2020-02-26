@@ -2,6 +2,7 @@ package edu.upm.midas.repository.jpa.impl;
 
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.model.jpa.Disease;
+import edu.upm.midas.model.response.particular.DiseaseListPageResponse;
 import edu.upm.midas.repository.jpa.AbstractDao;
 import edu.upm.midas.repository.jpa.DiseaseRepository;
 import org.apache.commons.collections.CollectionUtils;
@@ -15,6 +16,7 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by gerardo on 12/06/2017.
@@ -54,6 +56,50 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
                 .getResultList();
 
         return new PageImpl<>(diseaseList, pageable, numberOfDiseases.intValue());
+    }
+
+    @Override
+    public DiseaseListPageResponse findBySourceAndVersionNew(String sourceName, Date version, Pageable pageable) {
+        BigInteger numberOfDiseases = null;
+        List<BigInteger> countList = (List<BigInteger>) getEntityManager()
+                .createNamedQuery("Disease.findBySourceAndVersionNative.count")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .getResultList();
+        if (CollectionUtils.isNotEmpty(countList))
+            numberOfDiseases = countList.get(0);
+        else
+            numberOfDiseases = BigInteger.ZERO;
+
+        List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
+                .createNamedQuery("Disease.findBySourceAndVersionNative")
+                .setParameter("source", sourceName)
+                .setParameter("version", version)
+                .setFirstResult(pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+
+        return new DiseaseListPageResponse(createDiseaseList(diseaseList), pageable, numberOfDiseases.intValue());
+    }
+
+    public List<edu.upm.midas.model.Disease> createDiseaseList(List<Object[]> diseases){
+        return diseases.stream().map(dis -> {
+            edu.upm.midas.model.Disease diseaseDto = new edu.upm.midas.model.Disease();
+
+            diseaseDto.setDiseaseId((String) dis[0]);
+            diseaseDto.setName((String) dis[1]);
+            diseaseDto.setUrl((String) dis[3]);
+
+            try {
+                diseaseDto.setDisnetConceptsCount((Integer) dis[4]);
+            } catch (Exception e){
+                BigInteger count = (BigInteger) dis[4];
+
+                diseaseDto.setDisnetConceptsCount(count.intValue());
+            }
+
+            return diseaseDto;
+        }).collect(Collectors.toList());
     }
 
     public Disease findById(String diseaseId) {

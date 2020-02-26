@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -230,7 +231,8 @@ public class QueryController {
      * @param device
      * @return
      * @throws Exception
-     */
+     *//*
+
     @RequestMapping(path = { "/query/diseaseList" },//disease name OKOK
             method = RequestMethod.GET,
             params = {"token", "source", "version"})
@@ -267,6 +269,83 @@ public class QueryController {
                     if (diseaseList.size() > 0) {
                         response.setDiseaseList(diseaseList);
                         response.setDiseaseCount(diseaseList.size());
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    } else {
+                        response.setResponseCode(HttpStatus.OK.toString());
+                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                        errorService.insertApiErrorEnumGenericError(
+                                errorsFound,
+                                ApiErrorEnum.RESOURCE_NOT_FOUND,
+                                "Disease list exception.",
+                                "No diseases were found with the requested parameters. Check the list of DISNET sources and versions.",
+                                true,
+                                null);
+                    }
+                }else{
+                    response.setResponseCode(ApiErrorEnum.INVALID_PARAMETERS.getKey());
+                    response.setResponseMessage(ApiErrorEnum.INVALID_PARAMETERS.getDescription());
+                }
+            }catch (Exception e){
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                errorService.insertInternatServerError(errorsFound, e, true);
+            }
+        }else {
+            response.setResponseCode(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.toString());
+            response.setResponseMessage(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED.getReasonPhrase());
+            errorService.insertAuthorizationError(errorsFound, true);
+        }
+        //if (errorsFound.size() > 0)
+        response.setErrorsFound(errorsFound);
+        //if (parameters.size() > 0 && errorsFound.size() <= 0)
+        //    response.setExtraInfo(parameters);
+
+        return response;
+    }
+*/
+
+
+    /**
+     * @param token
+     * @param source
+     * @param version
+     * @param validated
+     * @param httpRequest
+     * @param device
+     * @param pageable
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(path = { "/query/diseaseList" /*"/query/diseaseListPageableResponse"*/ },
+            method = RequestMethod.GET,
+            params = {"token", "source", "version"})
+    public DiseaseListPageResponse diseaseListPageableResponse(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                               @RequestParam(value = "source") @Valid @NotBlank @NotNull @NotEmpty String source,//Nombre de la fuente "wikipedia"
+                                                               @RequestParam(value = "version") @Valid @NotBlank @NotNull @NotEmpty String version,
+                                                               @RequestParam(value = "validated", required = false, defaultValue = "true") boolean validated,
+                                                               HttpServletRequest httpRequest, Device device, Pageable pageable) throws Exception {
+
+        DiseaseListPageResponse response = new DiseaseListPageResponse(new ArrayList<>(), pageable, 0);
+        //<editor-fold desc="PROCESO DE AUTORIZACIÓN">
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(), device);
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
+        //</editor-fold>
+        //Si la autorización es exitosa se completa la respuesta
+        if (responseFather.isAuthorized()){
+            try {
+                Date dataVersion = timeProvider.getSdf().parse(version);
+                //System.out.println(" SOURCE: " + source + " VERSION: " + dataVersion);
+                //Validar versión y fuente
+                TypeSearchValidation validation = diseaseHelper.sourceAndVersionValidation(errorsFound, parameters, source, dataVersion);
+                if (!validation.isErrors()) {
+                    String start = timeProvider.getTimestampFormat();
+                    response = diseaseHelper.getDiseasePageWithTheirCodesPages(errorsFound, source, dataVersion, validated, responseFather, pageable);
+                    String end = timeProvider.getTimestampFormat();
+                    if (response.getContent().size() > 0) {
                         response.setResponseCode(HttpStatus.OK.toString());
                         response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                         common.saveQueryRuntime(responseFather.getInfoToken(), start, end);

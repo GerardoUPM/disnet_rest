@@ -2,6 +2,7 @@ package edu.upm.midas.service.jpa;
 
 import edu.upm.midas.model.jpa.Disease;
 import edu.upm.midas.model.*;
+import edu.upm.midas.model.response.particular.DiseaseListPageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,6 +21,8 @@ import java.util.List;
 public interface DiseaseService {
 
     Page<edu.upm.midas.model.Disease> findBySourceAndVersion(String sourceName, Date version, Pageable pageable);
+
+    DiseaseListPageResponse findBySourceAndVersion2(String sourceName, Date version, Pageable pageable);
 
     Disease findById(String diseaseId);
 
