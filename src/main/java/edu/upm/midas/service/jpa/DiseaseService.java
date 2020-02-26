@@ -2,6 +2,8 @@ package edu.upm.midas.service.jpa;
 
 import edu.upm.midas.model.jpa.Disease;
 import edu.upm.midas.model.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.List;
  * @see
  */
 public interface DiseaseService {
+
+    Page<edu.upm.midas.model.Disease> findBySourceAndVersion(String sourceName, Date version, Pageable pageable);
 
     Disease findById(String diseaseId);
 
