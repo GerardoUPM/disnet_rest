@@ -39,10 +39,12 @@ public class Validator {
 
         File[] directoryListing = dir.listFiles();
 
+        int count = 1;
         if (directoryListing != null) {
             for (File file : directoryListing) {
                 try {
-                    readExcel(file, validationSheet);
+                    readExcel(file, validationSheet, count);
+                    count++;
                 }
                 catch(NotOLE2FileException exception){
                     System.out.println("File " + file.getAbsolutePath() + " is not OLE");
@@ -57,17 +59,17 @@ public class Validator {
                 globalFalseNegativeMetamapCount, globalFalseNegativeTvpCount,
                 globalTotal);
         
-        double globalPrecision =
+        Double globalPrecision =
                 globalTruePositiveCount / (globalTruePositiveCount + (globalFalsePositiveRealCount + globalFalsePositiveContextCount) );
 
-        double globalPrecision_FPREAL = globalTruePositiveCount / ( globalTruePositiveCount + globalFalsePositiveRealCount);
-        double globalPrecision_FPCONTEXT = globalTruePositiveCount / ( globalTruePositiveCount + globalFalsePositiveContextCount);
+        Double globalPrecision_FPREAL = globalTruePositiveCount / ( globalTruePositiveCount + globalFalsePositiveRealCount);
+        Double globalPrecision_FPCONTEXT = globalTruePositiveCount / ( globalTruePositiveCount + globalFalsePositiveContextCount);
 
-        double globalRecallMetamap = globalTruePositiveCount / (globalTruePositiveCount + globalFalseNegativeMetamapCount);
-        double globalRecallTvp = globalTruePositiveCount / (globalTruePositiveCount + globalFalseNegativeTvpCount);
-        double globalRecall = globalTruePositiveCount / (globalTruePositiveCount + (globalFalseNegativeMetamapCount + globalFalseNegativeTvpCount));
+        Double globalRecallMetamap = globalTruePositiveCount / (globalTruePositiveCount + globalFalseNegativeMetamapCount);
+        Double globalRecallTvp = globalTruePositiveCount / (globalTruePositiveCount + globalFalseNegativeTvpCount);
+        Double globalRecall = globalTruePositiveCount / (globalTruePositiveCount + (globalFalseNegativeMetamapCount + globalFalseNegativeTvpCount));
 
-        double f1Score = 2 * ( (globalPrecision * globalRecall) / (globalPrecision + globalRecall) );
+        Double f1Score = 2 * ( (globalPrecision * globalRecall) / (globalPrecision + globalRecall) );
 
         System.out.println("GLOBAL PRECISION: " + globalPrecision);
         System.out.println("GLOBAL RESULT: \n"
@@ -91,10 +93,10 @@ public class Validator {
         );
     }
 
-    private void readExcel(File file, int validationSheet) throws InvalidFormatException, IOException {
+    private void readExcel(File file, int validationSheet, int count) throws InvalidFormatException, IOException {
 
 
-        System.out.println("Disease: " + file.getName());
+        System.out.print(count +". Disease: " + file.getName().replace(".xlsx", ""));
         // Creating a Workbook from an Excel file (.xls or .xlsx)
         Workbook workbook = WorkbookFactory.create(file);
 
@@ -127,8 +129,9 @@ public class Validator {
             Row row = rowIterator.next();
 
             Cell tvpCell = row.getCell(TVP_COL_NUM);
-
-            String tvpCellValue = tvpCell.getStringCellValue().trim().toUpperCase();
+//            System.out.println("CELDA TVP TEST value empty: " + ((tvpCell==null)?"NULO":"NO NULO"));
+//            System.out.println("CELDA TVP?: "+tvpCell.getStringCellValue().trim());
+            String tvpCellValue = ((tvpCell==null)?"":tvpCell.getStringCellValue().trim().toUpperCase());
 
             if (!process) {
                 process = tvpCellValue.equals(TVP_COL_NAME);
@@ -194,10 +197,10 @@ public class Validator {
     }
     
     private boolean validate(
-            double truePositiveCount, double trueNegativeCount, double falsePositiveCount, 
-            double falsePositiveContextCount, double falsePositiveRealCount, double falsePositiveErrorCount,
+            double truePositiveCount, Double trueNegativeCount, Double falsePositiveCount,
+            double falsePositiveContextCount, Double falsePositiveRealCount, Double falsePositiveErrorCount,
             double falseNegativeCount,
-            double falseNegativeMetamapCount, double falseNegativeTvpCount,
+            double falseNegativeMetamapCount, Double falseNegativeTvpCount,
             double total) {
         
         double expectedTotal = truePositiveCount + trueNegativeCount
@@ -221,17 +224,25 @@ public class Validator {
         //TP=15.0; TN=9.0; FP=0.0; FPCONTEXT=7.0; FPREAL=2.0; FNTVP=2.0; FNMETAMAP=6.0; TOTAL=41.0; PRECISION=0.625; NPV=0.5294117647058824; RECALL=0.6521739130434783; SPEC=0.5
 
 
-        double precision =
+        Double precision =
                 truePositiveCount / (truePositiveCount + (falsePositiveRealCount + falsePositiveContextCount) );
+        precision = precision.isNaN()?0:precision;
 
-        double precision_FPREAL = truePositiveCount / ( truePositiveCount + falsePositiveRealCount);
-        double precision_FPCONTEXT = truePositiveCount / ( truePositiveCount + falsePositiveContextCount);
+        Double precision_FPREAL = truePositiveCount / ( truePositiveCount + falsePositiveRealCount);
+        precision_FPREAL = precision_FPREAL.isNaN()?0:precision_FPREAL;
+        Double precision_FPCONTEXT = truePositiveCount / ( truePositiveCount + falsePositiveContextCount);
+        precision_FPCONTEXT = precision_FPCONTEXT.isNaN()?0:precision_FPCONTEXT;
 
-        double recallMetamap = truePositiveCount / (truePositiveCount + falseNegativeMetamapCount);
-        double recallTvp = truePositiveCount / (truePositiveCount + falseNegativeTvpCount);
-        double recall = truePositiveCount / (truePositiveCount + (falseNegativeMetamapCount + falseNegativeTvpCount));
+        Double recallMetamap = truePositiveCount / (truePositiveCount + falseNegativeMetamapCount);
+        recallMetamap = recallMetamap.isNaN()?0:recallMetamap;
+        Double recallTvp = truePositiveCount / (truePositiveCount + falseNegativeTvpCount);
+        recallTvp = recallTvp.isNaN()?0:recallTvp;
+        Double recall = truePositiveCount / (truePositiveCount + (falseNegativeMetamapCount + falseNegativeTvpCount));
+        recall = recall.isNaN()?0:recall;
+//        System.out.println("        recall = "+truePositiveCount +"/ ("+truePositiveCount +"+ ("+falseNegativeMetamapCount +"+"+ falseNegativeTvpCount+"))");
 
-        double f1Score = 2 * ( (precision * recall) / (precision + recall) );
+        Double f1Score = 2 * ( (precision * recall) / (precision + recall) );
+        f1Score = f1Score.isNaN()?0:f1Score;
 
         System.out.println(
 //                " TP="
