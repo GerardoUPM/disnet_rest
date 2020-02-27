@@ -31,6 +31,16 @@ import java.util.Objects;
 
 @NamedNativeQueries({
         //PAGEABLE
+
+        /*
+        * ESTA CONSULTA LA ELIMINO PORQUE RETORNA TODAS LOS ARTÍCULOS QUE SE CREEN QUE SON ENFERMEDADES, PERO REALMENTE
+        * NO LO SON.
+        *
+        * EL FILTRO NUEVO ES PRIMERO, UNA VERIFICACIÓN MANUAL (relevant field) ENCONTRADA EN LA TABLA DISEASE,
+        * SEGUNDO, EN EL WHERE, PARA SOLO CONSIDERAR AQUELLOS ARTÍCULOS QUE AL MENOS TENGAN UN CÓDIGO O MÁS Ó
+        * AL MENOS TENGAN UNO O MÁS TEXTOS, ESTO QUIERE DECIR QUE AL MENOS TIENE CONTENIDO EN LAS SECCIONES RELEVANTES
+        * AL DIAGNÓSTICO DE LA ENFERMEDAD
+        * */
         @NamedNativeQuery(
                 name = "Disease.findBySourceAndVersionNative",
                 query = "SELECT DISTINCT d.disease_id, d.name, d.cui, getDocumentUrl(s.name, doc.date, d.disease_id) 'url', getDisnetConceptsCount(s.name, doc.date, d.disease_id) 'disnetConceptCount' " +
@@ -60,6 +70,60 @@ import java.util.Objects;
                         "WHERE s.name COLLATE utf8_bin = :source " +
                         "AND doc.date = :version "
         ),
+        //--------------------------- PAGES
+
+
+        @NamedNativeQuery(
+                name = "Disease.findBySourceAndVersionNative_pages",
+                query = "SELECT dsyn.disease_id, dsyn.name, dsyn.cui, dsyn.url, dsyn.term_count, dsyn.code_list, dsyn.text_count " +
+                        "FROM ( " +
+                        "       SELECT DISTINCT d.disease_id, " +
+                        "                       d.name, " +
+                        "                       d.cui, " +
+                        "                       getDocumentUrl(s.name, doc.date, d.disease_id) 'url', " +
+                        "                       getFiltredDisnetConceptsCount(s.name, doc.date, d.disease_id, true, false) 'term_count', " +
+                        "                       getCodesListBySourceAndDiseaseIdAndSnapshot(s.name, doc.date, d.disease_id)  'code_list', " +
+                        "                       getRelevantRealTextCountDisease(s.name, doc.date, d.disease_id, true, false) 'text_count' " +
+                        "       FROM disease d " +
+                        "              INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "              INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "              INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "              INNER JOIN source s ON s.source_id = hs.source_id " +
+                        "       WHERE s.name COLLATE utf8_bin = :source " +
+                        "         AND doc.date = :version " +
+                        "         AND d.relevant = true " +
+                        "       ORDER BY d.name ASC " +
+                        "     ) dsyn " +
+                        "WHERE ( dsyn.text_count > 0 OR LENGTH(dsyn.code_list) > 0 )"
+        ),
+        @NamedNativeQuery(
+                name = "Disease.findBySourceAndVersionNative.count_pages",
+                query = "SELECT COUNT(*) " +
+                        "FROM ( " +
+                        "       SELECT DISTINCT d.disease_id, " +
+                        "                       d.name, " +
+                        "                       d.cui, " +
+                        "                       getDocumentUrl(s.name, doc.date, d.disease_id)                               url, " +
+                        "                       getFiltredDisnetConceptsCount(s.name, doc.date, d.disease_id, true, false)   term_count, " +
+                        "                       getCodesListBySourceAndDiseaseIdAndSnapshot(s.name, doc.date, d.disease_id)  code_list, " +
+                        "                       getRelevantRealTextCountDisease(s.name, doc.date, d.disease_id, true, false) text_count " +
+                        "       FROM disease d " +
+                        "              INNER JOIN has_disease hd ON hd.disease_id = d.disease_id " +
+                        "              INNER JOIN document doc ON doc.document_id = hd.document_id AND doc.date = hd.date " +
+                        "              INNER JOIN has_source hs ON hs.document_id = doc.document_id AND hs.date = doc.date " +
+                        "              INNER JOIN source s ON s.source_id = hs.source_id " +
+                        "       WHERE s.name COLLATE utf8_bin = :source " +
+                        "         AND doc.date = :version " +
+                        "         AND d.relevant = true " +
+                        "       ORDER BY d.name ASC " +
+                        "     ) dsyn " +
+                        "WHERE ( dsyn.text_count > 0 OR LENGTH(dsyn.code_list) > 0 )"
+        ),
+
+
+        //----------------------------
+
+
         @NamedNativeQuery(
                 name = "Disease.findByIdNative",
                 query = "SELECT d.disease_id, d.name, d.cui "

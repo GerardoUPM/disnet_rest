@@ -35,6 +35,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     private Common common;
 
     @Override
+    @SuppressWarnings("unchecked")
     public Page<Object[]> findBySourceAndVersion(String sourceName, Date version, Pageable pageable) {
         BigInteger numberOfDiseases = null;
         List<BigInteger> countList = (List<BigInteger>) getEntityManager()
@@ -59,10 +60,11 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public DiseaseListPageResponse findBySourceAndVersionNew(String sourceName, Date version, Pageable pageable) {
         BigInteger numberOfDiseases = null;
         List<BigInteger> countList = (List<BigInteger>) getEntityManager()
-                .createNamedQuery("Disease.findBySourceAndVersionNative.count")
+                .createNamedQuery("Disease.findBySourceAndVersionNative.count_pages")
                 .setParameter("source", sourceName)
                 .setParameter("version", version)
                 .getResultList();
@@ -72,7 +74,7 @@ public class DiseaseRepositoryImpl extends AbstractDao<String, Disease>
             numberOfDiseases = BigInteger.ZERO;
 
         List<Object[]> diseaseList = (List<Object[]>) getEntityManager()
-                .createNamedQuery("Disease.findBySourceAndVersionNative")
+                .createNamedQuery("Disease.findBySourceAndVersionNative_pages")
                 .setParameter("source", sourceName)
                 .setParameter("version", version)
                 .setFirstResult(pageable.getOffset())
