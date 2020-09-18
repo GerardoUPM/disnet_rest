@@ -17,7 +17,7 @@ import java.util.Objects;
  * @see
  */
 @Entity
-@Table(name = "symptom", catalog = "edsssdb", schema = "")
+@Table(name = "symptom", catalog = "edsssdb", schema = "edsssdb")
 @XmlRootElement
 @NamedQueries({
         @NamedQuery(name = "Symptom.findAll", query = "SELECT s FROM Symptom s")

@@ -17,7 +17,7 @@ import java.util.Objects;
  * @see
  */
 @Entity
-@Table(name = "semantic_type", catalog = "edsssdb", schema = "")
+@Table(name = "semantic_type", catalog = "edsssdb", schema = "edsssdb")
 @XmlRootElement
 @NamedQueries({
         @NamedQuery(name = "SemanticType.findAll", query = "SELECT s FROM SemanticType s")

@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -1015,6 +1014,5 @@ public class QueryController {
 
         return response;
     }
-
 
 }
