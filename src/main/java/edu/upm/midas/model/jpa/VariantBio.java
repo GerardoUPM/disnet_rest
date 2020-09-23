@@ -1,6 +1,13 @@
-package edu.upm.midas.model;
+package edu.upm.midas.model.jpa;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "variant", schema = "disnet_biolayer")
 public class VariantBio {
+    @Id
     private String variant_id;
     private String chromosome;
     private String chrposition;

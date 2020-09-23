@@ -1,4 +1,4 @@
-package edu.upm.midas.model;
+package edu.upm.midas.model.jpa;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -14,26 +14,7 @@ public class DiseaseBio {
     private String disease_id;
     @JsonProperty("disease_name")
     private String disease_name;
-//    @JsonProperty("source_id")
-//    private int source_id;
-//    @JsonProperty("ddf_type")
-//    private String ddf_type;
 
-//    public int getSource_id() {
-//        return source_id;
-//    }
-//
-//    public void setSource_id(int source_id) {
-//        this.source_id = source_id;
-//    }
-//
-//    public String getDdf_type() {
-//        return ddf_type;
-//    }
-//
-//    public void setDdf_type(String ddf_type) {
-//        this.ddf_type = ddf_type;
-//    }
 
     public String getDisease_id() {
         return disease_id;

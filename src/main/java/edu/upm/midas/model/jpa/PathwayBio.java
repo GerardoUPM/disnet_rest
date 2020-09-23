@@ -1,7 +1,19 @@
-package edu.upm.midas.model;
+package edu.upm.midas.model.jpa;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "pathway", schema = "disnet_biolayer")
 public class PathwayBio {
+    @Id
+    @JsonProperty("pathway_id")
     private String pathway_id;
+
+    @JsonProperty("pathway_name")
     private String pathway_name;
 
     public String getPathway_id() {

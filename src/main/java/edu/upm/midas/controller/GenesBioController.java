@@ -4,11 +4,12 @@ import edu.upm.midas.client_modules.authorization.token.service.TokenAuthorizati
 import edu.upm.midas.common.util.Common;
 import edu.upm.midas.common.util.TimeProvider;
 import edu.upm.midas.enums.ApiErrorEnum;
-import edu.upm.midas.model.jpa.DiseaseBio;
+import edu.upm.midas.model.jpa.GeneBioWithoutId;
+import edu.upm.midas.model.jpa.GeneBio;
 import edu.upm.midas.model.response.ApiResponseError;
 import edu.upm.midas.model.response.ResponseFather;
 import edu.upm.midas.model.response.bio.*;
-import edu.upm.midas.repository.jpa.DiseaseBioRepository;
+import edu.upm.midas.repository.jpa.GenesBioRepository;
 import edu.upm.midas.service.error.ErrorService;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -25,14 +26,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${my.service.rest.request.mapping.general.url}")
-public class DiseasesBioController {
-    /**
-     *
-     * Querys de Disnet_biolayer
-     *
-     * */
+public class GenesBioController {
+
     @Autowired
-    private DiseaseBioRepository diseaseBioRepository;
+    private GenesBioRepository genesBioRepository;
 
     @Autowired
     private TokenAuthorization tokenAuthorization;
@@ -45,105 +42,17 @@ public class DiseasesBioController {
 
     @Autowired
     private Common common;
-    @RequestMapping(path = { "/bio/diseases" },
-            params = {"token"},
-            method = RequestMethod.GET)
-    public DiseasesBioListResponse getListDiseases(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
-                                                   HttpServletRequest httpRequest, Device device){
 
-            ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
-            List<ApiResponseError> errorsFound = new ArrayList<>();
-            DiseasesBioListResponse response = new DiseasesBioListResponse();
-            response.setAuthorized(responseFather.isAuthorized());
-            response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
-            response.setToken(responseFather.getToken());
-            //Respuesta hecha
-            if (response.isAuthorized()){
-                try {
-                    String start = timeProvider.getTimestampFormat();
-                    List<DiseaseBio> diseases = diseaseBioRepository.findDiseases();
-                    String end = timeProvider.getTimestampFormat();
-                    if (diseases.size() > 0){
-                        response.setDiseases(diseases);
-                        response.setResponseCode(HttpStatus.OK.toString());
-                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                    } else {
-                        response.setResponseCode(HttpStatus.OK.toString());
-                        response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                        common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                        errorService.insertApiErrorEnumGenericError(
-                                errorsFound,
-                                ApiErrorEnum.RESOURCES_NOT_FOUND,
-                                "DiseaseBio list empty.",
-                                "No diseases were found in the DISNET database.",
-                                true,
-                                null);
-                    }
 
-                } catch (Exception e){
-                    response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-                    response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-                    errorService.insertInternatServerError(errorsFound, e, true);
-                }
 
-            }
-            return response;
-    }
-
-    @RequestMapping(path = { "/bio/diseases" },
-            method = RequestMethod.GET,
-            params = {"name" , "token"})
-    public DiseaseBioResponse getDiseaseByName(@RequestParam(name = "name") @Valid @NotBlank @NotNull @NotEmpty String name,
-                                       @RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
-                                               HttpServletRequest httpRequest, Device device){
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
-        List<ApiResponseError> errorsFound = new ArrayList<>();
-        DiseaseBioResponse response = new DiseaseBioResponse();
-        response.setAuthorized(responseFather.isAuthorized());
-        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
-        response.setToken(responseFather.getToken());
-        //Respuesta hecha
-        if (response.isAuthorized()) {
-            try {
-                String start = timeProvider.getTimestampFormat();
-                DiseaseBio disease = diseaseBioRepository.findDiseaseByName(name);
-                String end = timeProvider.getTimestampFormat();
-                if (disease != null){
-                    response.setDiseases(disease);
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                }else {
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                    errorService.insertApiErrorEnumGenericError(
-                            errorsFound,
-                            ApiErrorEnum.RESOURCES_NOT_FOUND,
-                            "No disease found it.",
-                            "No diseases were found in the DISNET database with this name.",
-                            true,
-                            null);
-                }
-            } catch (Exception e) {
-                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-                errorService.insertInternatServerError(errorsFound, e, true);
-            }
-        }
-        return response;
-    }
-
-    @RequestMapping(path = { "/bio/diseases/{id}" },
+    @RequestMapping(path = { "/bio/genes" },
             method = RequestMethod.GET,
             params = {"token"})
-    public DiseaseBioResponse getDiseaseById(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
-                                             @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
-                                               HttpServletRequest httpRequest, Device device){
+    public GenesBioResponse getGenes(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                     HttpServletRequest httpRequest, Device device){
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
         List<ApiResponseError> errorsFound = new ArrayList<>();
-        DiseaseBioResponse response = new DiseaseBioResponse();
+        GenesBioResponse response = new GenesBioResponse();
         response.setAuthorized(responseFather.isAuthorized());
         response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
         response.setToken(responseFather.getToken());
@@ -151,54 +60,10 @@ public class DiseasesBioController {
         if (response.isAuthorized()) {
             try {
                 String start = timeProvider.getTimestampFormat();
-                DiseaseBio disease = diseaseBioRepository.findDiseaseById(id);
-                String end = timeProvider.getTimestampFormat();
-                if (disease != null){
-                    response.setDiseases(disease);
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                }else {
-                    response.setResponseCode(HttpStatus.OK.toString());
-                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
-                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
-                    errorService.insertApiErrorEnumGenericError(
-                            errorsFound,
-                            ApiErrorEnum.RESOURCES_NOT_FOUND,
-                            "No disease found it.",
-                            "No diseases were found in the DISNET database with this id.",
-                            true,
-                            null);
-                }
-            } catch (Exception e) {
-                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-                errorService.insertInternatServerError(errorsFound, e, true);
-            }
-        }
-        return response;
-    }
-
-    @RequestMapping(path = { "/bio/diseases/{id}/genes" },
-            method = RequestMethod.GET,
-            params = {"token"})
-    public GeneBiobyIdResponse getGenesById(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
-                                            @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
-                                            HttpServletRequest httpRequest, Device device){
-        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
-        List<ApiResponseError> errorsFound = new ArrayList<>();
-        GeneBiobyIdResponse response = new GeneBiobyIdResponse();
-        response.setAuthorized(responseFather.isAuthorized());
-        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
-        response.setToken(responseFather.getToken());
-        //Respuesta hecha
-        if (response.isAuthorized()) {
-            try {
-                String start = timeProvider.getTimestampFormat();
-                List<Integer> genes = diseaseBioRepository.findGenesById(id);
+                List<GeneBio> genes = genesBioRepository.findGenes();
                 String end = timeProvider.getTimestampFormat();
                 if (genes.size() > 0){
-                    response.setGenes_Id(genes);
+                    response.setGenes(genes);
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
                     common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
@@ -210,7 +75,7 @@ public class DiseasesBioController {
                             errorsFound,
                             ApiErrorEnum.RESOURCES_NOT_FOUND,
                             "No genes found it.",
-                            "No genes were found in the DISNET database with this  disease id.",
+                            "No genes were found in the DISNET database.",
                             true,
                             null);
                 }
@@ -223,12 +88,193 @@ public class DiseasesBioController {
         return response;
     }
 
-    @RequestMapping(path = { "/bio/diseases/{id}/variants" },
+    @RequestMapping(path = { "/bio/genes/{id}" },
             method = RequestMethod.GET,
             params = {"token"})
-    public VariantBiobyIdResponse getVariantsById(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
-                                           @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
-                                           HttpServletRequest httpRequest, Device device){
+    public GeneBioResponse getGeneById(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                        @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
+                                        HttpServletRequest httpRequest, Device device){
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        GeneBioResponse response = new GeneBioResponse();
+        response.setAuthorized(responseFather.isAuthorized());
+        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
+        response.setToken(responseFather.getToken());
+        //Respuesta hecha
+        if (response.isAuthorized()) {
+            try {
+                String start = timeProvider.getTimestampFormat();
+                GeneBio gene = genesBioRepository.findGeneById(id);
+                String end = timeProvider.getTimestampFormat();
+                if (gene != null){
+                    GeneBioWithoutId geneWithoutId = new GeneBioWithoutId(gene.getGene_name(), gene.getGene_symbol());
+                    response.setGeneBio(geneWithoutId);
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                }else {
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    errorService.insertApiErrorEnumGenericError(
+                            errorsFound,
+                            ApiErrorEnum.RESOURCES_NOT_FOUND,
+                            "No genes found it.",
+                            "No genes were found in the DISNET database for this gene id.",
+                            true,
+                            null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                errorService.insertInternatServerError(errorsFound, e, true);
+            }
+        }
+        return response;
+    }
+
+    @RequestMapping(path = { "/bio/genes/{id}/diseases" },
+            method = RequestMethod.GET,
+            params = {"token"})
+    public DiseasesByIdResponse getDiseaseByGenes(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                  @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
+                                                  HttpServletRequest httpRequest, Device device){
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        DiseasesByIdResponse response = new DiseasesByIdResponse();
+        response.setAuthorized(responseFather.isAuthorized());
+        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
+        response.setToken(responseFather.getToken());
+        //Respuesta hecha
+        if (response.isAuthorized()) {
+            try {
+                String start = timeProvider.getTimestampFormat();
+                List<String> genes = genesBioRepository.findDiseseasesByGenes(id);
+                String end = timeProvider.getTimestampFormat();
+                if (genes.size() > 0) {
+                    response.setDiseases_Ids(genes);
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                }else {
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    errorService.insertApiErrorEnumGenericError(
+                            errorsFound,
+                            ApiErrorEnum.RESOURCES_NOT_FOUND,
+                            "No diseases found it.",
+                            "No findProteinsByGenes were found in the DISNET database for this gene.",
+                            true,
+                            null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                errorService.insertInternatServerError(errorsFound, e, true);
+            }
+        }
+        return response;
+    }
+
+    @RequestMapping(path = { "/bio/genes/{id}/proteins" },
+            method = RequestMethod.GET,
+            params = {"token"})
+    public ProteinsByIdResponse getProteinsByGenes(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                   @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
+                                                   HttpServletRequest httpRequest, Device device){
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        ProteinsByIdResponse response = new ProteinsByIdResponse();
+        response.setAuthorized(responseFather.isAuthorized());
+        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
+        response.setToken(responseFather.getToken());
+        //Respuesta hecha
+        if (response.isAuthorized()) {
+            try {
+                String start = timeProvider.getTimestampFormat();
+                List<String> proteins = genesBioRepository.findProteinsByGenes(id);
+                String end = timeProvider.getTimestampFormat();
+                if (proteins.size() > 0) {
+                    response.setProteins_Ids(proteins);
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                }else {
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    errorService.insertApiErrorEnumGenericError(
+                            errorsFound,
+                            ApiErrorEnum.RESOURCES_NOT_FOUND,
+                            "No proteins found it.",
+                            "No proteins were found in the DISNET database for this gene.",
+                            true,
+                            null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                errorService.insertInternatServerError(errorsFound, e, true);
+            }
+        }
+        return response;
+    }
+
+    @RequestMapping(path = { "/bio/genes/{id}/pathways" },
+            method = RequestMethod.GET,
+            params = {"token"})
+    public PathwayByIdResponse getPathWayByGenes(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                 @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
+                                                 HttpServletRequest httpRequest, Device device){
+        ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
+        List<ApiResponseError> errorsFound = new ArrayList<>();
+        PathwayByIdResponse response = new PathwayByIdResponse();
+        response.setAuthorized(responseFather.isAuthorized());
+        response.setAuthorizationMessage(responseFather.getAuthorizationMessage());
+        response.setToken(responseFather.getToken());
+        //Respuesta hecha
+        if (response.isAuthorized()) {
+            try {
+                String start = timeProvider.getTimestampFormat();
+                List<String> pathways = genesBioRepository.findPathwayByGenes(id);
+                String end = timeProvider.getTimestampFormat();
+                if (pathways.size() > 0) {
+                    response.setPathways_Ids(pathways);
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                }else {
+                    response.setResponseCode(HttpStatus.OK.toString());
+                    response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+                    common.saveQueryRuntime(responseFather.getInfoToken(), start, end);
+                    errorService.insertApiErrorEnumGenericError(
+                            errorsFound,
+                            ApiErrorEnum.RESOURCES_NOT_FOUND,
+                            "No pathways found it.",
+                            "No pathways were found in the DISNET database for this gene.",
+                            true,
+                            null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+                response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+                errorService.insertInternatServerError(errorsFound, e, true);
+            }
+        }
+        return response;
+    }
+
+    @RequestMapping(path = { "/bio/genes/{id}/variants" },
+            method = RequestMethod.GET,
+            params = {"token"})
+    public VariantBiobyIdResponse getVariantsByGenes(@RequestParam(value = "token") @Valid @NotBlank @NotNull @NotEmpty String token,
+                                                     @PathVariable("id") @Valid @NotBlank @NotNull @NotEmpty String id,
+                                                     HttpServletRequest httpRequest, Device device){
         ResponseFather responseFather = tokenAuthorization.validateService(token, httpRequest.getQueryString(), httpRequest.getMethod(), httpRequest.getRequestURL().toString(),device);
         List<ApiResponseError> errorsFound = new ArrayList<>();
         VariantBiobyIdResponse response = new VariantBiobyIdResponse();
@@ -239,9 +285,9 @@ public class DiseasesBioController {
         if (response.isAuthorized()) {
             try {
                 String start = timeProvider.getTimestampFormat();
-                List<String> variants = diseaseBioRepository.findVariantById(id);
+                List<String> variants = genesBioRepository.findVariantsByGenes(id);
                 String end = timeProvider.getTimestampFormat();
-                if (variants.size() > 0){
+                if (variants.size() > 0) {
                     response.setVariant_Id(variants);
                     response.setResponseCode(HttpStatus.OK.toString());
                     response.setResponseMessage(HttpStatus.OK.getReasonPhrase());
@@ -253,12 +299,13 @@ public class DiseasesBioController {
                     errorService.insertApiErrorEnumGenericError(
                             errorsFound,
                             ApiErrorEnum.RESOURCES_NOT_FOUND,
-                            "No genes found it.",
-                            "No genes were found in the DISNET database with this  disease id.",
+                            "No variants found it.",
+                            "No variants were found in the DISNET database for this gene.",
                             true,
                             null);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 response.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
                 response.setResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
                 errorService.insertInternatServerError(errorsFound, e, true);
@@ -266,5 +313,4 @@ public class DiseasesBioController {
         }
         return response;
     }
-
 }
